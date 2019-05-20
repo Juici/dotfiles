@@ -1,0 +1,34 @@
+[color]
+    ui = auto
+    pager = true
+[core]
+    excludesFile = ~/.gitignore
+    editor = vim
+    autocrlf = false
+    fscache = true
+    whitespace = 'tabwidth=4'
+[help]
+    autoCorrect = 50
+[push]
+    default = simple
+[user]
+    signingKey = 5283B069B646BDF63B6C0C27F03278A61EEDB2CA
+    name = James Whaley
+    email = juicy66173@gmail.com
+[commit]
+    gpgSign = true
+[tag]
+    forceSignAnnotated = true
+[gpg]
+    program = gpg2
+[credential]
+    helper = pass-git-helper
+[diff "pdf"]
+    binary = true
+    textconv = sh -c 'pdftotext -enc "UTF-8" -layout "$@" -'
+[diff "doc"]
+    binary = true
+    textconv = catdoc
+[diff "odf"]
+    binary = true
+    textconv = odt2txt

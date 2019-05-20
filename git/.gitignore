@@ -1,0 +1,45 @@
+### Jetbrains IDEs ###
+
+# Jetbrains
+.idea/
+*.iws
+/out/
+
+# CMake
+cmake-debug-build/
+
+# Crashlytics plugin (for Android Studio and IntelliJ)
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
+
+### Linux ###
+*~
+
+# Temporary files which can be created if a process still has a handle open of a deleted file
+.fuse_hidden*
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
+# .nfs files are created when an open file is removed but is still being accessed
+.nfs*
+
+### Vim ###
+
+# Swap
+.sw[a-p]
+.*.sw[a-p]
+
+# Session
+Session.vim
+
+# Temporary
+.netrwhist
+
+# Auto-generated tag files
+tags
