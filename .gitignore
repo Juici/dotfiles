@@ -1,0 +1,5 @@
+# Ignore compiled zsh files.
+*.zsh.zwc
+
+# Ignore local files.
+*.local
