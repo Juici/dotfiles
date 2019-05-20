@@ -1,0 +1,29 @@
+# Sane input configs for humans.
+
+# Ctrl+Left/Right to move by whole words.
+"\e[1;5D": backward-word
+"\e[1;5C": forward-word
+
+# Ctrl+Backspace/Delete to delete whole words.
+"\e[3;5~": kill-word
+"\C-_": backward-kill-word
+
+
+# Disable echo ^C when Ctrl+C is pressed.
+set echo-control-characters off
+
+# Colour completions to indicate file types.
+set colored-stats on
+
+# Ignore case.
+set completion-ignore-case on
+
+# Show if a symlink points to a directory.
+set mark-symlinked-directories on
+
+# Don't ring bell.
+set bell-style visible
+
+# List completions immediately.
+set show-all-if-ambiguous on
+set show-all-if-unmodified on
