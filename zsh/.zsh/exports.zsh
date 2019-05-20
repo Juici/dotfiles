@@ -2,7 +2,7 @@
 export PAGER='less -F'
 
 # Set editor.
-export VISUAL=vim
+(( ${+commands[nvim]} )) && export VISUAL=nvim || export VISUAL=vim
 export EDITOR=$VISUAL
 export FCEDIT=$VISUAL
 
