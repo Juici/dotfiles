@@ -3,7 +3,6 @@
     pager = true
 [core]
     excludesFile = ~/.gitignore
-    editor = nvim
     autocrlf = false
     fscache = true
     whitespace = 'tabwidth=4'

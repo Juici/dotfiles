@@ -40,3 +40,8 @@ if (( ${+commands[git]} )); then
     alias gsb='git status -sb'
     alias gst='git status'
 fi
+
+# Use neovim over vim, if available.
+if (( ${+commands[nvim]} )); then
+    alias vim='nvim'
+fi

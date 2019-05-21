@@ -2,9 +2,14 @@
 export PAGER='less -F'
 
 # Set editor.
-(( ${+commands[nvim]} )) && export VISUAL=nvim || export VISUAL=vim
+if (( ${+commands[nvim]} )); then
+    export VISUAL='nvim'
+else
+    export VISUAL='vim'
+fi
 export EDITOR=$VISUAL
 export FCEDIT=$VISUAL
+export GIT_EDITOR=$VISUAL
 
 # Enable ANSI colour support for less.
 export LESS=R
