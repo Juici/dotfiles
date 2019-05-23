@@ -22,7 +22,7 @@ zplugin ice wait'!0' atload'_zsh_autosuggest_start' lucid
 zplugin light zsh-users/zsh-autosuggestions
 
 # Syntax highlighting. LAST PLUGIN LOADED.
-zplugin ice wait'1' atinit'zpcompinit; zpcdreplay' lucid
+zplugin ice wait'!0' atinit'zpcompinit; zpcdreplay' lucid
 zplugin light zdharma/fast-syntax-highlighting
 
 # }}}
