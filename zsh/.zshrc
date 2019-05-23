@@ -55,6 +55,38 @@ fi
 
 # Load zplugin.
 source "${ZPLGM[ZERO]}"
+
+# Inject plugin loading finished hook.
+() {
+    # Hook functions.
+    typeset -gaU ZPLG_LOADED_FUNCTIONS
+
+    # Add a hook.
+    add-zplugin-loaded-hook() {
+        ZPLG_LOADED_FUNCTIONS+=( $1 )
+    }
+
+    # Inject into -zplg-scheduler function.
+    local scheduler_lines=( ${${(f)functions[-zplg-scheduler]}[@]} )
+    functions[-zplg-scheduler]="
+        ${(F)scheduler_lines[1,-2]}
+        if (( \${ZPLG_PLUGINS_LOADED:-0} != 1 )); then
+            local ntasks=0
+            : \${ZPLG_TASKS[@]/(#b)([0-9+]##)(*)/\$(( \${#match[1]} > 0 ? ++ntasks : 0 ))}
+
+            if (( ntasks == 0 )); then
+                ZPLG_PLUGINS_LOADED=1
+
+                local handler
+                for handler in \$ZPLG_LOADED_FUNCTIONS; do
+                    \$handler
+                done
+            fi
+        fi
+        ${scheduler_lines[-1]}
+    "
+}
+
 autoload -Uz _zplugin
 (( $+_comps )) && _comps[zplugin]=_zplugin
 
