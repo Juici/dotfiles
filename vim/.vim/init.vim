@@ -3,8 +3,8 @@ if v:progname == 'vi'
   set noloadplugins
 endif
 
-let g:mapleader = '\<Space>'
-let g:maplocalleader = '\\'
+let g:mapleader = "\<Space>"
+let g:maplocalleader = "\\"
 
 " Extension -> Filetype mappings.
 let g:filetype_pl = 'prolog'
