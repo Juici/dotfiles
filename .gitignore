@@ -3,3 +3,4 @@
 
 # Ignore local files.
 *.local
+*.local.*
