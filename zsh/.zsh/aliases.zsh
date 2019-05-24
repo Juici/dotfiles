@@ -5,12 +5,6 @@ alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias pacman='pacman --color=auto'
 
-# Autocorrection exceptions.
-alias sudo='nocorrect sudo'
-alias man='nocorrect man'
-alias mv='nocorrect mv'
-alias mkdir='nocorrect mkdir'
-
 # Git aliases (sorted alphabetically).
 if (( ${+commands[git]} )); then
     alias g='git'

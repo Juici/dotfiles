@@ -1,4 +1,4 @@
-# {{{ Prompt
+# Prompt {{{
 
 # Substitute colours in prompt.
 setopt prompt_subst
@@ -41,11 +41,11 @@ zstyle ':vcs_info:svn*:*' actionformats '[%b|%a%m%c%u] ' '%R' # default ' (%s)-[
     local TMUXING=$([[ "$TERM" == *tmux* ]] && echo tmux)
     if [[ ( -n "$TMUXING" ) && ( -n "$TMUX" ) ]]; then
         # In a a tmux session created in a non-root or root shell.
-        local LVL=$(($SHLVL - 1))
+        integer LVL=$(( $SHLVL - 1 ))
     else
         # Either in a root shell created inside a non-root tmux session,
         # or not in a tmux session.
-        local LVL=$SHLVL
+        integer LVL=$SHLVL
     fi
     if (( $EUID == 0 )); then
         local SUFFIX="%F{yellow}%n$(printf '\u276f%.0s' {1..$LVL})%f"
@@ -67,45 +67,46 @@ export SPROMPT="zsh: correct %F{red}'%R'%f to %F{red}'%r'%f [%B%Uy%u%bes, %B%Un%
 
 # }}}
 
-# {{{ Hooks
+# Hooks {{{
 
 autoload -Uz add-zsh-hook
 
 -prompt-preexec() {
     # Record start time of command.
-    prompt_record_start_time
+    -prompt-record-start-time
 }
 add-zsh-hook preexec -prompt-preexec
 
 -prompt-precmd() {
     # Perform long tasks async to prevent blocking.
-    prompt_async_tasks
+    -prompt-async-tasks
 
     # Report the execution time of previous command.
-    prompt_report_start_time
+    -prompt-report-start-time
 }
 add-zsh-hook precmd -prompt-precmd
 
 # }}}
 
-# {{{ Functions
+# Functions {{{
 
 typeset -gF SECONDS
-prompt_record_start_time() {
+-prompt-record-start-time() {
     emulate -L zsh
     ZSH_START_TIME=${ZSH_START_TIME:-$SECONDS}
 }
 
-prompt_report_start_time() {
+-prompt-report-start-time() {
     emulate -L zsh
     if (( $+ZSH_START_TIME )); then
-        local DELTA=$(($SECONDS - $ZSH_START_TIME))
-        local DAYS=$((~~($DELTA / 86400)))
-        local HOURS=$((~~(($DELTA - $DAYS * 86400) / 3600)))
-        local MINUTES=$((~~(($DELTA - $DAYS * 86400 - $HOURS * 3600) / 60)))
-        local SECS=$(($DELTA - $DAYS * 86400 - $HOURS * 3600 - $MINUTES * 60))
+        local -F DELTA=$(( $SECONDS - $ZSH_START_TIME ))
+        integer DAYS=$(( ~~($DELTA / 86400) ))
+        integer HOURS=$((~~(($DELTA - $DAYS * 86400) / 3600)))
+        integer MINUTES=$(( ~~(($DELTA - $DAYS * 86400 - $HOURS * 3600) / 60) ))
+        local SECS=$(( $DELTA - $DAYS * 86400 - $HOURS * 3600 - $MINUTES * 60 ))
+
         local ELAPSED=''
-        (( $DAYS > 0)) && ELAPSED="${DAYS}d"
+        (( $DAYS > 0 )) && ELAPSED="${DAYS}d"
         (( $HOURS > 0 )) && ELAPSED="${ELAPSED}${HOURS}h"
         (( $MINUTES > 0 )) && ELAPSED="${ELAPSED}${MINUTES}m"
         if [[ -z "$ELAPSED" ]]; then
@@ -113,17 +114,24 @@ prompt_report_start_time() {
         elif (( $DAYS )); then
             SECS=''
         else
-            SECS="$((~~$SECS))s"
+            SECS="$(( ~~$SECS ))s"
         fi
         ELAPSED="${ELAPSED}${SECS}"
-        export RPROMPT="%F{cyan}%{$__VARS[ITALIC_ON]%}${ELAPSED}%{$__VARS[ITALIC_OFF]%}%f $RPROMPT_BASE"
+
+        local ITALIC_ON='' ITALIC_OFF=''
+        if (( ${+terminfo[sitm]} && ${+terminfo[ritm]} )); then
+            ITALIC_ON="${terminfo[sitm]}"
+            ITALIC_OFF="${terminfo[ritm]}"
+        fi
+        export RPROMPT="%F{cyan}%{$ITALIC_ON%}${ELAPSED}%{$ITALIC_OFF%}%f $RPROMPT_BASE"
+
         unset ZSH_START_TIME
     else
         export RPROMPT="$RPROMPT_BASE"
     fi
 }
 
-prompt_async_vcs_info() {
+-prompt-async-vcs-info() {
     vcs_info
 
     local -A info
@@ -134,12 +142,12 @@ prompt_async_vcs_info() {
     builtin print -r -- "${(@kvq)info}"
 }
 
-prompt_async_tasks() {
+-prompt-async-tasks() {
     # Initialise async worker.
     if (( ! ${prompt_async_init:-0} )); then
         async_start_worker 'prompt' -u -n
-        async_register_callback 'prompt' prompt_async_callback
-        typeset -g prompt_async_init=1
+        async_register_callback 'prompt' -prompt-async-callback
+        integer -g prompt_async_init=1
     fi
 
     # Update current working directory of the async worker.
@@ -156,12 +164,12 @@ prompt_async_tasks() {
     fi
 
     # Async vcs_info.
-    async_job 'prompt' prompt_async_vcs_info
+    async_job 'prompt' -prompt-async-vcs-info
 }
 
-prompt_async_callback() {
+-prompt-async-callback() {
     local job=$1 code=$2 stdout=$3 exec_time=$4 stderr=$5 next_pending=$6
-    local do_render=0
+    integer do_render=0
 
     case $job in
         \[async])
@@ -169,10 +177,10 @@ prompt_async_callback() {
             # Code 2: dead worker.
             if (( $code == 2 )); then
                 # The worker died unexpectedly.
-                typeset -g prompt_async_init=0
+                integer -g prompt_async_init=0
             fi
             ;;
-        prompt_async_vcs_info)
+        -prompt-async-vcs-info)
             local -A info
             typeset -gA prompt_vcs_info
 
@@ -204,7 +212,7 @@ prompt_async_callback() {
     esac
 
     if (( next_pending )); then
-        (( do_render )) && typeset -g prompt_async_render_requested=1
+        (( do_render )) && integer -g prompt_async_render_requested=1
         return
     fi
 

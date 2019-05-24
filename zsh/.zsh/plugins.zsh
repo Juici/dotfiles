@@ -1,4 +1,4 @@
-# {{{ Load Plugins
+# Load Plugins {{{
 
 # Keychain SSH/GPG agent.
 zplugin ice id-as'local/keychain' wait'0' lucid
@@ -13,10 +13,6 @@ zplugin ice id-as'local/bat'
 zplugin light $LOCAL_PLUGINS/bat
 
 
-# Tmux aliases and colour support.
-#zplugin ice svn
-#zplugin snippet OMZ::plugins/tmux
-
 # Auto suggestions.
 zplugin ice wait'!0' atload'_zsh_autosuggest_start' lucid
 zplugin light zsh-users/zsh-autosuggestions
@@ -27,7 +23,7 @@ zplugin light zdharma/fast-syntax-highlighting
 
 # }}}
 
-# {{{ Settings
+# Settings {{{
 
 # Auto suggestions.
 export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'

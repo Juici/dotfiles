@@ -10,13 +10,38 @@ setopt pushd_silent
 # Don't clobber files with > redirect.
 setopt no_clobber
 
-# Correct commands.
-setopt correct
-#setopt correct_all
-setopt no_correct_all
-
 # Disabled ^S and ^Q.
 setopt no_flow_control
 
 # Allow comments in interactive shell.
 setopt interactive_comments
+
+# Autocorrection {{{
+
+# Correct commands.
+setopt correct
+#setopt correct_all
+
+# Correct ignore.
+CORRECT_IGNORE='_*'         # Ignore completion functions.
+CORRECT_IGNORE_FILE='.*'    # Ignore hidden files.
+
+# Nocorrect aliases.
+() {
+    local -aU cmds=(
+        sudo
+        cp
+        mv
+        rm
+        mkdir
+        man
+    )
+
+    local cmd
+    for cmd in $cmds; do
+        # Check that command exists, to prevent creating fake aliases.
+        (( ${+commands[$cmd]} )) && alias $cmd="nocorrect $cmd"
+    done
+}
+
+# }}}

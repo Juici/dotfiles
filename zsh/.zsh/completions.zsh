@@ -1,4 +1,4 @@
-# {{{ Plugins
+# Plugins {{{
 
 # Zsh completion functions.
 zplugin ice blockf
@@ -14,7 +14,7 @@ zplugin snippet OMZ::plugins/pip
 
 # }}}
 
-# {{{ Options
+# Options {{{
 
 # Options.
 setopt no_menu_complete     # do not auto select first entry
@@ -27,7 +27,7 @@ setopt no_nomatch
 
 # }}}
 
-# {{{ Zstyle
+# Zstyle {{{
 
 # Navigatable completion menu.
 zstyle ':completion:*:*:*:*:*' menu select

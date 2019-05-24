@@ -1,4 +1,4 @@
-# {{{ Environment
+# Environment {{{
 
 # Set history file.
 export HISTFILE="$HOME/.zsh_history"
@@ -13,7 +13,7 @@ export HISTIGNORE='&:[ ]*:exit:ls:bg:fg:history:clear'
 
 # }}}
 
-# {{{ Options
+# Options {{{
 
 setopt extended_history         # record timestamp of command in HISTFILE
 setopt hist_expire_dups_first   # delete duplicates first when HISTFILE exceeds HISTSIZE

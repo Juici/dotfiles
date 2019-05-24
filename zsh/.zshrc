@@ -1,15 +1,12 @@
-# {{{ Global Vars
+# Global Vars {{{
 
 # Create a hash table for globally stashing variables without polluting main
 # scope.
-typeset -A __VARS
-
-__VARS[ITALIC_ON]="${terminfo[sitm]}"
-__VARS[ITALIC_OFF]="${terminfo[ritm]}"
+typeset -gAH __JUICI
 
 # }}}
 
-# {{{ Load zplugin
+# Load zplugin {{{
 
 # Declare $ZPLGM global.
 typeset -gAH ZPLGM
@@ -60,7 +57,7 @@ autoload -Uz _zplugin
 
 # }}}
 
-# {{{ Initialise
+# Initialise {{{
 
 setopt extended_glob
 
@@ -71,14 +68,13 @@ zplugin light mafredri/zsh-async
 
 # }}}
 
-# {{{ Load Modules
+# Load Modules {{{
 
 # Anonymous function to avoid leaking variables.
 () {
     local DOT_ZSH="$HOME/.zsh"
 
     if [[ -d "$DOT_ZSH" ]]; then
-        local file file_path
         local -aU files
 
         # List of possible files to load.
@@ -99,6 +95,7 @@ zplugin light mafredri/zsh-async
             'plugins'
         )
 
+        local file file_path
         for file in $files[@]; do
             file_path="$DOT_ZSH/$file.zsh"
             [[ -f "$file_path" ]] && source "$file_path"
@@ -109,7 +106,7 @@ zplugin light mafredri/zsh-async
 
 # }}}
 
-# {{{ Finalise
+# Finalise {{{
 
 # Load local overrides.
 LOCAL_RC="$HOME/.zshrc.local"

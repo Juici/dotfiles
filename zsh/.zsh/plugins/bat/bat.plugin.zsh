@@ -1,7 +1,7 @@
 # Requires interactive terminal bat to be installed.
 [[ -o interactive ]] && (( ${+commands[bat]} )) || return
 
-# {{{ Variable Declaration
+# Variable Declaration {{{
 
 # Variables
 local -a opts
@@ -29,7 +29,7 @@ map_syntax=(
 # Pager.
 pager='less -RF'
 
-# {{{ Export Variables
+# Export Variables {{{
 
 for k v in ${(@kvq)map_syntax}; do
     opts+=( --map-syntax="${k}:${v}" )
