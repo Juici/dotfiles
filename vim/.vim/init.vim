@@ -9,13 +9,15 @@ let g:maplocalleader = "\\"
 " Extension -> Filetype mappings.
 let g:filetype_pl = 'prolog'
 
-let g:vim_dir = expand('<sfile>:p:h')
+let g:vim_dir = fnamemodify(expand('<sfile>'), ':p:h')
 
 " Language dependent indentation, syntax highlighting and more.
 filetype indent plugin on
 syntax on
 
 " LanguageClient {{{
+
+  let g:LanguageClient_serverCommands = {}
 
   " TODO: Configure LanguageClient.
 
@@ -44,7 +46,29 @@ endif
       execute 'source ' . s:plugins_local
     endif
 
-    " TODO: Load plugins.
+    " Load Plugins {{{
+
+      " Language Server Protocol (LSP) support for vim.
+      Plug 'autozimu/LanguageClient-neovim', {
+            \ 'branch': 'next',
+            \ 'do': 'sh install.sh',
+            \ }
+
+      "Plug 'chriskempson/base16-vim'
+      Plug 'joshdick/onedark.vim'       " OneDark colour scheme.
+
+      Plug 'itchyny/lightline.vim'      " Status line.
+      Plug 'Yggdroot/indentLine'        " Indent guides.
+      Plug 'wincent/terminus'           " Enhanced terminal features.
+      Plug 'editorconfig/editorconfig'  " Support for .editorconfig files.
+
+      " Syntax {{{
+
+
+
+      " }}}
+
+    " }}}
 
     " Finish loading plugins.
     call plug#end()

@@ -1,8 +1,4 @@
-" Get init.vim file.
-let s:init_vim = expand('<sfile>:p:h') . '/.vim/init.vim'
-
-if filereadable(s:init_vim)
-    exec 'source ' . s:init_vim
-else
-    echom 'Could not find init file ' . s:init_vim
+" Note: Skip initialisation for vim-tiny or vim-small.
+if 1
+  execute 'source' fnamemodify(expand('<sfile>'), ':h') . '/.vim/init.vim'
 endif
