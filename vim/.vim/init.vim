@@ -26,7 +26,7 @@ syntax on
 " Load local configurations.
 let s:init_local = g:vim_dir . '/init.local.vim'
 if filereadable(s:init_local)
-  execute 'source ' . s:init_local
+  execute 'source' s:init_local
 endif
 
 " Plugins {{{
@@ -43,15 +43,15 @@ endif
     " Load local plugins.
     let s:plugins_local = g:vim_dir . '/plugins.local.vim'
     if filereadable(s:plugins_local)
-      execute 'source ' . s:plugins_local
+      execute 'source' s:plugins_local
     endif
 
     " Load Plugins {{{
 
       " Language Server Protocol (LSP) support for vim.
       Plug 'autozimu/LanguageClient-neovim', {
-            \ 'branch': 'next',
-            \ 'do': 'sh install.sh',
+            \   'branch': 'next',
+            \   'do': 'sh install.sh',
             \ }
 
       "Plug 'chriskempson/base16-vim'
@@ -59,6 +59,7 @@ endif
 
       Plug 'itchyny/lightline.vim'      " Status line.
       Plug 'Yggdroot/indentLine'        " Indent guides.
+
       Plug 'wincent/terminus'           " Enhanced terminal features.
       Plug 'editorconfig/editorconfig'  " Support for .editorconfig files.
 

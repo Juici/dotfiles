@@ -23,7 +23,7 @@ scriptencoding utf-8
     set nowritebackup
   else
     " Keep backup files out of the way.
-    execute 'set backupdir=' . s:tmp_dir . '/backup'
+    execute 'set' 'backupdir=' . s:tmp_dir . '/backup'
     set backupdir+=.
   endif
 
@@ -32,7 +32,7 @@ scriptencoding utf-8
     set noswapfile
   else
     " Keep swap files out of the way.
-    execute 'set directory=' . s:tmp_dir . '/swap'
+    execute 'set' 'directory=' . s:tmp_dir . '/swap'
     set directory+=.
   endif
 
@@ -60,7 +60,7 @@ scriptencoding utf-8
       set noundofile
     else
       " Keep undo files out of the way.
-      execute 'set undodir=' . s:tmp_dir . '/undo'
+      execute 'set' 'undodir=' . s:tmp_dir . '/undo'
       set undodir+=.
       " Actually use undo files.
       set undofile
@@ -79,7 +79,7 @@ scriptencoding utf-8
   if exists('s:viminfo')
     if s:is_sudo
       " Don't create root-owned files.
-      execute 'set ' . s:viminfo . '='
+      execute 'set' s:viminfo . '='
     else
       " Defaults:
       "   Neovim: !,'100,<50,s10,h
@@ -99,7 +99,7 @@ scriptencoding utf-8
 
       let s:viminfo_file = s:tmp_dir . '/' . s:viminfo
 
-      execute 'set ' . s:viminfo . "='0,<0,f0,n" . s:viminfo_file
+      execute 'set' s:viminfo . "='0,<0,f0,n" . s:viminfo_file
 
       if !empty(glob(s:viminfo_file))
         if !filereadable(s:viminfo_file)
@@ -112,7 +112,7 @@ scriptencoding utf-8
 
   if has('mksession')
     " Override ~/.vim/view default.
-    execute 'set viewdir=' . s:tmp_dir . '/view'
+    execute 'set' 'viewdir=' . s:tmp_dir . '/view'
     " Save/Restore just these options (with `:{mk,load}view`).
     set viewoptions=cursor,folds
   endif
@@ -284,7 +284,7 @@ scriptencoding utf-8
 
     " Set 'guifont' if 's:guifont_name' has been set.
     if exists('s:guifont_name')
-      execute 'set guifont=' . s:guifont_name
+      execute 'set' 'guifont=' . s:guifont_name
     endif
   endif
 
