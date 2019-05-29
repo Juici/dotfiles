@@ -63,6 +63,8 @@ endif
       Plug 'wincent/terminus'           " Enhanced terminal features.
       Plug 'editorconfig/editorconfig'  " Support for .editorconfig files.
 
+      Plug 'tpope/vim-fugitive'         " Git wrapper.
+
       " Syntax {{{
 
 
