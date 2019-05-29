@@ -4,3 +4,5 @@
 # Ignore local files.
 *.local
 *.local.*
+# Don't ignore .local directories, unless specified otherwise.
+!.local/
