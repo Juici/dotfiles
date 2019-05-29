@@ -7,6 +7,15 @@ scriptencoding utf-8
 
 " }}}
 
+" External Programs {{{
+
+  " Use ripgrep as default grep program.
+  if executable('rg')
+    set grepprg=rg\ --vimgrep\ --no-heading\ --smart-case
+  endif
+
+" }}}
+
 " General {{{
 
   set autoread                  " Detect when a file is changed externally.
