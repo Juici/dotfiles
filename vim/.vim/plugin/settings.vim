@@ -245,8 +245,9 @@ scriptencoding utf-8
       set fillchars+=eob:\      " Suppress ~ at EndOfBuffer.
     endif
 
-    set foldmethod=syntax       " Fold based on syntax.
-    set foldlevelstart=99       " Start unfolded.
+
+    set foldmethod=marker       " Fold based on markers.
+    set foldcolumn=1            " Fold column size.
     set foldtext=juici#settings#FoldText()
   endif
 
