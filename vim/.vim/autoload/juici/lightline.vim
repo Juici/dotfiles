@@ -49,6 +49,10 @@ function! juici#lightline#ReadOnly() abort
   return &ft !~# 'help' && &readonly ? '' : ''
 endfunction
 
+function! juici#lightline#LineInfo() abort
+  return '%3p%% | %3l:%-2v'
+endfunction
+
 function! juici#lightline#GitBranch() abort
   if exists('*fugitive#head')
     " Use vim-fugitive to get branch name.

@@ -6,15 +6,15 @@ let g:lightline = {
       \   'colorscheme': 'onedark',
       \   'active': {
       \     'left': [ [ 'mode', 'paste' ],
-      \               [ 'gitbranch' ],
-      \               [ 'readonly', 'filename' ] ],
+      \               [ 'filename', 'readonly' ] ],
       \     'right': [ [ 'lineinfo' ],
-      \                [ 'percent' ],
+      \                [ 'gitbranch' ],
       \                [ 'filetype', 'fileformat', 'fileencoding' ],
       \                [ 'linter_warnings', 'linter_errors' ] ]
       \   },
       \   'component_expand': {
       \     'readonly': 'juici#lightline#ReadOnly',
+      \     'lineinfo': 'juici#lightline#LineInfo',
       \     'linter': 'juici#lightline#Linter',
       \     'linter_warnings': 'juici#lightline#LinterWarnings',
       \     'linter_errors': 'juici#lightline#LinterErrors',
