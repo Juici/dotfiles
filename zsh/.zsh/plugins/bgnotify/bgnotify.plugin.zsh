@@ -1,8 +1,11 @@
 # Must be running in interactive mode.
 [[ -o interactive ]] || return
 
+# Must have a display server.
+(( $+DISPLAY )) || return
+
 # Must be a local (non ssh) session.
-(( $+SSH_CLIENT || $+SSH_CONNECTION || $+SSH_TTY )) && return
+(( ! ( $+SSH_CLIENT || $+SSH_CONNECTION || $+SSH_TTY ) )) || return
 
 # Requires xdotool.
 if (( ! ${+commands[xdotool]} )); then
