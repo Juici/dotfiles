@@ -37,7 +37,13 @@ zstyle ':completion:*:*:*:*:*' menu select
 # - Then fall back to case-insensitive.
 # - Accept abbreviations after . or _ or - (ie. f.b -> foo.bar).
 # - Substring complete (ie. bar -> foobar).
-zstyle ':completion:*' matcher-list '' '+m:{[:lower:]}={[:upper:]}' '+m:{[:upper:]}={[:lower:]}' '+m:{_-}={-_}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' matcher-list \
+    '' \
+    '+m:{[:lower:]}={[:upper:]}' \
+    '+m:{[:upper:]}={[:lower:]}' \
+    '+m:{_-}={-_}' \
+    'r:|[._-]=* r:|=*' \
+    'l:|=* r:|=*'
 
 # Allow completion of ..<Tab> to ../ and beyond.
 zstyle -e ':completion:*' special-dirs '[[ $PREFIX = (../)#(..) ]] && reply=(..)'
@@ -47,14 +53,26 @@ zstyle -e ':completion:*' special-dirs '[[ $PREFIX = (../)#(..) ]] && reply=(..)
 # they will only be used as a fallback if no completions are found.
 zstyle ':completion:*:complete:(cd|pushd):*' tag-order 'local-directories named-directories'
 
-# Colour completions using default `ls` colours, this is overridden later.
+# Colour completions using default `ls` colours, this can be overridden later.
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
-zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;34=0=01'
 
+# Complete processes.
 if [[ "$OSTYPE" = solaris* ]]; then
   zstyle ':completion:*:*:*:*:processes' command "ps -u $USER -o pid,user,comm"
 else
   zstyle ':completion:*:*:*:*:processes' command "ps -u $USER -o pid,user,comm -w -w"
 fi
+# Colour processes.
+zstyle ':completion:*:*:*:*:processes' list-colors '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;34=0=01'
+
+# Don't complete uninteresting stuff.
+zstyle ':completion:*:*:*:users' ignored-patterns \
+    avahi bin colord cups daemon dbus dnsmasq flatpak ftp geoclue git http \
+    mail mpd nm-openconnect nm-openvpn nobody ntp polkitd postgres rpc rtkit \
+    sddm systemd-bus-proxy systemd-coredump systemd-journal-gateway \
+    systemd-journal-remote systemd-network systemd-resolve systemd-timesync \
+    usbmux uuidd
+# Unless we really want to.
+zstyle ':completion:*' single-ignored show
 
 # }}}
