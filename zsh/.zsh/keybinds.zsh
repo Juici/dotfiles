@@ -58,15 +58,12 @@ bindkey "^?" backward-delete-char
 
 # Clear auto suggestions, expand/complete and fetch auto suggestions.
 tab-complete() {
-    # Show an ellipsis ... whilst waiting for tab completion.
-    # Requires toggling line wrapping off and back on.
-    #if (( ${+terminfo[smam]} && ${+terminfo[rmam]} )); then
-    #    print -Pn "%{${terminfo[rmam]}%F{red}...%f${terminfo[smam]}%}"
-    #fi
-
     # Fix autosuggest interaction issues with tab completion.
     zle autosuggest-clear
+
+    #zle -R 'Completing...'
     zle expand-or-complete
+
     zle autosuggest-fetch
 
     # Redisplay prompt.
