@@ -3,18 +3,15 @@ function s:CheckColorScheme()
     let g:base16colorspace=256
   endif
 
+  let g:onedark_hide_endofbuffer = 1
+  let g:onedark_terminal_italics = 1
+
   " Set background and colour scheme.
   set background=dark
   colorscheme onedark
 
-  call s:ColorSchemeTweaks()
-
   " Allow for overrides.
   doautocmd ColorScheme
-endfunction
-
-function s:ColorSchemeTweaks()
-  highlight markdownItalic gui=italic cterm=italic
 endfunction
 
 if v:progname !=# 'vi'
