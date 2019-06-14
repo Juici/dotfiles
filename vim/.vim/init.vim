@@ -3,23 +3,48 @@ if v:progname == 'vi'
   set noloadplugins
 endif
 
+" Map leaders.
 let g:mapleader = "\<Space>"
 let g:maplocalleader = "\\"
 
 " Extension -> Filetype mappings.
 let g:filetype_pl = 'prolog'
 
+" The .vim directory.
 let g:vim_dir = fnamemodify(expand('<sfile>'), ':p:h')
 
 " Language dependent indentation, syntax highlighting and more.
 filetype indent plugin on
 syntax on
 
+" Speed up start by not searching for python executable.
+if filereadable('/usr/bin/python3')
+  let g:python3_host_prog = '/usr/bin/python3'
+endif
+
 " LanguageClient {{{
+
+  " Language Servers {{{
 
   let g:LanguageClient_serverCommands = {}
 
-  " TODO: Configure LanguageClient.
+  let s:rust_lsp = executable('rustup')
+        \ ? [exepath('rustup'), 'run', 'nightly', 'rls']
+        \ : []
+
+  let s:python_lsp = executable('pyls')
+        \ ? [exepath('pyls')]
+        \ : []
+
+  if s:rust_lsp != []
+    let g:LanguageClient_serverCommands['rust'] = s:rust_lsp
+  endif
+
+  if s:python_lsp != []
+    let g:LanguageClient_serverCommands['python'] = s:python_lsp
+  endif
+
+  " }}}
 
 " }}}
 
@@ -51,7 +76,7 @@ endif
       " Language Server Protocol (LSP) support for vim.
       Plug 'autozimu/LanguageClient-neovim', {
             \   'branch': 'next',
-            \   'do': 'sh install.sh',
+            \   'do': 'sh install.sh'
             \ }
 
       "Plug 'chriskempson/base16-vim'
@@ -65,7 +90,23 @@ endif
 
       Plug 'tpope/vim-fugitive'         " Git wrapper.
 
-      " Syntax {{{
+      " Completion {{{
+
+        if has('nvim')
+          Plug 'Shougo/deoplete.nvim', {
+                \   'do': ':UpdateRemotePlugins'
+                \ }
+        else
+          Plug 'Shougo/deoplete.nvim'
+          Plug 'roxma/nvim-yarp'
+          Plug 'roxma/vim-hug-neovim-rpc'
+        endif
+
+        let g:deoplete#enable_at_startup = 1
+
+      " }}}
+
+      " Languages {{{
 
 
 
