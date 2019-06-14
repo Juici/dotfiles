@@ -267,6 +267,7 @@ scriptencoding utf-8
     set ttimeoutlen=10
   endif
 
+  " Settings for GVim.
   if has('gui_running')
     " Set default size.
     set columns=132
@@ -279,22 +280,24 @@ scriptencoding utf-8
     set guioptions-=r
     set guioptions-=b           " Don't show bottom scrollbar.
 
-    " Font size.
+    let s:guifont_name = 'Fira Code'
     let s:guifont_size = 10
+
     " Set 's:guifont_name' correctly.
     if has('gui_gtk2') || has('gui_gtk3')
-      let s:guifont_name = 'Fira\ Code\ ' . s:guifont_size
+      let s:guifont = s:guifont_name . ' ' . s:guifont_size
     elseif has('gui_photon')
-      let s:guifont_name = 'Fira\ Code:s' . s:guifont_size
+      let s:guifont = s:guifont_name . ':s' . s:guifont_size
     elseif has('gui_kde')
-      let s:guifont_name = 'Fira\ Code/' . s:guifont_size . '/-1/50/0/0/0/1/0'
+      let s:guifont = s:guifont_name . '/' . s:guifont_size . '/-1/50/0/0/0/1/0'
     elseif has('gui_win32')
-      let s:guifont_name = 'Fira_Code:h' . s:guifont_size . ':cDEFAULT'
+      let s:guifont = substitute(s:guifont_name, ' ', '_', 'g') . ':h'
+            \ . s:guifont_size . ':cDEFAULT'
     endif
 
-    " Set 'guifont' if 's:guifont_name' has been set.
-    if exists('s:guifont_name')
-      execute 'set' 'guifont=' . s:guifont_name
+    " Set 'guifont' if 's:guifont' has been set.
+    if exists('s:guifont')
+      execute 'set' 'guifont=' . escape(s:guifont, ' ')
     endif
   endif
 
