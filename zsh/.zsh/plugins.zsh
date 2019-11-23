@@ -9,7 +9,7 @@ zplugin ice id-as'local/bgnotify' wait'0' lucid
 zplugin light $LOCAL_PLUGINS/bgnotify
 
 # Tweaks and configurations for bat.
-zplugin ice id-as'local/bat'
+zplugin ice id-as'local/bat' has'bat'
 zplugin light $LOCAL_PLUGINS/bat
 
 
@@ -17,7 +17,8 @@ zplugin light $LOCAL_PLUGINS/bat
 zplugin ice wait'!0' atload'_zsh_autosuggest_start' lucid
 zplugin light zsh-users/zsh-autosuggestions
 
-# Syntax highlighting. LAST PLUGIN LOADED.
+# Syntax highlighting.
+# !!! LAST PLUGIN LOADED. !!!
 zplugin ice wait'!0' atinit'zpcompinit; zpcdreplay' lucid
 zplugin light zdharma/fast-syntax-highlighting
 
