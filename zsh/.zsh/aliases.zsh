@@ -5,6 +5,9 @@ alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias pacman='pacman --color=auto'
 
+# QoL aliases
+alias la='ls -A'
+
 # Git aliases (sorted alphabetically).
 if (( ${+commands[git]} )); then
     alias g='git'
