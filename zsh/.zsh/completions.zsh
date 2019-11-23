@@ -12,6 +12,10 @@ zplugin light $LOCAL_PLUGINS/rust
 zplugin ice svn as'completion' pick'_pip'
 zplugin snippet OMZ::plugins/pip
 
+# General completions.
+zplugin ice id-as'local/completions' blockf
+zplugin light $LOCAL_PLUGINS/completions
+
 # }}}
 
 # Options {{{
