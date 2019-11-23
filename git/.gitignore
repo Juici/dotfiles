@@ -43,3 +43,11 @@ Session.vim
 
 # Auto-generated tag files
 tags
+
+### VirtualEnv ###
+
+# VirtualEnv directory
+.env
+.venv
+env
+venv
