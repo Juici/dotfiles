@@ -8,6 +8,19 @@ alias pacman='pacman --color=auto'
 # QoL aliases
 alias la='ls -A'
 
+if (( ${+commands[exa]} )); then
+    alias exa='exa --colour=auto --extended --git'
+
+    alias e='exa'
+
+    alias ea='exa --all'
+    alias el='exa --long'
+    alias eal='exa --all --long'
+
+    alias exaa='exa --all'
+    alias exal='exa --long'
+fi
+
 # Git aliases (sorted alphabetically).
 if (( ${+commands[git]} )); then
     alias g='git'
