@@ -1,26 +1,25 @@
 # Load Plugins {{{
 
 # Keychain SSH/GPG agent.
-zplugin ice id-as'local/keychain' wait'0' lucid
+zplugin ice lucid id-as'local/keychain'
 zplugin light $LOCAL_PLUGINS/keychain
 
 # Background notifier for long running commands.
-zplugin ice id-as'local/bgnotify' wait'0' lucid
-zplugin light $LOCAL_PLUGINS/bgnotify
+zplugin ice wait'0' lucid id-as'local/bgnotify'
+zplugin load $LOCAL_PLUGINS/bgnotify
 
 # Tweaks and configurations for bat.
-zplugin ice id-as'local/bat' has'bat'
-zplugin light $LOCAL_PLUGINS/bat
+zplugin ice wait'0' lucid id-as'local/bat' has'bat'
+zplugin load $LOCAL_PLUGINS/bat
 
-
-# Auto suggestions.
-zplugin ice wait'!0' atload'_zsh_autosuggest_start' lucid
-zplugin light zsh-users/zsh-autosuggestions
 
 # Syntax highlighting.
-# !!! LAST PLUGIN LOADED. !!!
-zplugin ice wait'!0' atinit'zpcompinit; zpcdreplay' lucid
-zplugin light zdharma/fast-syntax-highlighting
+zplugin ice wait'!0' lucid atinit'zpcompinit; zpcdreplay'
+zplugin load zdharma/fast-syntax-highlighting
+
+# Auto suggestions.
+zplugin ice wait'!0' lucid atload'_zsh_autosuggest_start'
+zplugin load zsh-users/zsh-autosuggestions
 
 # }}}
 

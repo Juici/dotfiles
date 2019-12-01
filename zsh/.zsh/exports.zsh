@@ -7,9 +7,9 @@ if (( ${+commands[nvim]} )); then
 else
     export VISUAL='vim'
 fi
-export EDITOR=$VISUAL
-export FCEDIT=$VISUAL
-export GIT_EDITOR=$VISUAL
+export EDITOR="$VISUAL"
+export FCEDIT="$VISUAL"
+export GIT_EDITOR="$VISUAL"
 
 # Enable ANSI colour support for less.
 export LESS=R
@@ -25,3 +25,8 @@ export LESS_TERMCAP_us=$'\e[04;34m'     # Begins underline.
 
 # Fix electron wastebin problem.
 export ELECTRON_TRASH=kioclient5
+
+# Use sccache wrapper for cargo.
+if (( ${+commands[sccache]} )); then
+    export RUSTC_WRAPPER="${commands[sccache]}"
+fi
