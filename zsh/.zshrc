@@ -35,11 +35,11 @@ if [[ ! -f "${ZPLGM[ZERO]}" ]]; then
             # Prompt the user if they want to exit the shell.
             # Gives the user time to read the error and the option continue.
             local yesno
-            read -k 1 'yesno?Do you wish to exit the shell? [Y/n]'
+            read -k 1 'yesno?Do you wish to continue? [Y/n]'
 
             case $yesno in
-                [nN])
-                    # Do nothing on no.
+                [yY])
+                    # Do nothing on yes.
                     ;;
                 *)
                     # Exit shell by default.
@@ -81,6 +81,7 @@ zplugin light mafredri/zsh-async
         # Arranged in order to prevent conflicts.
         files=(
             'colors'
+            'path'
             'completions'
             'prompt'
             'history'
@@ -90,8 +91,8 @@ zplugin light mafredri/zsh-async
             'exports'
             'functions'
             'hash'
-            'path'
             'hooks'
+            'programs'
             'plugins'
         )
 
