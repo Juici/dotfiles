@@ -1,3 +1,6 @@
+# Sourced by both `.zprofile` and `.zshrc`.
+# Must be agnostic to source environment.
+
 # Paths.
 typeset -gU cdpath fpath mailpath manpath path
 typeset -gUT INFOPATH infopath

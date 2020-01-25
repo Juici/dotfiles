@@ -80,8 +80,8 @@ zplugin light mafredri/zsh-async
         # List of possible files to load.
         # Arranged in order to prevent conflicts.
         files=(
-            'colors'
             'path'
+            'colors'
             'completions'
             'prompt'
             'history'
