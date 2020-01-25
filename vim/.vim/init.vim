@@ -90,8 +90,6 @@ endif
 
       Plug 'tpope/vim-fugitive'         " Git wrapper.
 
-      Plug 'zplugin/zplugin-vim-syntax' " Zplugin syntax highlighting.
-
       " Completion {{{
 
         if has('nvim')
@@ -110,7 +108,9 @@ endif
 
       " Languages {{{
 
+        Plug 'zplugin/zplugin-vim-syntax' " Zplugin syntax highlighting.
 
+        Plug 'cespare/vim-toml' " TOML syntax highlighting.
 
       " }}}
 
