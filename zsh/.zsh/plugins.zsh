@@ -1,8 +1,8 @@
 # Load Plugins {{{
 
 # Keychain SSH/GPG agent.
-zplugin ice lucid id-as'local/keychain'
-zplugin light $LOCAL_PLUGINS/keychain
+zplugin ice wait'0' lucid id-as'local/keychain'
+zplugin load $LOCAL_PLUGINS/keychain
 
 # Background notifier for long running commands.
 zplugin ice wait'0' lucid id-as'local/bgnotify'
