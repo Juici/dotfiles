@@ -55,3 +55,8 @@ fi
 if (( ${+commands[nvim]} )); then
     alias vim='nvim'
 fi
+
+# Alias for zathura.
+if (( ${+commands[zathura]} && !${+commands[pdf]} )); then
+    alias pdf='zathura --fork'
+fi
