@@ -36,6 +36,12 @@ zstyle ':vcs_info:svn*:*' actionformats '[%b|%a%m%c%u] ' '%R' # default ' (%s)-[
 
 # Anonymous function to avoid leaking variables.
 () {
+    if [[ "$TERM" == linux ]]; then
+        local SUFFIX_CHAR='>'
+    else
+        local SUFFIX_CHAR='\u276f'
+    fi
+
     # Check for tmux by looking at $TERM, because $TMUX won't be propagated to any
     # nested sudo shells but $TERM will.
     local TMUXING=$([[ "$TERM" == *tmux* ]] && echo tmux)
@@ -48,9 +54,9 @@ zstyle ':vcs_info:svn*:*' actionformats '[%b|%a%m%c%u] ' '%R' # default ' (%s)-[
         integer LVL=$SHLVL
     fi
     if (( $EUID == 0 )); then
-        local SUFFIX="%F{yellow}%n$(printf '\u276f%.0s' {1..$LVL})%f"
+        local SUFFIX="%F{yellow}%n$(printf "$SUFFIX_CHAR%.0s" {1..$LVL})%f"
     else
-        local SUFFIX="%F{red}$(printf '\u276f%.0s' {1..$LVL})%f"
+        local SUFFIX="%F{red}$(printf "$SUFFIX_CHAR%.0s" {1..$LVL})%f"
     fi
     export PS1="%F{green}${SSH_TTY:+%n@%m}%f%B${SSH_TTY:+:}%b%F{blue}%B%1~%b%F{yellow}%B%(1j.*.)%(?..!)%b%f %B${SUFFIX}%b "
     if [[ -n "$TMUXING" ]]; then

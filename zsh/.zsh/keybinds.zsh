@@ -49,11 +49,19 @@ zle -N forward-word
 # Shift+Tab goes to previous completion.
 (( ${+terminfo[kcbt]} )) && bindkey "${terminfo[kcbt]}" reverse-menu-complete
 
+# # Backspace/Delete characters.
+# bindkey "^?" backward-delete-char
+# (( ${+terminfo[kdch1]} )) && bindkey "${terminfo[kdch1]}" delete-char
+# # Ctrl+Backspace/Ctrl+Delete to delete whole words.
+# (( ${+terminfo[kbs]} )) && bindkey "${terminfo[kbs]}" backward-delete-word
+# (( ${+terminfo[kDC5]} )) && bindkey "${terminfo[kDC5]}" delete-word
+
 # Backspace/Delete characters.
 bindkey "^?" backward-delete-char
 (( ${+terminfo[kdch1]} )) && bindkey "${terminfo[kdch1]}" delete-char
 # Ctrl+Backspace/Ctrl+Delete to delete whole words.
-(( ${+terminfo[kbs]} )) && bindkey "${terminfo[kbs]}" backward-delete-word
+bindkey "^H" backward-delete-word
+bindkey "^_" backward-delete-word
 (( ${+terminfo[kDC5]} )) && bindkey "${terminfo[kDC5]}" delete-word
 
 # Clear auto suggestions, expand/complete and fetch auto suggestions.
