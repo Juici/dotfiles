@@ -17,3 +17,22 @@ jump() {
     cd "${nameddirs[$target]}"
 }
 
+battery() {
+    emulate -L zsh
+
+    local battery='/sys/class/power_supply/BAT1'
+
+    local -F bnow bfull bdesign
+
+    let "bnow = $(<$battery/energy_now)"
+    let "bfull = $(<$battery/energy_full)"
+    let "bdesign = $(<$battery/energy_full_design)"
+
+    local -F pbat phealth
+
+    let "pbat = 100 * bnow / bfull"
+    let "phealth = 100 * bfull / bdesign"
+
+    printf 'Battery: %.1f%% (Health: %.1f%%)\n' $pbat $phealth
+}
+
