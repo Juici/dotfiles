@@ -1,22 +1,22 @@
 # Plugins {{{
 
 # Zsh completion functions.
-zplugin ice wait'0' lucid blockf atpull'zplugin creinstall -q .'
-zplugin load zsh-users/zsh-completions
+zinit ice wait'0' lucid blockf atpull'zinit creinstall -q .'
+zinit load zsh-users/zsh-completions
 
 
 # Python pip completions.
-zplugin ice wait'0' lucid blockf svn as'completion' pick'/dev/null'
-zplugin snippet OMZ::plugins/pip
+zinit ice wait'0' lucid blockf svn as'completion' pick'/dev/null'
+zinit snippet OMZ::plugins/pip
 
 
 # Rust completions
-zplugin ice wait'0' lucid blockf id-as'local/rust-completions'
-zplugin load $LOCAL_PLUGINS/rust
+zinit ice wait'0' lucid blockf id-as'local/rust-completions'
+zinit load $LOCAL_PLUGINS/rust
 
 # General completions.
-zplugin ice wait'0' lucid blockf id-as'local/completions'
-zplugin load $LOCAL_PLUGINS/completions
+zinit ice wait'0' lucid blockf id-as'local/completions'
+zinit load $LOCAL_PLUGINS/completions
 
 # }}}
 

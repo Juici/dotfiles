@@ -6,26 +6,26 @@ typeset -gAH __JUICI
 
 # }}}
 
-# Load zplugin {{{
+# Load zinit {{{
 
-# Declare $ZPLGM global.
-typeset -gAH ZPLGM
+# Declare $ZINIT global.
+typeset -gAH ZINIT
 
-ZPLGM[HOME_DIR]="$HOME/.zplugin"
+ZINIT[HOME_DIR]="$HOME/.zinit"
 
 # Load zsh compile module.
-module_path+=( "${ZPLGM[HOME_DIR]}/bin/zmodules/Src" )
+module_path+=( "${ZINIT[HOME_DIR]}/bin/zmodules/Src" )
 zmodload -s zdharma/zplugin || echo 'error: zdharma/zplugin module not found' >&2
 
-ZPLGM[ZERO]="${ZPLGM[HOME_DIR]}/bin/zplugin.zsh"
+ZINIT[ZERO]="${ZINIT[HOME_DIR]}/bin/zinit.zsh"
 
-# Install zplugin if missing.
-if [[ ! -f "${ZPLGM[ZERO]}" ]]; then
+# Install zinit if missing.
+if [[ ! -f "${ZINIT[ZERO]}" ]]; then
     if (( ${+commands[curl]} )); then
-        sh -c "$(curl -fsSL https://raw.githubusercontent.com/zdharma/zplugin/master/doc/install.sh)"
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/zdharma/zinit/master/doc/install.sh)"
     else
-        print 'error: could not install zplugin: curl not found' >&2
-        print 'zplugin must be installed manually, or curl must be installed' >&2
+        print 'error: could not install zinit: curl not found' >&2
+        print 'zinit must be installed manually, or curl must be installed' >&2
 
         print ''
         print 'errors may occur if loading continues'
@@ -50,10 +50,10 @@ if [[ ! -f "${ZPLGM[ZERO]}" ]]; then
     fi
 fi
 
-# Load zplugin.
-source "${ZPLGM[ZERO]}"
-autoload -Uz _zplugin
-(( $+_comps )) && _comps[zplugin]=_zplugin
+# Load zinit.
+source "${ZINIT[ZERO]}"
+autoload -Uz _zinit
+(( $+_comps )) && _comps[zinit]=_zinit
 
 # }}}
 
@@ -64,7 +64,7 @@ setopt extended_glob
 typeset -g LOCAL_PLUGINS="$HOME/.zsh/plugins"
 
 # Async workers.
-zplugin light mafredri/zsh-async
+zinit light mafredri/zsh-async
 
 # }}}
 
