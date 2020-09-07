@@ -64,7 +64,7 @@ setopt extended_glob
 typeset -g LOCAL_PLUGINS="$HOME/.zsh/plugins"
 
 # Async workers.
-zinit light mafredri/zsh-async
+zinit light Juici/zsh-async
 
 # }}}
 
