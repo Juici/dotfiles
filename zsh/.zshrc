@@ -35,7 +35,7 @@ if [[ ! -f "${ZINIT[ZERO]}" ]]; then
             # Prompt the user if they want to exit the shell.
             # Gives the user time to read the error and the option continue.
             local yesno
-            read -k 1 'yesno?Do you wish to continue? [Y/n]'
+            read -k 1 'yesno?Do you wish to continue? [y/N]'
 
             case $yesno in
                 [yY])
@@ -53,7 +53,7 @@ fi
 # Load zinit.
 source "${ZINIT[ZERO]}"
 autoload -Uz _zinit
-(( $+_comps )) && _comps[zinit]=_zinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
 
 # }}}
 
