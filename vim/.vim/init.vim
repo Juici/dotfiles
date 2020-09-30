@@ -111,7 +111,9 @@ endif
         Plug 'zplugin/zplugin-vim-syntax' " Zplugin syntax highlighting.
 
         Plug 'cespare/vim-toml' " TOML syntax highlighting.
+
         Plug 'neovimhaskell/haskell-vim' " Haskell syntax highlighting.
+        Plug 'elixir-editors/vim-elixir' " Elixir syntax highlighting.
 
       " }}}
 
