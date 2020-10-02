@@ -1,0 +1,98 @@
+#compdef rustc
+
+_rustc() {
+    local curcontext="$curcontext" ret=1
+    local -a opt_flags opt_vals lints
+    local -a state line state_descr # Set by _arguments.
+    typeset -A opt_args
+
+    opt_flags=(
+        '(1 *)'{-h,--help}'[show help message]' # Help can be combined with `-v` and `-Z unstable-options`.
+        '(- 1 *)'{-V,--version}'[show version information]'
+        '-g[equivalent to -C debuginfo=2]'
+        '-O[equivalent to -C opt-level=2]'
+        '--test[build a test harness]'
+    )
+
+    opt_vals=(
+        '--cfg=[configure the compilation environment]:spec'
+        '--crate-type=[comma separated list of types of crates for the compiler to emit]: :_rustc_crate_types'
+        '--crate-name=[specify the name of the crate being built]:crate name'
+        '--edition=[specify the edition of the compiler to use when compiling code]:edition:(2015 2018)'
+        '--emit=[comma separated list of types of output for the compiler to emit]: :_rustc_emit_types'
+        '--print=[compiler information to print on stdout]: :_rustc_print_info'
+        '-o=[write output to filename]:filename'
+        '--out-dir=[write output to compiler chosen filename in dir]:dir:_files -/'
+        '--explain=[provide a detailed explanation of an error message]:error'
+        '--target=[target triple for which the code is compiled]: :_rustc_target_triples'
+        '--cap-lints=[sets the most restrictive lint level]:level:(allow warn deny forbid)'
+    )
+
+    lints=(
+        '*'{-W,--warn=}'[set lint warning]: :_rustc_lint_options'
+        '*'{-A,--allow=}'[set lint allowed]: :_rustc_lint_options'
+        '*'{-D,--deny=}'[set lint denied]: :_rustc_lint_options'
+        '*'{-F,--forbid=}'[set lint forbidden]: :_rustc_lint_options'
+    )
+
+    _arguments -s -S -C $opt_flags $opt_vals $lints \
+        '*-Z+[set unstable compiler options]: :_rustc_unstable_options' \
+        '*-C+[set codegen options]: :_rustc_codegen_options' \
+        '1: :_files -g "*.rs"'
+}
+
+_rustc_crate_types() {
+    local help
+    help="$(_call_program help rustc --help)"
+
+    local -a crate_types
+    crate_types=( ${(z)${(f)help/(#b)*'--crate-type ['([a-z-|]##)']'*/${match[1]}}//|/ } )
+
+    _values -s ',' 'crate type' "${crate_types[@]}"
+}
+
+_rustc_emit_types() {
+    local help
+    help="$(_call_program help rustc --help)"
+
+    local -a emit_types
+    emit_types=( ${(z)${(f)help/(#b)*'--emit ['([a-z-|]##)']'*/${match[1]}}//|/ } )
+
+    _values -s ',' 'emit type' "${emit_types[@]}"
+}
+
+_rustc_print_info() {
+    local help
+    help="$(_call_program help rustc --help)"
+
+    local -a print_types
+    print_types=( ${(z)${(f)help/(#b)*'--print ['([a-z-|]##)']'*/${match[1]}}//|/ } )
+
+    _values 'print type' "${print_types[@]}"
+}
+
+_rustc_target_triples() {
+    local -a triples
+    triples=( ${(z)$(_call_program triples rustc --print target-list)} )
+
+    _values 'target triple' "${triples[@]}"
+}
+
+_rustc_lint_options() {
+    local -a lints
+    lints=( "${(@f)"$(_call_program lints rustc -W help)"}" )
+    lints=( help ${${(@M)lints:#*([a-z-]##)' '#(allow|warn|deny|forbid)' '#*}/(#b)' '#([a-z-]##)' '#*/${match[1]}} )
+
+    _values 'lint' "${lints[@]}"
+}
+
+_rustc_unstable_options() {
+    # TODO
+}
+
+_rustc_codegen_options() {
+    # TODO
+}
+
+_rustc
+
