@@ -1,9 +1,7 @@
 #compdef rustc
 
 _rustc() {
-    local curcontext="$curcontext" ret=1
     local -a opt_flags opt_vals lints
-    local -a state line state_descr # Set by _arguments.
     typeset -A opt_args
 
     opt_flags=(
@@ -34,6 +32,8 @@ _rustc() {
         '--error-format=[how errors and other messages are produced]:format:(human json short)'
         '--json=[configure the JSON output of the compiler]:config'
         '--color=[configure coloring of output]: :_rustc_color_types'
+        '--pretty=[pretty-print the input instead of compiling]: :_rustc_pretty_types'
+        '--remap-path-prefix[remap source names in all output (compiler messages and output files)]:from=to'
     )
 
     lints=(
@@ -43,18 +43,39 @@ _rustc() {
         '*'{-F+,--forbid=}'[set lint forbidden]: :_rustc_lint_options'
     )
 
-    _arguments -s -S -C $opt_flags $opt_vals $lints \
+    _arguments -s -S $opt_flags $opt_vals $lints \
         '*-Z+[set unstable compiler options]: :_rustc_unstable_options' \
         '*'{-C+,--codegen}'[set codegen options]: :_rustc_codegen_options' \
         '1: :_files -g "*.rs"'
 }
 
 _rustc_library_path() {
-    # TODO
+    local files='path:_files -/'
+
+    local -a kinds
+    kinds=(
+        "dependency:$files"
+        "crate:$files"
+        "native:$files"
+        "framework:$files"
+        "all:$files"
+    )
+
+    _values 'library kind' $kinds
+    _files '-/'
 }
 
 _rustc_library_link() {
-    # TODO
+    # TODO: Look into searching library path to list libraries.
+
+    local -a kinds
+    kinds=(
+        "static:"
+        "framework:"
+        "dylib:"
+    )
+
+    _values 'library kind' $kinds
 }
 
 _rustc_color_types() {
@@ -68,64 +89,97 @@ _rustc_color_types() {
     _values 'color' $colors
 }
 
+_rustc_pretty_types() {
+    local -a pretty_types
+    pretty_types=(
+        'normal[un-annotated source]'
+        'expanded[crates expanded]'
+        'expanded,identified[fully parenthesized, AST nodes with IDs]'
+    )
+
+    _values 'type' $pretty_types
+}
+
 _rustc_crate_types() {
-    local help
-    help="$(_call_program help rustc --help)"
-
     local -a crate_types
-    crate_types=( ${(z)${(f)help/(#b)*'--crate-type ['([a-z-|]##)']'*/${match[1]}}//|/ } )
+    crate_types=( ${(z)${(f)"$(_call_program crate_types rustc --help)"/(#b)*'--crate-type ['([a-z-|]##)']'*/${match[1]}}//|/ } )
 
-    _values -s ',' 'crate type' "${crate_types[@]}"
+    _values -s ',' 'crate type' $crate_types
 }
 
 _rustc_emit_types() {
-    local help
-    help="$(_call_program help rustc --help)"
-
     local -a emit_types
-    emit_types=( ${(z)${(f)help/(#b)*'--emit ['([a-z-|]##)']'*/${match[1]}}//|/ } )
+    emit_types=( ${(z)${(f)"$(_call_program emit_types rustc --help)"/(#b)*'--emit ['([a-z-|]##)']'*/${match[1]}}//|/ } )
 
-    _values -s ',' 'emit type' "${emit_types[@]}"
+    _values -s ',' 'emit type' $emit_types
 }
 
 _rustc_print_info() {
-    local help
-    help="$(_call_program help rustc --help)"
-
     local -a print_types
-    print_types=( ${(z)${(f)help/(#b)*'--print ['([a-z-|]##)']'*/${match[1]}}//|/ } )
+    print_types=( ${(z)${(f)"$(_call_program print_types rustc --help)"/(#b)*'--print ['([a-z-|]##)']'*/${match[1]}}//|/ } )
 
-    _values 'print type' "${print_types[@]}"
+    _values 'print type' $print_types
 }
 
 _rustc_target_triples() {
     local -a triples
     triples=( ${(z)$(_call_program triples rustc --print target-list)} )
 
-    _values 'target triple' "${triples[@]}"
+    _values 'target triple' $triples
 }
 
 _rustc_extern_path() {
-    # TODO
+    # TODO: Add completion for path after `=`.
 }
 
 _rustc_lint_options() {
     local -a lints
-    lints=( help ${${(@M)${(f)"$(_call_program lints rustc -W help)"}:#*([a-z-]##)' '#(allow|warn|deny|forbid)' '#*}/(#b)' '#([a-z-]##)' '#[a-z]##' '#(*)' '#/"${match[1]}[${match[2]}]"} )
+    lints=( ${(f)"$(_call_program lints rustc -W help)"} )
+
+    # Filter out non lint lines.
+    lints=( ${(M)lints:#' '#[a-z-]##' '##(allow|warn|deny|forbid)' '##*} )
+    # Escape `[` and `]`.
+    lints=( ${${lints//'['/'\['}//']'/'\]'} )
+    # Extract lint and description.
+    lints=( ${lints/(#b)' '#([a-z-]##)' '##[a-z]##' '##(*)' '#/"${match[1]}[${match[2]}]"} )
+    # Add help.
+    lints+=( help )
 
     _values 'lint' $lints
 }
 
 _rustc_unstable_options() {
     local -a opts
-    opts=( help ${${${${(M)${(f)"$(rustc -Z help)"}:#' '#'-Z'' '#*'--'*}/'['/'\['}/']'/'\]'}/(#b)' '#'-Z'' '#([a-z-]##)'=val'' '#'--'' '#(*)' '#/"${match[1]}[${match[2]}]::val"} )
+    opts=( ${(f)"$(_call_program opts rustc -Z help)"} )
+
+    # Filter out non option lines.
+    opts=( ${(M)opts:#' '#'-Z'' '##*'--'*} )
+    # Escape `[` and `]`.
+    opts=( ${${opts//'['/'\['}//']'/'\]'} )
+    # Extract option and description.
+    opts=( ${opts/(#b)' '#'-Z'' '##([a-z-]##)'=val'' '##'--'' '##(*)' '#/"${match[1]}[${match[2]}]::val"} )
+    # Add help.
+    opts+=( help )
+
+    # TODO: Add custom completions for known options.
 
     _values 'unstable option' $opts
 }
 
 _rustc_codegen_options() {
     local -a opts
-    opts=( help ${${${${(M)${(f)"$(rustc -C help)"}:#' '#'-C'' '#*'--'*}/'['/'\['}/']'/'\]'}/(#b)' '#'-C'' '#([a-z-]##)'=val'' '#'--'' '#(*)' '#/"${match[1]}[${match[2]}]::val"} )
+    opts=( ${(f)"$(_call_program opts rustc -C help)"} )
+
+    # Filter out non option lines.
+    opts=( ${(M)opts:#' '#'-C'' '##*'--'*} )
+    # Escape `[` and `]`.
+    opts=( ${${opts//'['/'\['}//']'/'\]'} )
+    # Extract option and description.
+    opts=( ${opts/(#b)' '#'-C'' '##([a-z-]##)'=val'' '##'--'' '##(*)' '#/"${match[1]}[${match[2]}]::val"} )
+    # Add help.
+    opts+=( help )
+
+    # TODO: Add custom completions for known options.
 
     _values 'codegen option' $opts
 }
