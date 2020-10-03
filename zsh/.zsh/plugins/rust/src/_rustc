@@ -7,38 +7,65 @@ _rustc() {
     typeset -A opt_args
 
     opt_flags=(
-        '(1 *)'{-h,--help}'[show help message]' # Help can be combined with `-v` and `-Z unstable-options`.
-        '(- 1 *)'{-V,--version}'[show version information]'
+        '(1 *)'{-h,--help}'[show help message]' # `--help` can be combined with `--verbose` and `-Z unstable-options`.
+        '(1 *)'{-V,--version}'[show version information]' # `--version` can be combined with `--verbose`
+        {-v,--verbose}'[use verbose output]'
         '-g[equivalent to -C debuginfo=2]'
         '-O[equivalent to -C opt-level=2]'
         '--test[build a test harness]'
     )
 
     opt_vals=(
+        '-L+[add a directory to the library search path]: :_rustc_library_path'
+        '-l+[link the generated crate(s) to the specifiy native library name]: :_rustc_library_link'
         '--cfg=[configure the compilation environment]:spec'
         '--crate-type=[comma separated list of types of crates for the compiler to emit]: :_rustc_crate_types'
         '--crate-name=[specify the name of the crate being built]:crate name'
         '--edition=[specify the edition of the compiler to use when compiling code]:edition:(2015 2018)'
         '--emit=[comma separated list of types of output for the compiler to emit]: :_rustc_emit_types'
         '--print=[compiler information to print on stdout]: :_rustc_print_info'
-        '-o=[write output to filename]:filename'
+        '-o+[write output to filename]:filename'
         '--out-dir=[write output to compiler chosen filename in dir]:dir:_files -/'
         '--explain=[provide a detailed explanation of an error message]:error'
         '--target=[target triple for which the code is compiled]: :_rustc_target_triples'
         '--cap-lints=[sets the most restrictive lint level]:level:(allow warn deny forbid)'
+        '--extern[specify where an external rust library is located]: :_rustc_extern_path'
+        '--sysroot=[override the system root]:path:_files -/'
+        '--error-format=[how errors and other messages are produced]:format:(human json short)'
+        '--json=[configure the JSON output of the compiler]:config'
+        '--color=[configure coloring of output]: :_rustc_color_types'
     )
 
     lints=(
-        '*'{-W,--warn=}'[set lint warning]: :_rustc_lint_options'
-        '*'{-A,--allow=}'[set lint allowed]: :_rustc_lint_options'
-        '*'{-D,--deny=}'[set lint denied]: :_rustc_lint_options'
-        '*'{-F,--forbid=}'[set lint forbidden]: :_rustc_lint_options'
+        '*'{-W+,--warn=}'[set lint warning]: :_rustc_lint_options'
+        '*'{-A+,--allow=}'[set lint allowed]: :_rustc_lint_options'
+        '*'{-D+,--deny=}'[set lint denied]: :_rustc_lint_options'
+        '*'{-F+,--forbid=}'[set lint forbidden]: :_rustc_lint_options'
     )
 
     _arguments -s -S -C $opt_flags $opt_vals $lints \
         '*-Z+[set unstable compiler options]: :_rustc_unstable_options' \
-        '*-C+[set codegen options]: :_rustc_codegen_options' \
+        '*'{-C+,--codegen}'[set codegen options]: :_rustc_codegen_options' \
         '1: :_files -g "*.rs"'
+}
+
+_rustc_library_path() {
+    # TODO
+}
+
+_rustc_library_link() {
+    # TODO
+}
+
+_rustc_color_types() {
+    local -a colors
+    colors=(
+        'auto[colorize (default if output goes to tty)]'
+        'always[always colorize output]'
+        'never[never colorize output]'
+    )
+
+    _values 'color' $colors
 }
 
 _rustc_crate_types() {
@@ -78,20 +105,29 @@ _rustc_target_triples() {
     _values 'target triple' "${triples[@]}"
 }
 
+_rustc_extern_path() {
+    # TODO
+}
+
 _rustc_lint_options() {
     local -a lints
-    lints=( "${(@f)"$(_call_program lints rustc -W help)"}" )
-    lints=( help ${${(@M)lints:#*([a-z-]##)' '#(allow|warn|deny|forbid)' '#*}/(#b)' '#([a-z-]##)' '#*/${match[1]}} )
+    lints=( help ${${(@M)${(f)"$(_call_program lints rustc -W help)"}:#*([a-z-]##)' '#(allow|warn|deny|forbid)' '#*}/(#b)' '#([a-z-]##)' '#[a-z]##' '#(*)' '#/"${match[1]}[${match[2]}]"} )
 
-    _values 'lint' "${lints[@]}"
+    _values 'lint' $lints
 }
 
 _rustc_unstable_options() {
-    # TODO
+    local -a opts
+    opts=( help ${${${${(M)${(f)"$(rustc -Z help)"}:#' '#'-Z'' '#*'--'*}/'['/'\['}/']'/'\]'}/(#b)' '#'-Z'' '#([a-z-]##)'=val'' '#'--'' '#(*)' '#/"${match[1]}[${match[2]}]::val"} )
+
+    _values 'unstable option' $opts
 }
 
 _rustc_codegen_options() {
-    # TODO
+    local -a opts
+    opts=( help ${${${${(M)${(f)"$(rustc -C help)"}:#' '#'-C'' '#*'--'*}/'['/'\['}/']'/'\]'}/(#b)' '#'-C'' '#([a-z-]##)'=val'' '#'--'' '#(*)' '#/"${match[1]}[${match[2]}]::val"} )
+
+    _values 'codegen option' $opts
 }
 
 _rustc
