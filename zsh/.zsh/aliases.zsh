@@ -8,6 +8,20 @@ alias pacman='pacman --color=auto'
 # QoL aliases
 alias la='ls -A'
 
+# Aliases when using kitty.
+if [[ "$TERM" == "xterm-kitty" ]]; then
+    # Send kitty terminfo over ssh.
+    # Use a function over an alias to keep completion function.
+    ssh() {
+        kitty +kitten ssh "$@"
+    }
+
+    # Inline image viewer.
+    icat() {
+        kitty +icat "$@"
+    }
+fi
+
 if (( ${+commands[exa]} )); then
     alias exa='exa --colour=auto --extended --git'
 
