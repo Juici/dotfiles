@@ -2,7 +2,6 @@
 	ui = auto
 	pager = true
 [core]
-	excludesFile = ~/.gitignore
 	autocrlf = false
 	fscache = true
 	whitespace = 'tabwidth=4'
@@ -21,7 +20,7 @@
 [gpg]
 	program = gpg2
 [include]
-	path = ~/.gitconfig.local
+	path = config.local
 [diff "pdf"]
 	binary = true
 	textconv = sh -c 'pdftotext -enc "UTF-8" -layout "$@" -'
@@ -33,3 +32,5 @@
 	textconv = odt2txt
 [pull]
 	rebase = false
+
+# vim:ft=gitconfig
