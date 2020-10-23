@@ -23,7 +23,7 @@
 	path = config.local
 [diff "pdf"]
 	binary = true
-	textconv = sh -c 'pdftotext -enc "UTF-8" -layout "$@" -'
+	textconv = pdf2text
 [diff "doc"]
 	binary = true
 	textconv = catdoc

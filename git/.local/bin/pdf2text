@@ -1,0 +1,2 @@
+#!/bin/sh
+pdftotext -enc "UTF-8" -layout -- "$1" -
