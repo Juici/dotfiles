@@ -38,8 +38,10 @@ zstyle ':vcs_info:svn*:*' actionformats '[%b|%a%m%c%u] ' '%R' # default ' (%s)-[
 () {
     if [[ "$TERM" == linux ]]; then
         local SUFFIX_CHAR='>'
+        local ELLIPSIS='...'
     else
         local SUFFIX_CHAR='\u276f'
+        local ELLIPSIS='…'
     fi
 
     # Check for tmux by looking at $TERM, because $TMUX won't be propagated to any
@@ -64,9 +66,9 @@ zstyle ':vcs_info:svn*:*' actionformats '[%b|%a%m%c%u] ' '%R' # default ' (%s)-[
         # prompt still gets corrupted even if we add an extra space to compensate.
         export ZLE_RPROMPT_INDENT=0
     fi
-}
 
-RPROMPT_BASE='${prompt_vcs_info[branch]}%F{blue}%~%f'
+    export RPROMPT_BASE="\${prompt_vcs_info[branch]}%F{blue}%\$(( COLUMNS / 4 ))<${ELLIPSIS}<%~%<<%f"
+}
 
 export RPROMPT="$RPROMPT_BASE"
 export SPROMPT="zsh: correct %F{red}'%R'%f to %F{red}'%r'%f [%B%Uy%u%bes, %B%Un%u%bo, %B%Ue%u%bdit, %B%Ua%u%bbort]? "
