@@ -25,6 +25,12 @@ if [[ "$TERM" == "xterm-kitty" ]]; then
     }
 fi
 
+if (( ${+commands[cross]} )); then
+    cross() {
+        sudo -E cross "$@"
+    }
+fi
+
 if (( ${+commands[exa]} )); then
     alias exa='exa --colour=auto --extended --git'
 
