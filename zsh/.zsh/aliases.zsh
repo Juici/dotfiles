@@ -8,6 +8,9 @@ alias pacman='pacman --color=auto'
 # QoL aliases
 alias la='ls -A'
 
+# Unified diff.
+alias diff='diff -u --color=auto'
+
 # Aliases when using kitty.
 if [[ "$TERM" == "xterm-kitty" ]]; then
     # Send kitty terminfo over ssh.
