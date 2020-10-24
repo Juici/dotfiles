@@ -35,16 +35,27 @@ fi
 (( ${+terminfo[kend]} )) && bindkey "${terminfo[kend]}" end-of-line
 
 # Do history expansion.
-bindkey " " magic-space
+bindkey ' ' magic-space
 
 # Ctrl+Left/Right to jump whole words.
 (( ${+terminfo[kLFT5]} )) && bindkey "${terminfo[kLFT5]}" backward-word
+[[ "$TERM" = 'linux' ]] && bindkey '^[[D' backward-word
+bindkey '^[[1;5D' backward-word
+
 forward-word() {
     zle .forward-word
     zle autosuggest-fetch
 }
 zle -N forward-word
 (( ${+terminfo[kRIT5]} )) && bindkey "${terminfo[kRIT5]}" forward-word
+[[ "$TERM" = 'linux' ]] && bindkey '^[[C' forward-word
+bindkey '^[[1;5C' forward-word
+
+# Ctrl+Up/Down noop, require for some systems.
+[[ "$TERM" = 'linux' ]] && bindkey -s '^[[A' ''
+bindkey -s '^[[1;5A' ''
+[[ "$TERM" = 'linux' ]] && bindkey -s '^[[B' ''
+bindkey -s '^[[1;5B' ''
 
 # Shift+Tab goes to previous completion.
 (( ${+terminfo[kcbt]} )) && bindkey "${terminfo[kcbt]}" reverse-menu-complete
@@ -57,12 +68,13 @@ zle -N forward-word
 # (( ${+terminfo[kDC5]} )) && bindkey "${terminfo[kDC5]}" delete-word
 
 # Backspace/Delete characters.
-bindkey "^?" backward-delete-char
+bindkey '^?' backward-delete-char
 (( ${+terminfo[kdch1]} )) && bindkey "${terminfo[kdch1]}" delete-char
 # Ctrl+Backspace/Ctrl+Delete to delete whole words.
-bindkey "^H" backward-delete-word
-bindkey "^_" backward-delete-word
+bindkey '^H' backward-delete-word
+bindkey '^_' backward-delete-word
 (( ${+terminfo[kDC5]} )) && bindkey "${terminfo[kDC5]}" delete-word
+bindkey '^[[3;5~' delete-word
 
 # Clear auto suggestions, expand/complete and fetch auto suggestions.
 tab-complete() {
@@ -80,4 +92,4 @@ tab-complete() {
     # TODO: Fix highlighting when tab completion fails.
 }
 zle -N tab-complete
-bindkey "^I" tab-complete
+bindkey '^I' tab-complete
