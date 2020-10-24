@@ -11,63 +11,119 @@ colors
 autoload -Uz vcs_info
 zstyle ':vcs_info:*' enable git svn
 zstyle ':vcs_info:*' check-for-changes true
-zstyle ':vcs_info:*' stagedstr "%F{green}●%f" # default 'S'
-zstyle ':vcs_info:*' unstagedstr "%F{red}●%f" # default 'U'
+zstyle ':vcs_info:*' stagedstr '%F{green}●%f' # default 'S'
+zstyle ':vcs_info:*' unstagedstr '%F{red}●%f' # default 'U'
 zstyle ':vcs_info:*' use-simple true
 zstyle ':vcs_info:*' max-exports 2
 zstyle ':vcs_info:git+set-message:*' hooks git-untracked
+
+# VCS format strings.
 # %a - action
 # %b - branch
 # %m - misc
 # %c - stagedstr
 # %u - unstagedstr
-zstyle ':vcs_info:git*:*' formats '[%b%m%c%u] ' '%R' # default ' (%s)-[%b]%c%u-'
-zstyle ':vcs_info:git*:*' actionformats '[%b|%a%m%c%u] ' '%R' # default ' (%s)-[%b|%a]%c%u-'
-zstyle ':vcs_info:svn*:*' formats '[%b%m%c%u] ' '%R' # default ' (%s)-[%b]%c%u-'
-zstyle ':vcs_info:svn*:*' actionformats '[%b|%a%m%c%u] ' '%R' # default ' (%s)-[%b|%a]%c%u-'
+zstyle ':vcs_info:git*:*' formats '[%b%m%c%u]' '%R' # default ' (%s)-[%b]%c%u-'
+zstyle ':vcs_info:git*:*' actionformats '[%b|%a%m%c%u]' '%R' # default ' (%s)-[%b|%a]%c%u-'
+zstyle ':vcs_info:svn*:*' formats '[%b%m%c%u]' '%R' # default ' (%s)-[%b]%c%u-'
+zstyle ':vcs_info:svn*:*' actionformats '[%b|%a%m%c%u]' '%R' # default ' (%s)-[%b|%a]%c%u-'
 
 # Include untracked files in unstagedstr.
 +vi-git-untracked() {
     emulate -L zsh
     if [[ -n $(git ls-files --exclude-standard --others 2> /dev/null) ]]; then
-        hook_com[unstaged]+="%F{blue}●%f"
+        hook_com[unstaged]+='%F{blue}●%f'
     fi
 }
 
 # Anonymous function to avoid leaking variables.
 () {
-    if [[ "$TERM" == linux ]]; then
-        local SUFFIX_CHAR='>'
-        local ELLIPSIS='...'
-    else
-        local SUFFIX_CHAR='\u276f'
-        local ELLIPSIS='…'
-    fi
+    # Set the prompt suffix character.
+    local suffix_char
+    case "$TERM" in
+        linux|tmux)
+            suffix_char='>'
+            ;;
+        *)
+            suffix_char='\u276f'
+            ;;
+    esac
 
     # Check for tmux by looking at $TERM, because $TMUX won't be propagated to any
     # nested sudo shells but $TERM will.
-    local TMUXING=$([[ "$TERM" == *tmux* ]] && echo tmux)
-    if [[ ( -n "$TMUXING" ) && ( -n "$TMUX" ) ]]; then
+    local tmuxing
+    [[ "$TERM" = *tmux* ]] && tmuxing='tmux'
+
+    integer lvl
+    if [[ ( -n "$tmuxing" ) && ( -n "$TMUX" ) ]]; then
         # In a a tmux session created in a non-root or root shell.
-        integer LVL=$(( $SHLVL - 1 ))
+        lvl=$(( SHLVL - 1 ))
     else
         # Either in a root shell created inside a non-root tmux session,
         # or not in a tmux session.
-        integer LVL=$SHLVL
+        lvl=$SHLVL
     fi
-    if (( $EUID == 0 )); then
-        local SUFFIX="%F{yellow}%n$(printf "$SUFFIX_CHAR%.0s" {1..$LVL})%f"
-    else
-        local SUFFIX="%F{red}$(printf "$SUFFIX_CHAR%.0s" {1..$LVL})%f"
-    fi
-    export PS1="%F{green}${SSH_TTY:+%n@%m}%f%B${SSH_TTY:+:}%b%F{blue}%B%1~%b%F{yellow}%B%(1j.*.)%(?..!)%b%f %B${SUFFIX}%b "
-    if [[ -n "$TMUXING" ]]; then
+
+    # Repeat the suffix character to represent shell level.
+    local suffix_chars="$(printf "${suffix_char}%.0s" {1..$lvl})"
+    # Suffix with extra information for root.
+    #
+    # Displays in bold yellow with username for privileged shells.
+    # Displays in bold red for regular shells.
+    #
+    # '%(!.true.false)' - tennary expression on if the shell is running with
+    #                     privileges.
+    local suffix="%B%(!.%F{yellow}%n.%F{red})${suffix_chars}%f%b"
+
+    # Prompt expansion:
+    # http://zsh.sourceforge.net/Doc/Release/Prompt-Expansion.html
+
+    # Login info, displayed when in an SSH session.
+    #
+    # Display 'user@host' in green and ':' in bold.
+    #
+    # '%n' - username
+    # '%m' - hostname up to first .
+    local ssh_info='%F{green}%n@%m%f%B:%b'
+
+    # Current working directory info.
+    #
+    # Display name of current working directory in bold blue.
+    #
+    # '%1~' - last part of current path, ie. the directory name
+    local wd='%F{blue}%B%1~%b%f'
+
+    # Running jobs and exit status.
+    #
+    # Display if there are running jobs and if the exit status of the last
+    # command was non-zero.
+    #
+    # '%(1j.*.)' - '*' if the numer of running jobs is at least 1
+    # '%(?..!)' - '!' if the exit status is not 0
+    #
+    # Conditional substrings:
+    # http://zsh.sourceforge.net/Doc/Release/Prompt-Expansion.html#Conditional-Substrings-in-Prompts
+    local status_info='%F{yellow}%B%(1j.*.)%(?..!)%b%f'
+
+    # Export PS1.
+    export PS1="${SSH_TTY:+${ssh_info}}${wd}${status_info} ${suffix} "
+
+    if [[ -n "$tmuxing" ]]; then
         # Outside tmux, ZLE_RPROMPT_INDENT ends up eating the space after PS1, and
         # prompt still gets corrupted even if we add an extra space to compensate.
         export ZLE_RPROMPT_INDENT=0
     fi
 
-    export RPROMPT_BASE="\${prompt_vcs_info[branch]}%F{blue}%\$(( COLUMNS / 4 ))<${ELLIPSIS}<%~%<<%f"
+    # The full path, displayed in the right prompt.
+    #
+    # Not displayed if terminal width is less than 80 columns.
+    # Trimmed from left side to fit within a quarter of the terminal width.
+    local full_path='%-80(l.%F{blue}%$(( COLUMNS / 4 ))<...<%~%<<%f.)'
+
+    # VCS branch info, set by async precmd callback.
+    local vcs_info='${prompt_vcs_info[branch]}'
+
+    export RPROMPT_BASE="${vcs_info}${full_path}"
 }
 
 export RPROMPT="$RPROMPT_BASE"
