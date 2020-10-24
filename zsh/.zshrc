@@ -96,11 +96,16 @@ zinit light Juici/zsh-async
             'plugins'
         )
 
+        # TODO: Look into sourcing each file in its own scope.
         local file file_path
         for file in $files[@]; do
+            # Source file.
             file_path="$DOT_ZSH/$file.zsh"
             [[ -f "$file_path" ]] && source "$file_path"
-            # TODO: Look into sourcing each file in its own scope.
+
+            # Source local overrides.
+            file_path="$DOT_ZSH/$file.local.zsh"
+            [[ -f "$file_path" ]] && source "$file_path"
         done
     fi
 }
