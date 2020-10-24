@@ -118,7 +118,9 @@ zstyle ':vcs_info:svn*:*' actionformats '[%b|%a%m%c%u]' '%R' # default ' (%s)-[%
     #
     # Not displayed if terminal width is less than 80 columns.
     # Trimmed from left side to fit within a quarter of the terminal width.
-    local full_path='%-80(l.%F{blue}%$(( COLUMNS / 4 ))<...<%~%<<%f.)'
+    #
+    # Adds a space before if VCS info is displayed.
+    local full_path='%-80(l.${${prompt_vcs_info[branch]:-}:+ }%F{blue}%$(( COLUMNS / 4 ))<...<%~%<<%f.)'
 
     # VCS branch info, set by async precmd callback.
     local vcs_info='${prompt_vcs_info[branch]}'
