@@ -114,21 +114,34 @@ zstyle ':vcs_info:svn*:*' actionformats '[%b|%a%m%c%u]' '%R' # default ' (%s)-[%
         export ZLE_RPROMPT_INDENT=0
     fi
 
+    # Space before full_path, if vcs_info or elapsed_time present.
+    local path_space='${${prompt_vcs_info[branch]:-${prompt_cmd_elapsed:-}}:+ }'
+    # Space before vcs_info, if elapsed_time present.
+    local vcs_space='${${prompt_cmd_elapsed:-}:+ }'
+
     # The full path, displayed in the right prompt.
     #
     # Not displayed if terminal width is less than 80 columns.
     # Trimmed from left side to fit within a quarter of the terminal width.
     #
     # Adds a space before if VCS info is displayed.
-    local full_path='%-80(l.${${prompt_vcs_info[branch]:-}:+ }%F{blue}%$(( COLUMNS / 4 ))<...<%~%<<%f.)'
+    local full_path="%-80(l.${path_space}%F{blue}%\$(( COLUMNS / 4 ))<...<%~%<<%f.)"
 
     # VCS branch info, set by async precmd callback.
-    local vcs_info='${prompt_vcs_info[branch]}'
+    local vcs_info="\${prompt_vcs_info[branch]:+${vcs_space}}\${prompt_vcs_info[branch]}"
 
-    export RPROMPT_BASE="${vcs_info}${full_path}"
+    local italic_on='' italic_off=''
+    if (( ${+terminfo[sitm]} && ${+terminfo[ritm]} )); then
+        italic_on="%{${terminfo[sitm]}%}"
+        italic_off="%{${terminfo[ritm]}%}"
+    fi
+
+    # Time taken for previous command.
+    local elapsed_time="%F{cyan}${italic_on}\${prompt_cmd_elapsed}${italic_off}%f"
+
+    export RPROMPT="${elapsed_time}${vcs_info}${full_path}"
 }
 
-export RPROMPT="$RPROMPT_BASE"
 export SPROMPT="zsh: correct %F{red}'%R'%f to %F{red}'%r'%f [%B%Uy%u%bes, %B%Un%u%bo, %B%Ue%u%bdit, %B%Ua%u%bbort]? "
 
 # }}}
@@ -159,41 +172,55 @@ add-zsh-hook precmd -prompt-precmd
 typeset -gF SECONDS
 -prompt-record-start-time() {
     emulate -L zsh
-    ZSH_START_TIME=${ZSH_START_TIME:-$SECONDS}
+
+    # Set command start time.
+    prompt_cmd_elapsed=''
+    prompt_cmd_start="$SECONDS"
 }
 
 -prompt-report-start-time() {
     emulate -L zsh
-    if (( $+ZSH_START_TIME )); then
-        local -F DELTA=$(( $SECONDS - $ZSH_START_TIME ))
-        integer DAYS=$(( ~~($DELTA / 86400) ))
-        integer HOURS=$((~~(($DELTA - $DAYS * 86400) / 3600)))
-        integer MINUTES=$(( ~~(($DELTA - $DAYS * 86400 - $HOURS * 3600) / 60) ))
-        local SECS=$(( $DELTA - $DAYS * 86400 - $HOURS * 3600 - $MINUTES * 60 ))
 
-        local ELAPSED=''
-        (( $DAYS > 0 )) && ELAPSED="${DAYS}d"
-        (( $HOURS > 0 )) && ELAPSED="${ELAPSED}${HOURS}h"
-        (( $MINUTES > 0 )) && ELAPSED="${ELAPSED}${MINUTES}m"
-        if [[ -z "$ELAPSED" ]]; then
-            SECS="$(print -f "%.2f" $SECS)s"
-        elif (( $DAYS )); then
-            SECS=''
-        else
-            SECS="$(( ~~$SECS ))s"
+    # If command start time was set, calculate elapsed time.
+    if (( $+prompt_cmd_start )); then
+        local -F delta secs
+        integer days hours mins
+
+        # Delta time for command in seconds.
+        delta=$(( SECONDS - prompt_cmd_start ))
+
+        # Days as an integer.
+        days=$(( delta / 86400 ))
+        delta=$(( delta - (days * 86400) ))
+
+        # Hours as an integer.
+        hours=$(( delta / 3600 ))
+        delta=$(( delta - (hours * 3600) ))
+
+        # Minutes as an integer.
+        mins=$(( delta / 60 ))
+        delta=$(( delta - (mins * 60) ))
+
+        # Seconds as a floating point.
+        secs=$(( delta ))
+
+        # Construct time elapsed string.
+        local elapsed=''
+        (( days > 0 )) && elapsed="${days}d"
+        (( hours > 0 )) && elapsed="${elapsed}${hours}d"
+        (( mins > 0 )) && elapsed="${elapsed}${days}d"
+
+        if [[ -z "$elapsed" ]]; then
+            elapsed="$(printf '%.2f' $secs)s"
+        elif (( days == 0 )); then
+            integer int_secs=$(( secs ))
+            elapsed="${elapsed}${int_secs}s"
         fi
-        ELAPSED="${ELAPSED}${SECS}"
 
-        local ITALIC_ON='' ITALIC_OFF=''
-        if (( ${+terminfo[sitm]} && ${+terminfo[ritm]} )); then
-            ITALIC_ON="${terminfo[sitm]}"
-            ITALIC_OFF="${terminfo[ritm]}"
-        fi
-        export RPROMPT="%F{cyan}%{$ITALIC_ON%}${ELAPSED}%{$ITALIC_OFF%}%f $RPROMPT_BASE"
-
-        unset ZSH_START_TIME
+        prompt_cmd_elapsed="$elapsed"
+        unset prompt_cmd_start
     else
-        export RPROMPT="$RPROMPT_BASE"
+        prompt_cmd_elapsed=''
     fi
 }
 
@@ -259,7 +286,7 @@ typeset -gF SECONDS
             fi
 
             # Check if git toplevel has changed.
-            if [[ ${info[top]} == ${prompt_vcs_info[top]} ]]; then
+            if [[ ${info[top]} = ${prompt_vcs_info[top]} ]]; then
                 # If stored pwd is part of $PWD: $PWD is shorter and likelier to
                 # be toplevel, so update pwd.
                 if [[ ${prompt_vcs_info[pwd]} = ${PWD}* ]]; then
