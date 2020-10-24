@@ -16,6 +16,8 @@ setopt no_flow_control
 # Allow comments in interactive shell.
 setopt interactive_comments
 
+[[ "$TERM" = 'linux' ]] && setopt nobeep
+
 # Autocorrection {{{
 
 # Correct commands.
