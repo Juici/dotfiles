@@ -37,11 +37,12 @@ fi
 # Do history expansion.
 bindkey ' ' magic-space
 
-# Ctrl+Left/Right to jump whole words.
+# Ctrl+Left to jump whole words.
 (( ${+terminfo[kLFT5]} )) && bindkey "${terminfo[kLFT5]}" backward-word
 [[ "$TERM" = 'linux' ]] && bindkey '^[[D' backward-word
 bindkey '^[[1;5D' backward-word
 
+# Ctrl+Right to jump whole words.
 forward-word() {
     zle .forward-word
     zle autosuggest-fetch
@@ -51,30 +52,28 @@ zle -N forward-word
 [[ "$TERM" = 'linux' ]] && bindkey '^[[C' forward-word
 bindkey '^[[1;5C' forward-word
 
-# Ctrl+Up/Down noop, require for some systems.
+# Ctrl+Up noop, required for some systems.
 [[ "$TERM" = 'linux' ]] && bindkey -s '^[[A' ''
 bindkey -s '^[[1;5A' ''
+# Ctrl+Down noop, required for some systems.
 [[ "$TERM" = 'linux' ]] && bindkey -s '^[[B' ''
 bindkey -s '^[[1;5B' ''
 
 # Shift+Tab goes to previous completion.
 (( ${+terminfo[kcbt]} )) && bindkey "${terminfo[kcbt]}" reverse-menu-complete
 
-# # Backspace/Delete characters.
-# bindkey "^?" backward-delete-char
-# (( ${+terminfo[kdch1]} )) && bindkey "${terminfo[kdch1]}" delete-char
-# # Ctrl+Backspace/Ctrl+Delete to delete whole words.
-# (( ${+terminfo[kbs]} )) && bindkey "${terminfo[kbs]}" backward-delete-word
-# (( ${+terminfo[kDC5]} )) && bindkey "${terminfo[kDC5]}" delete-word
-
 # Backspace/Delete characters.
 bindkey '^?' backward-delete-char
 (( ${+terminfo[kdch1]} )) && bindkey "${terminfo[kdch1]}" delete-char
-# Ctrl+Backspace/Ctrl+Delete to delete whole words.
+
+# Ctrl+Backspace to delete whole words.
 bindkey '^H' backward-delete-word
 bindkey '^_' backward-delete-word
+
+# Ctrl+Delete to delete whole words.
 (( ${+terminfo[kDC5]} )) && bindkey "${terminfo[kDC5]}" delete-word
 bindkey '^[[3;5~' delete-word
+[[ "$TERM" = 'linux' ]] && bindkey '^[[3~' delete-word
 
 # Clear auto suggestions, expand/complete and fetch auto suggestions.
 tab-complete() {
