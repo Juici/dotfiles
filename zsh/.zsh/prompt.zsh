@@ -341,6 +341,9 @@ typeset -gF SECONDS
             branch="${info[revision]:0:9}"
         fi
 
+        # Trim long branch names.
+        (( ${#branch} > 32 )) && branch="${branch:0:12}...${branch:0-12}"
+
         [[ -n "${info[action]}" ]] && action="|${info[action]}"
         [[ -n "${info[misc]}" ]] && misc="(${info[misc]})"
 
