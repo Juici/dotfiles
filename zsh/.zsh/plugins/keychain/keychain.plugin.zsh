@@ -6,6 +6,9 @@
 
 _keychain_async_callback() {
     eval "$(<&$1)"
+
+    zle -F "$1"
+    exec {1}<&-
 }
 
 # If there is a pending task cancel it.
