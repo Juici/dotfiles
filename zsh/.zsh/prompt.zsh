@@ -38,6 +38,8 @@ zstyle ':vcs_info:svn*:*' actionformats '[%b|%a%m%c%u]' '%R' # default ' (%s)-[%
 
 # Anonymous function to avoid leaking variables.
 () {
+    # Left Prompt.
+
     # Set the prompt suffix character.
     local suffix_char
     case "$TERM" in
@@ -108,11 +110,7 @@ zstyle ':vcs_info:svn*:*' actionformats '[%b|%a%m%c%u]' '%R' # default ' (%s)-[%
     # Export PS1.
     export PS1="${SSH_TTY:+${ssh_info}}${wd}${status_info} ${suffix} "
 
-    if [[ -n "$tmuxing" ]]; then
-        # Outside tmux, ZLE_RPROMPT_INDENT ends up eating the space after PS1, and
-        # prompt still gets corrupted even if we add an extra space to compensate.
-        export ZLE_RPROMPT_INDENT=0
-    fi
+    # Right Prompt
 
     # Space before full_path, if vcs_info or elapsed_time present.
     local path_space='${${prompt_vcs_info[branch]:-${prompt_cmd_elapsed:-}}:+ }'
@@ -140,6 +138,7 @@ zstyle ':vcs_info:svn*:*' actionformats '[%b|%a%m%c%u]' '%R' # default ' (%s)-[%
     local elapsed_time="%F{cyan}${italic_on}\${prompt_cmd_elapsed}${italic_off}%f"
 
     export RPROMPT="${elapsed_time}${vcs_info}${full_path}"
+    export ZLE_RPROMPT_INDENT=0
 }
 
 export SPROMPT="zsh: correct %F{red}'%R'%f to %F{red}'%r'%f [%B%Uy%u%bes, %B%Un%u%bo, %B%Ue%u%bdit, %B%Ua%u%bbort]? "
