@@ -1,4 +1,4 @@
-# Prompt {{{
+# Setup {{{
 
 # Substitute colours in prompt.
 setopt prompt_subst
@@ -7,34 +7,34 @@ setopt prompt_subst
 autoload -Uz colors
 colors
 
+# Load gitstatus plugin and start daemon.
+zinit ice wait lucid atload'gitstatus_stop "gitprompt" && gitstatus_start "gitprompt"'
+zinit load romkatv/gitstatus
+
 # http://zsh.sourceforge.net/Doc/Release/User-Contributions.html#Version-Control-Information
 autoload -Uz vcs_info
-zstyle ':vcs_info:*' enable git svn
+zstyle ':vcs_info:*' enable svn
 zstyle ':vcs_info:*' check-for-changes true
-zstyle ':vcs_info:*' stagedstr '%F{green}●%f' # default 'S'
-zstyle ':vcs_info:*' unstagedstr '%F{red}●%f' # default 'U'
+zstyle ':vcs_info:*' get-revision true
+zstyle ':vcs_info:*' stagedstr '1' # Boolean value.
+zstyle ':vcs_info:*' unstagedstr '1' # Boolean value.
 zstyle ':vcs_info:*' use-simple true
-zstyle ':vcs_info:*' max-exports 2
-zstyle ':vcs_info:git+set-message:*' hooks git-untracked
+zstyle ':vcs_info:*' max-exports 7
 
 # VCS format strings.
-# %a - action
+# %R - top repo directory
 # %b - branch
+# %i - revision
+# %a - action
 # %m - misc
 # %c - stagedstr
 # %u - unstagedstr
-zstyle ':vcs_info:git*:*' formats '[%b%m%c%u]' '%R' # default ' (%s)-[%b]%c%u-'
-zstyle ':vcs_info:git*:*' actionformats '[%b|%a%m%c%u]' '%R' # default ' (%s)-[%b|%a]%c%u-'
-zstyle ':vcs_info:svn*:*' formats '[%b%m%c%u]' '%R' # default ' (%s)-[%b]%c%u-'
-zstyle ':vcs_info:svn*:*' actionformats '[%b|%a%m%c%u]' '%R' # default ' (%s)-[%b|%a]%c%u-'
+zstyle ':vcs_info:*:*' formats '%R' '%b' '%i' '%m' '%c' '%u'
+zstyle ':vcs_info:*:*' actionformats '%R' '%b' '%i' '%m' '%c' '%u' '%a'
 
-# Include untracked files in unstagedstr.
-+vi-git-untracked() {
-    emulate -L zsh
-    if [[ -n $(git ls-files --exclude-standard --others 2> /dev/null) ]]; then
-        hook_com[unstaged]+='%F{blue}●%f'
-    fi
-}
+# }}}
+
+# Prompt {{{
 
 # Anonymous function to avoid leaking variables.
 () {
@@ -113,7 +113,7 @@ zstyle ':vcs_info:svn*:*' actionformats '[%b|%a%m%c%u]' '%R' # default ' (%s)-[%
     # Right Prompt
 
     # Space before full_path, if vcs_info or elapsed_time present.
-    local path_space='${${prompt_vcs_info[branch]:-${prompt_cmd_elapsed:-}}:+ }'
+    local path_space='${${prompt_vcs_info[info]:-${prompt_cmd_elapsed:-}}:+ }'
     # Space before vcs_info, if elapsed_time present.
     local vcs_space='${${prompt_cmd_elapsed:-}:+ }'
 
@@ -126,7 +126,7 @@ zstyle ':vcs_info:svn*:*' actionformats '[%b|%a%m%c%u]' '%R' # default ' (%s)-[%
     local full_path="%-80(l.${path_space}%F{blue}%\$(( COLUMNS / 4 ))<...<%~%<<%f.)"
 
     # VCS branch info, set by async precmd callback.
-    local vcs_info="\${prompt_vcs_info[branch]:+${vcs_space}}\${prompt_vcs_info[branch]}"
+    local vcs_info="\${prompt_vcs_info[info]:+${vcs_space}}\${prompt_vcs_info[info]}"
 
     local italic_on='' italic_off=''
     if (( ${+terminfo[sitm]} && ${+terminfo[ritm]} )); then
@@ -167,6 +167,8 @@ add-zsh-hook precmd -prompt-precmd
 # }}}
 
 # Functions {{{
+
+# Timer {{{
 
 typeset -gF SECONDS
 -prompt-record-start-time() {
@@ -223,95 +225,137 @@ typeset -gF SECONDS
     fi
 }
 
+# }}}
+
+# VCS {{{
+
 -prompt-async-vcs-info() {
-    vcs_info
+    local wd=$1
+
+    builtin cd -q $wd
 
     local -A info
-    info[pwd]=$PWD
-    info[top]=$vcs_info_msg_1_
-    info[branch]=$vcs_info_msg_0_
+
+    # Execute gitstatus query if function loaded.
+    if command -v gitstatus_query >/dev/null; then
+        gitstatus_query 'gitprompt'
+    else
+        VCS_STATUS_RESULT='norepo-sync'
+    fi
+
+    case "$VCS_STATUS_RESULT" in
+        ok-sync)
+            info[root]="$VCS_STATUS_WORKDIR"
+
+            # Branch or tag name.
+            if [[ -n "$VCS_STATUS_LOCAL_BRANCH" ]]; then
+                info[branch]="$VCS_STATUS_LOCAL_BRANCH"
+            elif [[ -n "$VCS_STATUS_TAG" ]]; then
+                info[branch]="$VCS_STATUS_TAG"
+            else
+                info[branch]=''
+            fi
+
+            info[revision]="$VCS_STATUS_COMMIT"
+            info[action]="$VCS_STATUS_ACTION"
+            info[misc]=''
+
+            info[staged]=$(( VCS_STATUS_HAS_STAGED ))
+            info[unstaged]=$(( VCS_STATUS_HAS_UNSTAGED == 1 )) # Ignore unknown = -1.
+            info[untracked]=$(( VCS_STATUS_HAS_UNTRACKED == 1 )) # Ignore unknown = -1.
+            ;;
+        norepo-sync)
+            # Check other VCS.
+            vcs_info
+
+            info[root]="$vcs_info_msg_0_"
+            info[branch]="$vcs_info_msg_1_"
+            info[revision]="$vcs_info_msg_2_"
+            info[action]="$vcs_info_msg_6_"
+            info[misc]="$vcs_info_msg_3_"
+            info[staged]=$(( vcs_info_msg_4_ ))
+            info[unstaged]=$(( vcs_info_msg_5_ ))
+            info[untracked]=0
+            ;;
+    esac
+
+    info[pwd]="$PWD"
 
     builtin print -r -- "${(@kvq)info}"
 }
 
 -prompt-async-tasks() {
-    # Initialise async worker.
-    if (( ! ${prompt_async_init:-0} )); then
-        async_start_worker 'prompt' -u -n
-        async_register_callback 'prompt' -prompt-async-callback
-        integer -g prompt_async_init=1
+    # If there is a pending task cancel it.
+    if [[ -n "$_prompt_async_fd" ]] && { true <&$_prompt_async_fd } 2>/dev/null; then
+        # Close the file descriptor and remove the handler.
+        exec {_prompt_async_fd}<&-
+        zle -F $_prompt_async_fd
     fi
-
-    # Update current working directory of the async worker.
-    async_worker_eval 'prompt' "builtin cd -q $PWD"
 
     typeset -gA prompt_vcs_info
 
-    if [[ $PWD != ${prompt_vcs_info[pwd]}* ]]; then
-        # Stop running async jobs.
-        async_flush_jobs 'prompt'
-
-        prompt_vcs_info[top]=''
-        prompt_vcs_info[branch]=''
+    # No longer within the VCS tree.
+    if [[ -n ${prompt_vcs_info[root]} ]] && [[ "$PWD" != "${prompt_vcs_info[root]}"* ]]; then
+        prompt_vcs_info[root]=''
+        prompt_vcs_info[info]=''
     fi
 
-    # Async vcs_info.
-    async_job 'prompt' -prompt-async-vcs-info
+    # Fork a process to fetch VCS info and open a pipe to read from it.
+    exec {_prompt_async_fd}< <(
+        # Fetch and print VCS info.
+        -prompt-async-vcs-info "$PWD"
+    )
+
+    # When the file descriptor is readable, run the callback handler.
+    zle -F "$_prompt_async_fd" -prompt-async-callback
 }
 
 -prompt-async-callback() {
-    local job=$1 code=$2 stdout=$3 exec_time=$4 stderr=$5 next_pending=$6
-    integer do_render=0
+    typeset -gA prompt_vcs_info
 
-    case $job in
-        \[async])
-            # Code 1: corrupted worker output.
-            # Code 2: dead worker.
-            if (( $code == 2 )); then
-                # The worker died unexpectedly.
-                integer -g prompt_async_init=0
-            fi
-            ;;
-        -prompt-async-vcs-info)
-            local -A info
-            typeset -gA prompt_vcs_info
+    # Read from file descriptor.
+    local read_in="$(<&$1)"
 
-            # Parse output (z) and unquote as array (Q@).
-            info=("${(Q@)${(z)stdout}}")
+    # Remove the handler and close the file descriptor.
+    zle -F "$1"
+    exec {1}<&-
 
-            if [[ ${info[pwd]} != $PWD ]]; then
-                # The path has changed since the job started, abort.
-                return
-            fi
+    local -A info
 
-            # Check if git toplevel has changed.
-            if [[ ${info[top]} = ${prompt_vcs_info[top]} ]]; then
-                # If stored pwd is part of $PWD: $PWD is shorter and likelier to
-                # be toplevel, so update pwd.
-                if [[ ${prompt_vcs_info[pwd]} = ${PWD}* ]]; then
-                    prompt_vcs_info[pwd]=$PWD
-                fi
-            else
-                # Store $PWD to detect if we (maybe) left the git path.
-                prompt_vcs_info[pwd]=$PWD
-            fi
+    # Parse output (z) and unquote as array (Q@).
+    info=( "${(Q@)${(z)read_in}}" )
 
-            prompt_vcs_info[top]=${info[top]}
-            prompt_vcs_info[branch]=${info[branch]}
+    # Check if the path has changed since the job started, if so abort.
+    [[ "${info[pwd]}" != "$PWD" ]] && return
 
-            do_render=1
-            ;;
-    esac
+    prompt_vcs_info[root]="${info[root]}"
+    prompt_vcs_info[pwd]="${info[pwd]}"
 
-    if (( next_pending )); then
-        (( do_render )) && integer -g prompt_async_render_requested=1
-        return
+    if [[ -n "${prompt_vcs_info[root]}" ]]; then
+        local branch action='' misc='' staged='' unstaged='' untracked=''
+
+        # Use branch, tag, or revision.
+        if [[ -n "${info[branch]}" ]]; then
+            branch="${info[branch]}"
+        else
+            branch="${info[revision]:0:9}"
+        fi
+
+        [[ -n "${info[action]}" ]] && action="|${info[action]}"
+        [[ -n "${info[misc]}" ]] && misc="(${info[misc]})"
+
+        (( info[staged] )) && staged="%F{green}●%f"
+        (( info[unstaged] )) && unstaged="%F{red}●%f"
+        (( info[untracked] )) && untracked="%F{blue}●%f"
+
+        prompt_vcs_info[info]="[${branch}${action}${misc}${staged}${unstaged}${untracked}]"
+    else
+        prompt_vcs_info[info]=''
     fi
 
-    if (( ${prompt_async_render_requested:-$do_render} == 1 )); then
-        zle .reset-prompt
-    fi
-    unset prompt_async_render_requested
+    zle && zle .reset-prompt
 }
+
+# }}}
 
 # }}}
