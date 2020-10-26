@@ -3,34 +3,39 @@
 
 # Paths.
 typeset -gU cdpath fpath mailpath manpath path
-typeset -gUT INFOPATH infopath
 
-# Get a copy of the system PATH.
-local -aU system_path
-system_path=($path)
+typeset -gUT INFOPATH infopath
+typeset -gUT GOPATH gopath
 
 # Set GOPATH.
-typeset -gUT GOPATH gopath
 gopath=(
     $HOME/go
 )
 
-# Configure PATH.
+# Paths to look for executable files.
 path=(
-    $HOME/bin
+    $HOME/.local/bin
     $HOME/.zsh/bin
     $HOME/.cargo/bin
-    ${^gopath}/bin
-    $HOME/.local/bin
     $HOME/.node_modules/bin
-    /bin
-    /usr/bin
-    /usr/local/bin
-    /usr/local/sbin
-    $system_path
+    ${^gopath}/bin
+    /usr/local/{,s}bin
+    /usr/{,s}bin
+    /{,s}bin
+    $path
 )
 
+# Paths to look for man pages.
+manpath=(
+    $HOME/.local/share/man
+    /usr/local/share/man
+    /usr/share/man
+    $infopath
+)
+
+# Paths to look for info pages.
 infopath=(
+    $HOME/.local/share/info
     /usr/local/share/info
     /usr/share/info
     $infopath

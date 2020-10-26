@@ -14,6 +14,8 @@ _keychain_async_callback() {
 
     # Unset the keychain async fd variable.
     unset _keychain_async_fd
+    # Remove the callback function.
+    unfunction _keychain_async_callback
 }
 
 # If there is a pending task cancel it.

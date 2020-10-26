@@ -108,7 +108,9 @@ typeset -g LOCAL_PLUGINS="$HOME/.zsh/plugins"
 # Finalise {{{
 
 # Load local overrides.
-LOCAL_RC="$HOME/.zshrc.local"
-[[ -f "$LOCAL_RC" ]] && source "$LOCAL_RC"
+() {
+    local LOCAL_RC="$HOME/.zshrc.local"
+    [[ -f "$LOCAL_RC" ]] && source "$LOCAL_RC"
+}
 
 # }}}
