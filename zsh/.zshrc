@@ -1,11 +1,3 @@
-# Global Vars {{{
-
-# Create a hash table for globally stashing variables without polluting main
-# scope.
-typeset -gAH __JUICI
-
-# }}}
-
 # Load zinit {{{
 
 # Declare $ZINIT global.
@@ -65,7 +57,7 @@ typeset -g LOCAL_PLUGINS="$HOME/.zsh/plugins"
 
 # Async workers.
 #zinit light Juici/zsh-async
-zinit light mafredri/zsh-async
+#zinit light mafredri/zsh-async
 
 # }}}
 
