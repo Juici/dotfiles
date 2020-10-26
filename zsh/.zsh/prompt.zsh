@@ -107,8 +107,8 @@ zstyle ':vcs_info:*:*' actionformats '%R' '%b' '%i' '%m' '%c' '%u' '%a'
     # http://zsh.sourceforge.net/Doc/Release/Prompt-Expansion.html#Conditional-Substrings-in-Prompts
     local status_info='%F{yellow}%B%(1j.*.)%(?..!)%b%f'
 
-    # Export PS1.
-    export PS1="${SSH_TTY:+${ssh_info}}${wd}${status_info} ${suffix} "
+    # Export PROMPT.
+    export PROMPT="${SSH_TTY:+${ssh_info}}${wd}${status_info} ${suffix} "
 
     # Right Prompt
 
