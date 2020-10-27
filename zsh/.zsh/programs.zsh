@@ -9,3 +9,12 @@ zinit light BurntSushi/ripgrep
 # Replacement for find.
 zinit ice wait lucid if'(( ! ${+commands[fd]} ))' from'gh-r' as'program' mv'*/fd -> fd'
 zinit light sharkdp/fd
+
+# Replacement for cat.
+zinit ice wait lucid if'(( ! ${+commands[bat]} ))' from'gh-r' as'program' mv'*/bat -> bat' atclone'mv */autocomplete/bat.zsh _bat' atpull'%atclone'
+zinit light sharkdp/bat
+
+
+# Tweaks and configurations for bat.
+zinit ice wait lucid id-as'local/bat'
+zinit load ${Juici[CONFIGS]}/bat

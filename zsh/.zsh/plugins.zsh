@@ -8,10 +8,6 @@ zinit load ${Juici[PLUGINS]}/keychain
 zinit ice wait lucid id-as'local/bgnotify'
 zinit load ${Juici[PLUGINS]}/bgnotify
 
-# Tweaks and configurations for bat.
-zinit ice wait lucid id-as'local/bat' has'bat'
-zinit load ${Juici[PLUGINS]}/bat
-
 
 # Syntax highlighting.
 zinit ice wait lucid atinit'ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay'

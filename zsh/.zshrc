@@ -7,6 +7,7 @@ Juici[RC]="$HOME/.zshrc"
 Juici[RC_LOCAL]="$HOME/.zshrc.local"
 Juici[DOT_ZSH]="$HOME/.zsh"
 Juici[PLUGINS]="${Juici[DOT_ZSH]}/plugins"
+Juici[CONFIGS]="${Juici[DOT_ZSH]}/configs"
 
 # }}}
 
