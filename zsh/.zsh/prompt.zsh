@@ -243,7 +243,11 @@ typeset -gF EPOCHREALTIME
     setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
 
     # Change directory to the target.
-    builtin cd -q $1
+    if [[ -d "$1" ]]; then
+        builtin cd -q $1
+    else
+        return 1
+    fi
 
     local -A info
 
@@ -344,6 +348,9 @@ typeset -gF EPOCHREALTIME
     # Remove the handler and close the file descriptor.
     zle -F "$async_fd"
     exec {async_fd}<&-
+
+    # Check if data read from file descriptor was empty, if so abort.
+    [[ -z "$read_in" ]] && return
 
     local -A info
 
