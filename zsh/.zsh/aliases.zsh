@@ -11,7 +11,14 @@ alias la='ls -A'
 # Unified diff.
 alias diff='diff -u --color=auto'
 
-# Aliases when using kitty.
+# Exa aliases.
+alias exa='exa --colour=auto --extended --git'
+alias e='exa'
+alias ea='exa --all'
+alias el='exa --long'
+alias eal='exa --all --long'
+
+# Alias functions when using kitty.
 if [[ "$TERM" == "xterm-kitty" ]]; then
     # Send kitty terminfo over ssh.
     # Use a function over an alias to keep completion function.
@@ -25,23 +32,12 @@ if [[ "$TERM" == "xterm-kitty" ]]; then
     }
 fi
 
+# Alias functions when using cross.
 if (( ${+commands[cross]} )); then
+    # Wrap cross in a sudo call due to docker needing root.
     cross() {
         sudo -E cross "$@"
     }
-fi
-
-if (( ${+commands[exa]} )); then
-    alias exa='exa --colour=auto --extended --git'
-
-    alias e='exa'
-
-    alias ea='exa --all'
-    alias el='exa --long'
-    alias eal='exa --all --long'
-
-    alias exaa='exa --all'
-    alias exal='exa --long'
 fi
 
 # Git aliases (sorted alphabetically).
