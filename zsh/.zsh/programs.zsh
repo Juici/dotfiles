@@ -1,3 +1,5 @@
+# Programs {{{
+
 # Replacement for ls.
 zinit ice wait lucid if'(( ! ${+commands[exa]} ))' from'gh-r' as'program' mv'exa* -> exa' atclone'curl -o _exa https://raw.githubusercontent.com/ogham/exa/master/contrib/completions.zsh' atpull'%atclone'
 zinit light ogham/exa
@@ -14,7 +16,15 @@ zinit light sharkdp/fd
 zinit ice wait lucid if'(( ! ${+commands[bat]} ))' from'gh-r' as'program' mv'*/bat -> bat' atclone'mv */autocomplete/bat.zsh _bat' atpull'%atclone'
 zinit light sharkdp/bat
 
+zinit ice wait lucid if'(( ! ${+commands[nvim]} ))' from'gh-r' as'program' pick'*/bin/nvim'
+zinit light neovim/neovim
+
+# }}}
+
+# Configs {{{
 
 # Tweaks and configurations for bat.
 zinit ice wait lucid id-as'local/bat'
 zinit load ${Juici[CONFIGS]}/bat
+
+# }}}

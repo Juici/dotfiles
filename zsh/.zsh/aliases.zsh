@@ -11,6 +11,9 @@ alias la='ls -A'
 # Unified diff.
 alias diff='diff -u --color=auto'
 
+# Use neovim over vim.
+alias vim='nvim'
+
 # Exa aliases.
 alias exa='exa --colour=auto --extended --git'
 alias e='exa'
@@ -68,11 +71,6 @@ if (( ${+commands[git]} )); then
 
     alias gsb='git status -sb'
     alias gst='git status'
-fi
-
-# Use neovim over vim, if available.
-if (( ${+commands[nvim]} )); then
-    alias vim='nvim'
 fi
 
 # Alias for zathura.
