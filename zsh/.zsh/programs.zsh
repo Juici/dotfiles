@@ -16,6 +16,11 @@ zinit light sharkdp/fd
 zinit ice wait lucid if'(( ! ${+commands[bat]} ))' from'gh-r' as'program' mv'*/bat -> bat' atclone'mv */autocomplete/bat.zsh _bat' atpull'%atclone'
 zinit light sharkdp/bat
 
+# Hex viewer.
+zinit ice wait lucid if'(( ! ${+commands[hexyl]} ))' from'gh-r' as'program' mv'*/hexyl -> hexyl'
+zinit light sharkdp/hexyl
+
+# Replacement for vim.
 zinit ice wait lucid if'(( ! ${+commands[nvim]} ))' from'gh-r' as'program' pick'*/bin/nvim'
 zinit light neovim/neovim
 
