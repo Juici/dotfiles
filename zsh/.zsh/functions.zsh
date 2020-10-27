@@ -4,4 +4,4 @@
 
 # Load functions.
 #zinit ice id-as'local/functions'
-zinit load ${JUICI[DOT_ZSH]}/functions
+zinit load ${Juici[DOT_ZSH]}/functions
