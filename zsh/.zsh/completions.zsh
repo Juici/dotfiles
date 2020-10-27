@@ -1,7 +1,7 @@
 # Plugins {{{
 
 # Zsh completion functions.
-zinit ice wait lucid blockf atpull'zinit creinstall -q .'
+zinit ice wait lucid blockf atload'zicompinit; zicdreplay' atpull'zinit creinstall -q .'
 zinit load zsh-users/zsh-completions
 
 
