@@ -1,0 +1,77 @@
+#!/usr/bin/env zsh
+# -*- mode: sh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+
+# Set the base and typically useful options
+emulate -LR zsh
+setopt extendedglob warncreateglobal typesetsilent noshortloops rcquotes
+
+# Run as script? ZSH_SCRIPT is a Zsh 5.3 addition
+if [[ $0 != bar || -n $ZSH_SCRIPT ]]; then
+    # Handle $0 according to the Zsh Plugin Standard:
+    # http://zdharma.org/Zsh-100-Commits-Club/Zsh-Plugin-Standard.html
+    0=${${ZERO:-${0:#$ZSH_ARGZERO}}:-${(%):-%N}}
+    0=${${(M)0##/*}:-$PWD/$0}
+
+    # Such global variable is expected to be typeset'd -g in the plugin.zsh
+    # file. Here it's restored in case of the function being run as a script.
+    typeset -gA Plugins
+    Plugins[FUNCTIONS_DIR]=${0:h}
+
+    # In case of the script using other scripts from the plugin, either set up
+    # $fpath and autoload, or add the directory to $PATH.
+    # fpath+=( $Plugins[FUNCTIONS_DIR] )
+    # autoload ...
+
+    # OR
+    # path+=( $Plugins[FUNCTIONS_DIR] )
+fi
+
+# The script/function contents possibly using $Plugins[FUNCTIONS_DIR].
+
+bar() {
+    integer BASE_BLOCK=16#2588 N_BLOCKS=8
+
+    if (( $# < 1 )); then
+        print -u 2 "usage: $0 <fraction> [width]"
+        return 1
+    fi
+
+    float -F fraction=$1        # The fraction of the bar.
+    integer full_width=${2:-4}  # The full width of the bar (default: 4).
+
+    if (( fraction < 0 || fraction > 1 )); then
+        print -u 2 'error: value must be between 0 and 1'
+        return 1
+    fi
+
+    float -F width=$(( full_width * fraction ))
+    integer full_blocks=$width
+
+    fraction=$(( width - full_blocks ))
+
+    # Print full blocks.
+    integer i
+    for (( i = 0; i < full_blocks; i++ )); do
+        print -n "${(#)BASE_BLOCK}"
+    done
+
+    if (( fraction > 0 )); then
+        integer fraction_block
+        fraction_block=$(( (N_BLOCKS - 1) * fraction ))
+        fraction_block=$(( [#16] BASE_BLOCK + ((N_BLOCKS - 1) - fraction_block) ))
+
+        print -n "${(#)fraction_block}"
+    fi
+
+    integer leftover=$(( full_width - width ))
+    for (( i = 0; i < leftover; i++ )); do
+        print -n ' '
+    done
+}
+
+bar "$@"
+
+# Use alternate marks [[[ and ]]] as the original ones can confuse nested
+# substitutions, e.g.: ${${${VAR}}}
+
+# vim:ft=zsh:tw=80:sw=4:sts=4:et:foldmarker=[[[,]]]

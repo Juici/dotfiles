@@ -32,6 +32,7 @@ autoload -Uz add-zsh-hook || {
 
 # }}}
 
+typeset -gA BgNotify
 
 # Settings used by the plugin.
 typeset -gF BGNOTIFY_THRESHOLD=${BGNOTIFY_THRESHOLD:-30}    # Threshold time in seconds.
@@ -59,16 +60,13 @@ typeset -gaU BGNOTIFY_IGNORE=(
     $BGNOTIFY_IGNORE
 )
 
-
-# Get the id of the active window.
-_bgnotify_active_window_id() {
-    integer id=$(xdotool getactivewindow)
-    return $id
+# Get the ID of the active window.
+.bgnotify_active_window_id() {
+    xdotool getactivewindow
 }
-functions -M _bgnotify_active_window_id
 
 # Send a background notification.
-_bgnotify_send() {
+.bgnotify_send() {
     local summary=$1 body=$2 exit_status=$3
 
     local urgency='normal'
@@ -80,7 +78,7 @@ _bgnotify_send() {
 }
 
 # Pretty-print elapsed time.
-_bgnotify_format_time() {
+.bgnotify_format_time() {
     local -F delta secs
     integer days hours mins
 
@@ -118,19 +116,17 @@ _bgnotify_format_time() {
     print -- "$elapsed"
 }
 
-typeset -gA _bgnotify
-
--bgnotify-start() {
-    _bgnotify[timestamp]=$EPOCHREALTIME
-    _bgnotify[window_id]=$(( _bgnotify_active_window_id() ))
-    _bgnotify[command]="$1"
+→bgnotify_start() {
+    BgNotify[timestamp]=$EPOCHREALTIME
+    BgNotify[window_id]=$(.bgnotify_active_window_id)
+    BgNotify[command]="$1"
 }
 
--bgnotify-end() {
-    (( ${+_bgnotify[command]} )) || return
+→bgnotify_end() {
+    (( ${+BgNotify[command]} )) || return
 
     local prev_status=$?
-    local prev_cmd="${_bgnotify[command]}"
+    local prev_cmd="${BgNotify[command]}"
 
     # TODO: Check if in ignore list.
 
@@ -138,20 +134,20 @@ typeset -gA _bgnotify
     (( ${#prev_cmd} > 30 )) && prev_cmd="${prev_cmd:0:27}..."
 
     local threshold=$(( BGNOTIFY_THRESHOLD ))
-    local delta=$(( EPOCHREALTIME - _bgnotify[timestamp] ))
+    local delta=$(( EPOCHREALTIME - BgNotify[timestamp] ))
 
-    if (( delta > threshold && _bgnotify_active_window_id() != _bgnotify[window_id] )); then
-        local elapsed=$(_bgnotify_format_time $delta)
+    if (( delta > threshold && $(.bgnotify_active_window_id) != BgNotify[window_id] )); then
+        local elapsed=$(.bgnotify_format_time $delta)
 
         if (( prev_status == 0 )); then
-            _bgnotify_send "Command Succeeded" "Command '$prev_cmd' succeeded after $elapsed" "$prev_status"
+            .bgnotify_send "Command Succeeded" "Command '$prev_cmd' succeeded after $elapsed" "$prev_status"
         else
-            _bgnotify_send "Command Failed" "Command '$prev_cmd' failed (exit code $prev_status) after $elapsed" "$prev_status"
+            .bgnotify_send "Command Failed" "Command '$prev_cmd' failed (exit code $prev_status) after $elapsed" "$prev_status"
         fi
     fi
 
-    unset _bgnotify[command]
+    unset BgNotify[command]
 }
 
-add-zsh-hook preexec -bgnotify-start
-add-zsh-hook precmd -bgnotify-end
+add-zsh-hook preexec →bgnotify_start
+add-zsh-hook precmd →bgnotify_end

@@ -16,7 +16,7 @@ zinit load Juici/zsh-rust-completions
 
 # General completions.
 zinit ice wait lucid blockf id-as'local/completions'
-zinit load $LOCAL_PLUGINS/completions
+zinit load ${Juici[PLUGINS]}/completions
 
 # }}}
 

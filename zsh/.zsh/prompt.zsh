@@ -36,8 +36,13 @@ zstyle ':vcs_info:*:*' actionformats '%R' '%b' '%i' '%m' '%c' '%u' '%a'
 
 # Prompt {{{
 
+typeset -gA Prompt
+
 # Anonymous function to avoid leaking variables.
 () {
+    emulate -L zsh
+    setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
+
     # Left Prompt.
 
     # Set the prompt suffix character.
@@ -112,10 +117,10 @@ zstyle ':vcs_info:*:*' actionformats '%R' '%b' '%i' '%m' '%c' '%u' '%a'
 
     # Right Prompt
 
-    # Space before full_path, if vcs_info or elapsed_time present.
-    local path_space='${${prompt_vcs_info[info]:-${prompt_cmd_elapsed:-}}:+ }'
-    # Space before vcs_info, if elapsed_time present.
-    local vcs_space='${${prompt_cmd_elapsed:-}:+ }'
+    # Space before full_path, if vcs_info or cmd_elapsed present.
+    local path_space='${${Prompt[vcs_info]:-${Prompt[cmd_elapsed]:-}}:+ }'
+    # Space before vcs_info, if cmd_elapsed present.
+    local vcs_space='${${Prompt[cmd_elapsed]:-}:+ }'
 
     # The full path, displayed in the right prompt.
     #
@@ -126,7 +131,7 @@ zstyle ':vcs_info:*:*' actionformats '%R' '%b' '%i' '%m' '%c' '%u' '%a'
     local full_path="%-80(l.${path_space}%F{blue}%\$(( COLUMNS / 4 ))<...<%~%<<%f.)"
 
     # VCS branch info, set by async precmd callback.
-    local vcs_info="\${prompt_vcs_info[info]:+${vcs_space}}\${prompt_vcs_info[info]}"
+    local vcs_info="\${Prompt[vcs_info]:+${vcs_space}}\${Prompt[vcs_info]}"
 
     local italic_on='' italic_off=''
     if (( ${+terminfo[sitm]} && ${+terminfo[ritm]} )); then
@@ -135,7 +140,7 @@ zstyle ':vcs_info:*:*' actionformats '%R' '%b' '%i' '%m' '%c' '%u' '%a'
     fi
 
     # Time taken for previous command.
-    local elapsed_time="%F{cyan}${italic_on}\${prompt_cmd_elapsed}${italic_off}%f"
+    local elapsed_time="%F{cyan}${italic_on}\${Prompt[cmd_elapsed]}${italic_off}%f"
 
     export RPROMPT="${elapsed_time}${vcs_info}${full_path}"
     export ZLE_RPROMPT_INDENT=0
@@ -149,20 +154,20 @@ export SPROMPT="zsh: correct %F{red}'%R'%f to %F{red}'%r'%f [%B%Uy%u%bes, %B%Un%
 
 autoload -Uz add-zsh-hook
 
--prompt-preexec() {
+→prompt_preexec() {
     # Record start time of command.
-    -prompt-record-start-time
+    .prompt_record_start_time
 }
-add-zsh-hook preexec -prompt-preexec
+add-zsh-hook preexec →prompt_preexec
 
--prompt-precmd() {
+→prompt_precmd() {
     # Perform long tasks async to prevent blocking.
-    -prompt-async-tasks
+    .prompt_async_tasks
 
     # Report the execution time of previous command.
-    -prompt-report-start-time
+    .prompt_report_start_time
 }
-add-zsh-hook precmd -prompt-precmd
+add-zsh-hook precmd →prompt_precmd
 
 # }}}
 
@@ -170,25 +175,28 @@ add-zsh-hook precmd -prompt-precmd
 
 # Timer {{{
 
-typeset -gF SECONDS
--prompt-record-start-time() {
+typeset -gF EPOCHREALTIME
+
+.prompt_record_start_time() {
     emulate -L zsh
+    setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
 
     # Set command start time.
-    prompt_cmd_elapsed=''
-    prompt_cmd_start="$SECONDS"
+    Prompt[cmd_elapsed]=''
+    Prompt[cmd_start]=$EPOCHREALTIME
 }
 
--prompt-report-start-time() {
+.prompt_report_start_time() {
     emulate -L zsh
+    setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
 
     # If command start time was set, calculate elapsed time.
-    if (( $+prompt_cmd_start )); then
-        local -F delta secs
+    if (( ${+Prompt[cmd_start]} )); then
+        float -F delta secs
         integer days hours mins
 
         # Delta time for command in seconds.
-        delta=$(( SECONDS - prompt_cmd_start ))
+        delta=$(( EPOCHREALTIME - Prompt[cmd_start] ))
 
         # Days as an integer.
         days=$(( delta / 86400 ))
@@ -218,10 +226,11 @@ typeset -gF SECONDS
             elapsed="${elapsed}${int_secs}s"
         fi
 
-        prompt_cmd_elapsed="$elapsed"
-        unset prompt_cmd_start
+        Prompt[cmd_elapsed]="$elapsed"
+
+        unset 'Prompt[cmd_start]'
     else
-        prompt_cmd_elapsed=''
+        Prompt[cmd_elapsed]=''
     fi
 }
 
@@ -229,10 +238,12 @@ typeset -gF SECONDS
 
 # VCS {{{
 
--prompt-async-vcs-info() {
-    local wd=$1
+.prompt_async_vcs_info() {
+    emulate -L zsh
+    setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
 
-    builtin cd -q $wd
+    # Change directory to the target.
+    builtin cd -q $1
 
     local -A info
 
@@ -240,7 +251,7 @@ typeset -gF SECONDS
     if command -v gitstatus_query >/dev/null; then
         gitstatus_query 'gitprompt'
     else
-        VCS_STATUS_RESULT='norepo-sync'
+        export VCS_STATUS_RESULT='norepo-sync'
     fi
 
     case "$VCS_STATUS_RESULT" in
@@ -284,41 +295,55 @@ typeset -gF SECONDS
     builtin print -r -- "${(@kvq)info}"
 }
 
--prompt-async-tasks() {
+.prompt_async_tasks() {
+    emulate -L zsh
+    setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
+
+    # Note: exec doesn't accept variables in the form of associative arrays, so
+    #       we have to go through a intermediate variable 'async_fd'.
+    integer async_fd
+
     # If there is a pending task cancel it.
-    if [[ -n "$_prompt_async_fd" ]] && { true <&$_prompt_async_fd } 2>/dev/null; then
-        # Close the file descriptor and remove the handler.
-        exec {_prompt_async_fd}<&-
-        zle -F $_prompt_async_fd
+    if [[ -n "${Prompt[async_fd]}" ]] && { true <&${Prompt[async_fd]} } 2>/dev/null; then
+        # Close the file descriptor.
+        async_fd=${Prompt[async_fd]}
+        exec {async_fd}<&-
+        unset async_fd
+
+        # Remove the handler.
+        zle -F ${Prompt[async_fd]}
     fi
 
-    typeset -gA prompt_vcs_info
-
     # No longer within the VCS tree.
-    if [[ -n ${prompt_vcs_info[root]} ]] && [[ "$PWD" != "${prompt_vcs_info[root]}"* ]]; then
-        prompt_vcs_info[root]=''
-        prompt_vcs_info[info]=''
+    if [[ -n ${Prompt[vcs_root]} ]] && [[ "$PWD" != "${Prompt[vcs_root]}"* ]]; then
+        Prompt[vcs_root]=''
+        Prompt[vcs_info]=''
     fi
 
     # Fork a process to fetch VCS info and open a pipe to read from it.
-    exec {_prompt_async_fd}< <(
+    exec {async_fd}< <(
         # Fetch and print VCS info.
-        -prompt-async-vcs-info "$PWD"
+        .prompt_async_vcs_info "$PWD"
     )
+    Prompt[async_fd]=$async_fd
+    unset async_fd
 
     # When the file descriptor is readable, run the callback handler.
-    zle -F "$_prompt_async_fd" -prompt-async-callback
+    zle -F "${Prompt[async_fd]}" →prompt_async_callback
 }
 
--prompt-async-callback() {
-    typeset -gA prompt_vcs_info
+→prompt_async_callback() {
+    emulate -L zsh
+    setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
+
+    local async_fd=$1
 
     # Read from file descriptor.
-    local read_in="$(<&$1)"
+    local read_in="$(<&$async_fd)"
 
     # Remove the handler and close the file descriptor.
-    zle -F "$1"
-    exec {1}<&-
+    zle -F "$async_fd"
+    exec {async_fd}<&-
 
     local -A info
 
@@ -328,10 +353,10 @@ typeset -gF SECONDS
     # Check if the path has changed since the job started, if so abort.
     [[ "${info[pwd]}" != "$PWD" ]] && return
 
-    prompt_vcs_info[root]="${info[root]}"
-    prompt_vcs_info[pwd]="${info[pwd]}"
+    Prompt[vcs_root]="${info[root]}"
+    Prompt[vcs_pwd]="${info[pwd]}"
 
-    if [[ -n "${prompt_vcs_info[root]}" ]]; then
+    if [[ -n "${info[root]}" ]]; then
         local branch action='' misc='' staged='' unstaged='' untracked=''
 
         # Use branch, tag, or revision.
@@ -351,12 +376,12 @@ typeset -gF SECONDS
         (( info[unstaged] )) && unstaged="%F{red}●%f"
         (( info[untracked] )) && untracked="%F{blue}●%f"
 
-        prompt_vcs_info[info]="[${branch}${action}${misc}${staged}${unstaged}${untracked}]"
+        Prompt[vcs_info]="[${branch}${action}${misc}${staged}${unstaged}${untracked}]"
     else
-        prompt_vcs_info[info]=''
+        Prompt[vcs_info]=''
     fi
 
-    zle && zle .reset-prompt
+    zle && zle reset-prompt
 }
 
 # }}}

@@ -1,7 +1,19 @@
+# Global Vars {{{
+
+# Create a hashtable to store global variables without polluting scope.
+typeset -gA Juici
+
+Juici[RC]="$HOME/.zshrc"
+Juici[RC_LOCAL]="$HOME/.zshrc.local"
+Juici[DOT_ZSH]="$HOME/.zsh"
+Juici[PLUGINS]="${Juici[DOT_ZSH]}/plugins"
+
+# }}}
+
 # Load zinit {{{
 
 # Declare $ZINIT global.
-typeset -gAH ZINIT
+typeset -gA ZINIT
 
 ZINIT[HOME_DIR]="$HOME/.zinit"
 
@@ -53,8 +65,6 @@ autoload -Uz _zinit
 
 setopt extended_glob
 
-typeset -g LOCAL_PLUGINS="$HOME/.zsh/plugins"
-
 # Async workers.
 #zinit light Juici/zsh-async
 #zinit light mafredri/zsh-async
@@ -65,9 +75,7 @@ typeset -g LOCAL_PLUGINS="$HOME/.zsh/plugins"
 
 # Anonymous function to avoid leaking variables.
 () {
-    local DOT_ZSH="$HOME/.zsh"
-
-    if [[ -d "$DOT_ZSH" ]]; then
+    if [[ -d "${Juici[DOT_ZSH]}" ]]; then
         local -aU files
 
         # List of possible files to load.
@@ -89,15 +97,14 @@ typeset -g LOCAL_PLUGINS="$HOME/.zsh/plugins"
             'plugins'
         )
 
-        # TODO: Look into sourcing each file in its own scope.
         local file file_path
-        for file in $files[@]; do
+        for file in ${files[@]}; do
             # Source file.
-            file_path="$DOT_ZSH/$file.zsh"
+            file_path="${Juici[DOT_ZSH]}/${file}.zsh"
             [[ -f "$file_path" ]] && source "$file_path"
 
             # Source local overrides.
-            file_path="$DOT_ZSH/$file.local.zsh"
+            file_path="${Juici[DOT_ZSH]}/${file}.local.zsh"
             [[ -f "$file_path" ]] && source "$file_path"
         done
     fi
@@ -108,9 +115,6 @@ typeset -g LOCAL_PLUGINS="$HOME/.zsh/plugins"
 # Finalise {{{
 
 # Load local overrides.
-() {
-    local LOCAL_RC="$HOME/.zshrc.local"
-    [[ -f "$LOCAL_RC" ]] && source "$LOCAL_RC"
-}
+[[ -f "${Juici[RC_LOCAL]}" ]] && source "${Juici[RC_LOCAL]}"
 
 # }}}

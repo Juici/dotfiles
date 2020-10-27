@@ -1,14 +1,16 @@
-autoload -U add-zsh-hook
+autoload -Uz add-zsh-hook
 
 
--hooks-title() {
+.hooks_title() {
     emulate -L zsh
 
     local cmd="${1:gs/$/\\$}"
     print -Pn "\e]0;$cmd:q\a"
 }
 
--hooks-pwd() {
+.hooks_pwd() {
+    emulate -L zsh
+
     print -Pn '%~'
 }
 
@@ -16,12 +18,12 @@ autoload -U add-zsh-hook
 # Keep track of local command history.
 HISTCMD_LOCAL=0
 
--hooks-update-window-title-precmd() {
+→hooks_update_window_title_precmd() {
     emulate -L zsh
 
     if (( HISTCMD_LOCAL == 0 )); then
         # HISTCMD_LOCAL not set yet, just show PWD.
-        -hooks-title "$(-hooks-pwd)"
+        .hooks_title "$(.hooks_pwd)"
     else
         local last
         print -v last -- ${$(history -1)[2]}
@@ -29,16 +31,16 @@ HISTCMD_LOCAL=0
         if [[ -n "$TMUX" ]]; then
             # Inside tmux, just show last cmd since tmux will prefix title with
             # session name.
-            -hooks-title "$last"
+            .hooks_title "$last"
         else
             # Outside tmux, from PWD followed by last cmd.
-            -hooks-title "$(-hooks-pwd) > $last"
+            .hooks_title "$(.hooks_pwd) > $last"
         fi
     fi
 }
-add-zsh-hook precmd -hooks-update-window-title-precmd
+add-zsh-hook precmd →hooks_update_window_title_precmd
 
--hooks-update-window-title-preexec() {
+→hooks_update_window_title_preexec() {
     emulate -L zsh
     setopt extendedglob
 
@@ -48,10 +50,10 @@ add-zsh-hook precmd -hooks-update-window-title-precmd
     if [[ -n "$TMUX" ]]; then
         # Inside tmux, just show last cmd since tmux will prefix title with
         # session name.
-        -hooks-title "$trimmed"
+        .hooks_title "$trimmed"
     else
         # Outside tmux, from PWD followed by last cmd.
-        -hooks-title "$(-hooks-pwd) > $trimmed"
+        .hooks_title "$(.hooks_pwd) > $trimmed"
     fi
 }
-add-zsh-hook preexec -hooks-update-window-title-preexec
+add-zsh-hook preexec →hooks_update_window_title_preexec
