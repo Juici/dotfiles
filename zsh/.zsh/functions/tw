@@ -6,6 +6,7 @@ emulate -LR zsh
 setopt extendedglob warncreateglobal typesetsilent noshortloops rcquotes
 
 zmodload zsh/datetime
+zmodload zsh/zutil
 
 # Run as script? ZSH_SCRIPT is a Zsh 5.3 addition
 if [[ $0 != bar || -n $ZSH_SCRIPT ]]; then
@@ -32,18 +33,50 @@ tw() {
     emulate -L zsh
     setopt extendedglob warncreateglobal typesetsilent noshortloops rcquotes
 
-    local args="$@"
-
     # Check for invalid timewarps.
-    if [[ "$TW" = *[^[:digit:]\+\-]* ]]; then
+    if [[ -n "$TW" ]] && [[ "$TW" = *[^[:digit:]\+\-]* ]]; then
         print "error: invalid timewarp currently set '${(q)TW}'" >&2
         return 1
     fi
 
-    # If there are no arguments print the current time warp, if no time warp is
-    # set also print the usage.
-    if (( $# == 0 )); then
-        if (( ${+TW} )); then
+    # Parse arguments.
+    local -A opts
+    zparseopts -D -E -M -A opts - d:=-date -date: 2>/dev/null
+    if (( $? != 0 )); then
+        # The only argument we are parsing is date, so this is guaranteed.
+        print 'error: missing argument for date' >&2
+        return 1
+    fi
+    local args="$@"
+
+    # Strip leading '=' from date if present.
+    local date=${opts[--date]/#=/}
+    # Strip leading and trailing whitespace.
+    date=${${date/#[[:space:]]#/}/%[[:space:]]#/}
+
+    integer tw
+
+    if [[ -n "$date" ]]; then
+        # Timewarp to an exact date.
+        if (( ! ${+commands[date]} )); then
+            # FIXME: Currently we don't have much choice but to delegate to gnu
+            #        date, due to complexity of date parsing.
+            print 'error: exact date is not supported without gnu date' >&2
+            return 1
+        fi
+
+        # If the date string wasn't properly quoted, we end up with leftover
+        # args. We just append them to the date with a space between them.
+        if [[ -n "$args" ]]; then
+            date+=" $args"
+        fi
+
+        # Delegate to gnu date to parse date format and return seconds since
+        # Unix epoch, quitting on failure.
+        tw=$(date "--date=$date" '+%s') || return 1
+    elif [[ -z "$args" ]]; then
+        # There are no arguments, print the current time warp.
+        if [[ -n "$TW" ]]; then
             integer tw_epoch=$(( TW ))
 
             # Format timewarp using preferred local date and time.
@@ -55,49 +88,55 @@ tw() {
             print 'no timewarp currently set'
         fi
     else
-        # Parse the timewarp offset.
-        integer tw_offset
-        tw_offset=$(parseoffset "$args") || return 1
+        integer tw tw_base tw_offset
 
-        # Get the base time to warp from.
-        integer tw_base
-        if (( ${+TW} )); then
-            # Use the current timewarp as a base.
-            tw_base=$(( TW ))
+        # If the timewarp begins with '@' parse as offset from Unix epoch.
+        # Otherwise parse as offset from current timewarp.
+        if [[ "${args:0:1}" = '@' ]]; then
+            tw_base=0
+            tw_offset=$(( ${args:1} ))
         else
-            # Use the current time as a base.
-            tw_base=$EPOCHSECONDS
+            # Parse offset, quitting on failure.
+            tw_offset=$(parseoffset "$args") || return 1
+
+            if [[ -n "$TW" ]]; then
+                # Use the current timewarp as a base.
+                tw_base=$TW
+            else
+                # Use the current time as a base.
+                tw_base=$EPOCHSECONDS
+            fi
         fi
 
         # Calculate the new timewarp.
-        integer tw=$(( tw_base + tw_offset ))
+        tw=$(( tw_base + tw_offset ))
+    fi
 
-        # Format the timewarp for git.
-        local git_date
-        strftime -s git_date '%s %z' $tw
+    # Format the timewarp for git.
+    local git_date
+    strftime -s git_date '%s %z' $tw
 
-        # Format new timewarp using preferred local date and time.
-        local new_date
-        strftime -s new_date '%c' $tw
+    # Format new timewarp using preferred local date and time.
+    local new_date
+    strftime -s new_date '%c' $tw
 
-        if (( ${+TW} )); then
-            # Format old timewarp using preferred local date and time.
-            local old_date
-            strftime -s old_date '%c' $tw
+    if (( ${+TW} )); then
+        # Format old timewarp using preferred local date and time.
+        local old_date
+        strftime -s old_date '%c' $tw
 
-            print "warping from '$old_date' to '$new_date'"
+        print "warping from '$old_date' to '$new_date'"
 
-            export GIT_AUTHOR_DATE=$git_date
-            export GIT_COMMITTER_DATE=$git_date
-            export TW=$tw
-        else
-            print "spawning subshell with timewarp '$new_date'"
+        export GIT_AUTHOR_DATE=$git_date
+        export GIT_COMMITTER_DATE=$git_date
+        export TW=$tw
+    else
+        print "spawning subshell with timewarp '$new_date'"
 
-            GIT_AUTHOR_DATE=$git_date \
-            GIT_COMMITTER_DATE=$git_date \
-            TW=$tw \
-            ${ZSH_SCRIPT:+exec} zsh
-        fi
+        GIT_AUTHOR_DATE=$git_date \
+        GIT_COMMITTER_DATE=$git_date \
+        TW=$tw \
+        ${ZSH_SCRIPT:+exec} zsh
     fi
 }
 
