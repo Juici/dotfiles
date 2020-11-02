@@ -1,0 +1,11 @@
+#compdef tw
+
+local ret=1
+local -a context line state state_descr alts opts
+local -A opts_args
+
+_arguments -s -S \
+    {-d,--date}'[specify an exact date to timewarp to]' \
+&& ret=0
+
+return ret
