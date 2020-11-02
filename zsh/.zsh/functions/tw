@@ -1,0 +1,109 @@
+#!/usr/bin/env zsh
+# -*- mode: sh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+
+# Set the base and typically useful options
+emulate -LR zsh
+setopt extendedglob warncreateglobal typesetsilent noshortloops rcquotes
+
+zmodload zsh/datetime
+
+# Run as script? ZSH_SCRIPT is a Zsh 5.3 addition
+if [[ $0 != bar || -n $ZSH_SCRIPT ]]; then
+    # Handle $0 according to the Zsh Plugin Standard:
+    # http://zdharma.org/Zsh-100-Commits-Club/Zsh-Plugin-Standard.html
+    0=${${ZERO:-${0:#$ZSH_ARGZERO}}:-${(%):-%N}}
+    0=${${(M)0##/*}:-$PWD/$0}
+
+    # Such global variable is expected to be typeset'd -g in the plugin.zsh
+    # file. Here it's restored in case of the function being run as a script.
+    typeset -gA Plugins
+    Plugins[FUNCTIONS_DIR]=${0:h}
+
+    # In case of the script using other scripts from the plugin, either set up
+    # $fpath and autoload, or add the directory to $PATH.
+    fpath+=( $Plugins[FUNCTIONS_DIR] )
+    autoload -Uz parseoffset
+fi
+
+# The script/function contents possibly using $Plugins[FUNCTIONS_DIR].
+
+# Time warp by setting GIT_AUTHOR_DATE and GIT_COMMITTER_DATE.
+tw() {
+    emulate -L zsh
+    setopt extendedglob warncreateglobal typesetsilent noshortloops rcquotes
+
+    local args="$@"
+
+    # Check for invalid timewarps.
+    if [[ "$TW" = *[^[:digit:]\+\-]* ]]; then
+        print "error: invalid timewarp currently set '${(q)TW}'" >&2
+        return 1
+    fi
+
+    # If there are no arguments print the current time warp, if no time warp is
+    # set also print the usage.
+    if (( $# == 0 )); then
+        if (( ${+TW} )); then
+            integer tw_epoch=$(( TW ))
+
+            # Format timewarp using preferred local date and time.
+            local tw_date
+            strftime -s tw_date '%c' $tw_epoch
+
+            print "current timewarp: '$tw_date'"
+        else
+            print 'no timewarp currently set'
+        fi
+    else
+        # Parse the timewarp offset.
+        integer tw_offset
+        tw_offset=$(parseoffset "$args") || return 1
+
+        # Get the base time to warp from.
+        integer tw_base
+        if (( ${+TW} )); then
+            # Use the current timewarp as a base.
+            tw_base=$(( TW ))
+        else
+            # Use the current time as a base.
+            tw_base=$EPOCHSECONDS
+        fi
+
+        # Calculate the new timewarp.
+        integer tw=$(( tw_base + tw_offset ))
+
+        # Format the timewarp for git.
+        local git_date
+        strftime -s git_date '%s %z' $tw
+
+        # Format new timewarp using preferred local date and time.
+        local new_date
+        strftime -s new_date '%c' $tw
+
+        if (( ${+TW} )); then
+            # Format old timewarp using preferred local date and time.
+            local old_date
+            strftime -s old_date '%c' $tw
+
+            print "warping from '$old_date' to '$new_date'"
+
+            export GIT_AUTHOR_DATE=$git_date
+            export GIT_COMMITTER_DATE=$git_date
+            export TW=$tw
+        else
+            print "spawning subshell with timewarp '$new_date'"
+
+            GIT_AUTHOR_DATE=$git_date \
+            GIT_COMMITTER_DATE=$git_date \
+            TW=$tw \
+            ${ZSH_SCRIPT:+exec} zsh
+        fi
+    fi
+}
+
+tw "$@"
+
+# Use alternate marks [[[ and ]]] as the original ones can confuse nested
+# substitutions, e.g.: ${${${VAR}}}
+
+# vim:ft=zsh:tw=80:sw=4:sts=4:et:foldmarker=[[[,]]]

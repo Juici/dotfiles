@@ -16,7 +16,7 @@ if [[ ${zsh_loaded_plugins[-1]} != */functions && -z ${fpath[(r)${0:h}]} ]] {
 typeset -gA Plugins
 Plugins[FUNCTIONS_DIR]="${0:h}"
 
-autoload -Uz bar
+autoload -Uz bar tw parseoffset
 
 # Use alternate vim marks [[[ and ]]] as the original ones can
 # confuse nested substitutions, e.g.: ${${${VAR}}}
