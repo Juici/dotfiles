@@ -26,7 +26,7 @@ HISTCMD_LOCAL=0
         .hooks_title "$(.hooks_pwd)"
     else
         local last
-        print -v last -- ${$(history -1)[2]}
+        print -v last -- "${$(history -1)[2]}"
 
         if [[ -n "$TMUX" ]]; then
             # Inside tmux, just show last cmd since tmux will prefix title with
