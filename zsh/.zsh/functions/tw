@@ -49,7 +49,7 @@ tw() {
     fi
     local args="$@"
     # Strip leading '-' or '--' from the arguments.
-    args=${args/#-(#c1,2)[[:space:]]#/}
+    args=${args/#-(#c1,2)[[:space:]]##/}
 
     # Strip leading '=' from date if present.
     local date=${opts[--date]/#=/}
