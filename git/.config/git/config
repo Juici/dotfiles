@@ -21,6 +21,11 @@
 	program = gpg2
 [include]
 	path = config.local
+[pull]
+	rebase = false
+[advice]
+	addEmptyPathspec = false
+
 [diff "pdf"]
 	binary = true
 	textconv = pdf2text
@@ -30,7 +35,5 @@
 [diff "odf"]
 	binary = true
 	textconv = odt2txt
-[pull]
-	rebase = false
 
 # vim:ft=gitconfig
