@@ -127,7 +127,7 @@ tw() {
             fi
         fi
 
-        TW="$tw" faketime "@$tw" ${(z)cmd}
+        TW="$tw" faketime "@$tw" ${(Qz)cmd}
         return $?
     fi
 
