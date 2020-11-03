@@ -41,18 +41,23 @@ tw() {
 
     # Parse arguments.
     local -A opts
-    zparseopts -D -E -M -A opts - d:=-date -date: 2>/dev/null
+    zparseopts -D -M -A opts - d:=-date -date: 2>/dev/null
     if (( $? != 0 )); then
         # The only argument we are parsing is date, so this is guaranteed.
         print 'error: missing argument for date' >&2
         return 1
     fi
     local args="$@"
+    # Strip leading '-' or '--' from the arguments.
+    args=${args/#-(#c1,2)[[:space:]]##/}
 
     # Strip leading '=' from date if present.
     local date=${opts[--date]/#=/}
     # Strip leading and trailing whitespace.
     date=${${date/#[[:space:]]#/}/%[[:space:]]#/}
+
+    # Debug print statement.
+    #print "date: $date\nargs: $args"
 
     integer tw
 
@@ -87,6 +92,8 @@ tw() {
         else
             print 'no timewarp currently set'
         fi
+
+        return 0
     else
         integer tw tw_base tw_offset
 
