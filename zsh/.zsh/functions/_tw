@@ -6,7 +6,8 @@ local -A opts_args
 
 _arguments -A '-*' : \
     '(* -d --date)'{-d+,--date=}'[specify an exact date to timewarp to]:date' \
-    '(* - --)'{-,--}'[stop parsing options]' \
+    '(-c --cmd)'{-c+,--cmd=}'[specify a command to run under a timewarp]:cmd' \
+    '(- --)'{-,--}'[stop parsing options]' \
 && ret=0
 
 return ret

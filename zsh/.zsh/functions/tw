@@ -35,13 +35,13 @@ tw() {
 
     # Check for invalid timewarps.
     if [[ -n "$TW" ]] && [[ "$TW" = *[^[:digit:]\+\-]* ]]; then
-        print "error: invalid timewarp currently set '${(q)TW}'" >&2
+        print -r "error: invalid timewarp currently set '${TW}'" >&2
         return 1
     fi
 
     # Parse arguments.
     local -A opts
-    zparseopts -D -M -A opts - d:=-date -date: 2>/dev/null
+    zparseopts -D -E -M -A opts - d:=-date -date: c:=-cmd -cmd: 2>/dev/null
     if (( $? != 0 )); then
         # The only argument we are parsing is date, so this is guaranteed.
         print 'error: missing argument for date' >&2
@@ -49,17 +49,32 @@ tw() {
     fi
     local args="$@"
     # Strip leading '-' or '--' from the arguments.
-    args=${args/#-(#c1,2)[[:space:]]##/}
+    args=${args/#-(#c1,2)[[:space:]]#/}
 
     # Strip leading '=' from date if present.
     local date=${opts[--date]/#=/}
     # Strip leading and trailing whitespace.
     date=${${date/#[[:space:]]#/}/%[[:space:]]#/}
 
-    # Debug print statement.
-    #print "date: $date\nargs: $args"
+    # Strip leading '=' from cmd if present.
+    local cmd=${opts[--cmd]/#=/}
+    # Strip leading and trailing whitespace.
+    cmd=${${cmd/#[[:space:]]#/}/%[[:space:]]#/}
 
-    integer tw
+    if [[ -n "$cmd" ]] && (( ! ${+commands[faketime]} )); then
+        print 'error: timewarp for arbitrary commands is not supported without libfaketime' >&2
+        return 1
+    fi
+
+    # Debug print statement.
+    #print "date: $date\ncmd: $cmd\noffset: $args"
+
+    integer tw has_tw=0
+
+    if [[ -n "$date" ]] && [[ -n "$args" ]]; then
+        print -r "error: cannot have exact date '$date' and offset '$args' at the same time" >&2
+        return 1
+    fi
 
     if [[ -n "$date" ]]; then
         # Timewarp to an exact date.
@@ -70,31 +85,11 @@ tw() {
             return 1
         fi
 
-        # If the date string wasn't properly quoted, we end up with leftover
-        # args. We just append them to the date with a space between them.
-        if [[ -n "$args" ]]; then
-            date+=" $args"
-        fi
-
         # Delegate to gnu date to parse date format and return seconds since
         # Unix epoch, quitting on failure.
         tw=$(date "--date=$date" '+%s') || return 1
-    elif [[ -z "$args" ]]; then
-        # There are no arguments, print the current time warp.
-        if [[ -n "$TW" ]]; then
-            integer tw_epoch=$(( TW ))
-
-            # Format timewarp using preferred local date and time.
-            local tw_date
-            strftime -s tw_date '%c' $tw_epoch
-
-            print "current timewarp: '$tw_date'"
-        else
-            print 'no timewarp currently set'
-        fi
-
-        return 0
-    else
+        has_tw=1
+    elif [[ -n "$args" ]]; then
         integer tw tw_base tw_offset
 
         # If the timewarp begins with '@' parse as offset from Unix epoch.
@@ -117,6 +112,40 @@ tw() {
 
         # Calculate the new timewarp.
         tw=$(( tw_base + tw_offset ))
+        has_tw=1
+    fi
+
+    if [[ -n "$cmd" ]]; then
+        # Get the value of the timewarp to use for the command.
+        if (( has_tw == 0 )); then
+            if [[ -n "$TW" ]]; then
+                tw=$TW
+                has_tw=1
+            else
+                print 'error: no timewarp given for command' >&2
+                return 1
+            fi
+        fi
+
+        TW="$tw" faketime "@$tw" ${(z)cmd}
+        return $?
+    fi
+
+    if (( has_tw == 0 )); then
+        # There is no timewarp given, print the current time warp.
+        if [[ -n "$TW" ]]; then
+            integer tw_epoch=$(( TW ))
+
+            # Format timewarp using preferred local date and time.
+            local tw_date
+            strftime -s tw_date '%c' $tw_epoch
+
+            print "current timewarp: '$tw_date'"
+        else
+            print 'no timewarp currently set'
+        fi
+
+        return 0
     fi
 
     # Format the timewarp for git.
