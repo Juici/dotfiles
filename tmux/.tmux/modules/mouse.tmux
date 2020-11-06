@@ -31,7 +31,7 @@ bind -T root -n WheelDownPane \
     "
 
 # Mouse wheel options must be set seperately for copy-mode than from root.
-bind -T copy-mode WheelUpPane send-keys -X scroll-up
-bind -T copy-mode WheelDownPane send-keys -X scroll-down
-bind -T copy-mode-vi WheelUpPane send-keys -X scroll-up
-bind -T copy-mode-vi WheelDownPane send-keys -X scroll-down
+bind -T copy-mode WheelUpPane send-keys -N 3 -X scroll-up
+bind -T copy-mode WheelDownPane send-keys -N 3-X scroll-down
+bind -T copy-mode-vi WheelUpPane send-keys -N 3 -X scroll-up
+bind -T copy-mode-vi WheelDownPane send-keys -N 3 -X scroll-down
