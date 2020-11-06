@@ -109,6 +109,7 @@ endif
       " Languages {{{
 
         Plug 'zplugin/zplugin-vim-syntax' " Zplugin syntax highlighting.
+        Plug 'tmux-plugins/vim-tmux' " TMUX syntax highlighting.
 
         Plug 'cespare/vim-toml' " TOML syntax highlighting.
 
