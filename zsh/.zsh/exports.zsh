@@ -11,8 +11,8 @@ export EDITOR="$VISUAL"
 export FCEDIT="$VISUAL"
 export GIT_EDITOR="$VISUAL"
 
-# Enable ANSI colour support for less.
-export LESS=R
+# Enable ANSI colour and mouse support for less.
+export LESS='-R --mouse --wheel-lines=3'
 
 # Coloured man pages.
 export LESS_TERMCAP_mb=$'\e[01;31m'     # Begins blinking.
