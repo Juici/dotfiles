@@ -6,12 +6,8 @@ if exists('b:did_ftplugin')
 endif
 let b:did_ftplugin = 1
 
-setl formatoptions-=t
+setlocal formatoptions-=t
+setlocal shiftwidth=2 tabstop=2
+setlocal comments=s1:(*,mb:*,ex:*)
 
-setl shiftwidth=2 tabstop=2
-
-" Comments `(* comment *)`.
-setl comments=s1:(*,mb:*,ex:*)
-
-let b:undo_ftplugin = 'setl fo< com<'
-
+let b:undo_ftplugin = 'setlocal formatoptions< shiftwidth< tabstop< comments<'
