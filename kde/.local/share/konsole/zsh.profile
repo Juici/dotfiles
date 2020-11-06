@@ -2,8 +2,9 @@
 AntiAliasFonts=true
 BoldIntense=true
 ColorScheme=OneDark
-Font=Fira Code,10,-1,5,50,0,0,0,0,0,Regular
-UseFontLineChararacters=true
+Font=JetBrainsMono Nerd Font Mono,10,-1,5,50,0,0,0,0,0
+LineSpacing=0
+UseFontLineChararacters=false
 
 [Cursor Options]
 CustomCursorColor=171,178,191
@@ -13,13 +14,13 @@ UseCustomCursorColor=false
 DefaultEncoding=UTF-8
 
 [General]
-Command=/bin/zsh
-Environment=TERM=xterm-256color,COLORTERM=truecolor,TERM_PROGRAM=Konsole
+Command=/usr/bin/zsh
+Environment=COLORTERM=truecolor,TERM_PROGRAM=Konsole
 LocalTabTitleFormat=%w
 Name=zsh
 Parent=FALLBACK/
 RemoteTabTitleFormat=%h : %w
-TerminalCenter=false
+TerminalCenter=true
 TerminalColumns=120
 TerminalMargin=0
 TerminalRows=35
@@ -29,4 +30,5 @@ KeyBindings=default
 
 [Scrolling]
 HistoryMode=1
+HistorySize=2000
 ScrollBarPosition=2
