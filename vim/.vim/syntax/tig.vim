@@ -79,7 +79,31 @@ syn region tigBindStatement start='^\s*\<bind\>\@=' skip='\\\n' end='\($\|#\)\@=
 syn keyword tigBind bind nextgroup=tigBindKeymap skipwhite contained
 syn keyword tigBindKeymap nextgroup=tigBindKey skipwhite contained  main diff log reflog help pager status stage tree blob blame refs stash grep generic search
 syn match tigBindKey '\S\+' nextgroup=tigBindAction skipwhite contained
+" TODO: Add highlighting for external user-defined commands, eg. !foobar.
+" TODO: Add highlighting for state variables, eg. %(head).
+" TODO: Add highlighting for action names, eg. view-main.
 syn region tigBindAction start='' skip='\\\n' end='\($\|#\)\@=' contained
+
+
+"
+" Color statement
+"
+
+" TODO: Add highlighting for color statements.
+syn region tigColorStatement start='^\s*\<color\>\@=' skip='\\\n' end='\($\|#\)\@=' nextgroup=@tigStatement keepend contains=tigColor
+
+
+syn keyword tigColor color nextgroup=tigColorArea skipwhite contained
+
+
+"
+" Source statement
+"
+
+" TODO: Add highlighting for source statements.
+syn region tigBindStatement start='^\s*\<source\>\@=' skip='\\\n' end='\($\|#\)\@=' nextgroup=@tigStatement keepend contains=tigSource
+
+syn keyword tigSource source nextgroup=tigSourcePath skipwhite contained
 
 
 "
@@ -125,6 +149,16 @@ hi def link tigBind       tigKeyword
 hi def link tigBindKeymap tigType
 hi def link tigBindKey    tigIdent
 hi def link tigBindAction tigString
+
+
+" Color statements.
+
+hi def link tigColor    tigKeyword
+
+
+" Source statements.
+
+hi def link tigSource   tigKeyword
 
 
 " Generic
