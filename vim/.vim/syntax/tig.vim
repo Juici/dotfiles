@@ -17,17 +17,15 @@ syn case ignore
 set iskeyword=@,48-57,_,-
 
 "
-" Comments
+" Generic
 "
 
 " Line comment.
 syn region tigComment start='#' end='$' keepend
 
-"
-" Statement
-"
+" Statement.
+syn cluster tigStatement contains=tigComment,tigSetStatement,tigBindStatement
 
-syn cluster tigStatement contains=tigComment,tigSetStatement
 
 "
 " Set statement
@@ -73,13 +71,20 @@ syn match tigColumnInt '\d\+'   contained nextgroup=tigColumnComma
 syn keyword tigColumnConstant   contained nextgroup=tigColumnComma  full abbreviated email email-user relative relative-compact custom default auto always default units short long
 
 "
-" Links
+" Bind statement
 "
 
-" Comments
+syn region tigBindStatement start='^\s*\<bind\>\@=' skip='\\\n' end='\($\|#\)\@=' nextgroup=@tigStatement keepend contains=tigBind
 
-hi def link tigComment Comment
+syn keyword tigBind bind nextgroup=tigBindKeymap skipwhite contained
+syn keyword tigBindKeymap nextgroup=tigBindKey skipwhite contained  main diff log reflog help pager status stage tree blob blame refs stash grep generic search
+syn match tigBindKey '\S\+' nextgroup=tigBindAction skipwhite contained
+syn region tigBindAction start='' skip='\\\n' end='\($\|#\)\@=' contained
 
+
+"
+" Links
+"
 
 " Set statements.
 
@@ -114,7 +119,17 @@ hi def link tigColumnInt        tigNumber
 hi def link tigColumnConstant   tigConstant
 
 
+" Bind statements.
+
+hi def link tigBind       tigKeyword
+hi def link tigBindKeymap tigType
+hi def link tigBindKey    tigIdent
+hi def link tigBindAction tigString
+
+
 " Generic
+
+hi def link tigComment    Comment
 
 hi def link tigKeyword    Statement
 hi def link tigIdent      Identifier
