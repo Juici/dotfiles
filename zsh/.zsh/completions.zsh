@@ -71,13 +71,13 @@ fi
 # Colour processes.
 zstyle ':completion:*:*:*:*:processes' list-colors '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;34=0=01'
 
-# Don't complete uninteresting stuff.
-zstyle ':completion:*:*:*:users' ignored-patterns \
-    avahi bin colord cups daemon dbus dnsmasq flatpak ftp geoclue git http \
-    mail mpd nm-openconnect nm-openvpn nobody ntp polkitd postgres rpc rtkit \
-    sddm systemd-bus-proxy systemd-coredump systemd-journal-gateway \
-    systemd-journal-remote systemd-network systemd-resolve systemd-timesync \
-    usbmux uuidd
+# Don't complete user pollution.
+zstyle ':completion:*:*:*:*:users' ignored-patterns \
+    avahi bin clamav colord cups daemon dbus dhcpcd dnsmasq flatpak ftp geoclue \
+    git gluster http mail mpd nm-openconnect nm-openvpn nobody ntp polkitd \
+    postgres rpc rtkit sddm systemd-bus-proxy systemd-coredump \
+    systemd-journal-gateway systemd-journal-remote systemd-network \
+    systemd-resolve systemd-timesync tor usbmux uuidd
 # Unless we really want to.
 zstyle ':completion:*' single-ignored show
 
