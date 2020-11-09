@@ -2,7 +2,7 @@ scriptencoding utf-8
 
 " Variables {{{
 
-  let s:is_sudo = exists('$SUDO_USER')
+  let s:is_sudo = exists('$SUDO_USER')  " In sudo, but not root user.
   let s:tmp_dir = g:vim_dir . '/tmp'
 
 " }}}
@@ -112,7 +112,7 @@ scriptencoding utf-8
 
       if !empty(glob(s:viminfo_file))
         if !filereadable(s:viminfo_file)
-          call juici#functions#EchoWarn('Warning: ' . s:viminfo
+          call juici#log#warn('Warning: ' . s:viminfo
                 \ . ' file exists but is not readable: ' . s:viminfo_file)
         endif
       endif
@@ -248,7 +248,7 @@ scriptencoding utf-8
 
     set foldmethod=marker       " Fold based on markers.
     set foldcolumn=1            " Fold column size.
-    set foldtext=juici#settings#FoldText()
+    set foldtext=juici#fold#fold_text()
   endif
 
   " Switch cursor when in different modes.
@@ -280,7 +280,7 @@ scriptencoding utf-8
     set guioptions-=r
     set guioptions-=b           " Don't show bottom scrollbar.
 
-    let s:guifont_name = 'Fira Code'
+    let s:guifont_name = 'JetBrainsMono Nerd Font Mono'
     let s:guifont_size = 10
 
     " Set 's:guifont_name' correctly.

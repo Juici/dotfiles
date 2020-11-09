@@ -1,3 +1,4 @@
+" Hide modeline if lightline is enabled.
 if &loadplugins
   set noshowmode
 endif
@@ -10,36 +11,36 @@ let g:lightline = {
       \     'right': [ [ 'lineinfo' ],
       \                [ 'gitbranch' ],
       \                [ 'filetype', 'fileformat', 'fileencoding' ],
-      \                [ 'linter_warnings', 'linter_errors' ] ]
+      \                [ 'linter_warnings', 'linter_errors' ] ],
       \   },
       \   'component_expand': {
-      \     'readonly': 'juici#lightline#ReadOnly',
-      \     'lineinfo': 'juici#lightline#LineInfo',
-      \     'linter': 'juici#lightline#Linter',
-      \     'linter_warnings': 'juici#lightline#LinterWarnings',
-      \     'linter_errors': 'juici#lightline#LinterErrors',
-      \     'linter_ok': 'juici#lightline#LinterOk'
+      \     'readonly': 'juici#status#read_only',
+      \     'lineinfo': 'juici#status#line_info',
+      \     'linter': 'juici#status#Linter',
+      \     'linter_warnings': 'juici#status#linter_warnings',
+      \     'linter_errors': 'juici#status#linter_errors',
+      \     'linter_ok': 'juici#status#linter_ok',
       \   },
       \   'component_type': {
       \     'readonly': 'error',
       \     'linter_warnings': 'warning',
-      \     'linter_errors': 'error'
+      \     'linter_errors': 'error',
       \   },
       \   'component_function': {
-      \     'fileencoding': 'juici#lightline#FileEncoding',
-      \     'filename': 'juici#lightline#FileName',
-      \     'fileformat': 'juici#lightline#FileFormat',
-      \     'filetype': 'juici#lightline#FileType',
-      \     'gitbranch': 'juici#lightline#GitBranch'
+      \     'fileencoding': 'juici#status#file_encoding',
+      \     'filename': 'juici#status#file_name',
+      \     'fileformat': 'juici#status#file_format',
+      \     'filetype': 'juici#status#file_type',
+      \     'gitbranch': 'juici#status#git_branch',
       \   },
       \   'tabline': {
       \     'left': [ [ 'tabs' ] ],
-      \     'right': [ [ 'close' ] ]
+      \     'right': [ [ 'close' ] ],
       \   },
       \   'tab': {
       \     'active': [ 'filename', 'modified' ],
-      \     'inactive': [ 'filename', 'modified' ]
+      \     'inactive': [ 'filename', 'modified' ],
       \   },
       \   'separator': { 'left': '', 'right': '' },
-      \   'subseparator': { 'left': '|', 'right': '|' }
+      \   'subseparator': { 'left': '|', 'right': '|' },
       \ }
