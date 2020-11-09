@@ -3,13 +3,14 @@ let s:dein_dir = s:plugin_dir . '/repos/github.com/Shougo/dein.vim'
 
 function! s:install_dein() abort
   let l:plugin_dir = fnamemodify(resolve(expand(s:plugin_dir)), ':p')
-  let l:dein_dir = fnamemodify(expand(s:plugin_dir . s:dein_dir), ':p')
+  let l:dein_dir = fnamemodify(expand(s:dein_dir), ':p')
 
   let l:dein_repo = 'https://github.com/Shougo/dein.vim'
 
-  " Check for plugin directory.
   try
+    " Check for plugin directory.
     if !isdirectory(l:dein_dir)
+      call juici#log#warn('Warning: Missing dein plugin manager')
       if executable('git')
         call juici#log#info('Installing dein at ' . l:dein_dir)
 
