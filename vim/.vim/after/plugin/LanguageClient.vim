@@ -1,5 +1,5 @@
 function! s:Config()
-  if has_key(g:LanguageClient_serverCommands, &filetype)
+  if has_key(get(g:, 'LanguageClient_serverCommands', {}), &filetype)
     " gd -- go to definition
     nnoremap <buffer> <silent> gd :call LanguageClient#textDocument_definition()<CR>
 

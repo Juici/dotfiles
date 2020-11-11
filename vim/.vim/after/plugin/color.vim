@@ -8,7 +8,7 @@ function s:CheckColorScheme()
 
   " Set background and colour scheme.
   set background=dark
-  colorscheme onedark
+  silent! colorscheme onedark   " Fail silently if the colourscheme isn't available.
 
   " Allow for overrides.
   doautocmd ColorScheme
