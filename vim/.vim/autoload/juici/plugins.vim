@@ -37,17 +37,23 @@ function! s:install_dein() abort
 endfunction
 
 function! juici#plugins#load() abort
+  " Load plugin settings.
+  call juici#settings#load_plugin_settings()
+
   " Ensure dein is installed.
   if s:install_dein()
     " Add dein to runtime path.
     execute 'set' 'runtimepath+=' . s:dein_dir
 
+    " The path to this file, used to invalidate cache when modified.
+    let l:plugins_file = g:vim_dir . '/autoload/juici/plugins.vim'
+
     if dein#load_state(s:plugin_dir)
-      call dein#begin(s:plugin_dir)
+      call dein#begin(s:plugin_dir, [l:plugins_file])
 
       call dein#add(s:dein_dir)     " Load dein plugin.
 
-      call juici#lsp_client#load()  " Load LSP client.
+      call s:load_lsp_client()      " Load LSP client.
       call s:load_general()         " Load general plugins.
       call s:load_deoplete()        " Load deoplete completion framework.
       call s:load_syntax()          " Load syntax plugins.
@@ -56,6 +62,14 @@ function! juici#plugins#load() abort
       call dein#save_state()
     endif
   endif
+endfunction
+
+function! s:load_lsp_client() abort
+  " Language Server Protocol (LSP) support for vim.
+  call dein#add('autozimu/LanguageClient-neovim', {
+        \   'rev': 'next',
+        \   'build': 'sh install.sh',
+        \ })
 endfunction
 
 function! s:load_general() abort
@@ -77,15 +91,10 @@ function! s:load_deoplete() abort
     call dein#add('roxma/nvim-yarp')          " Remote plugin framework for Vim8.
     call dein#add('roxma/vim-hug-neovim-rpc') " Neovim RPC client support for Vim8.
   endif
-
-  " Enable deoplete on startup.
-  let g:deoplete#enable_at_startup = 1
 endfunction
 
 function! s:load_syntax() abort
-  " Disabled polyglot syntaxes.
-  let g:polyglot_disabled = []
-
   " Load polyglot enhanced syntax.
   call dein#add('sheerun/vim-polyglot')
 endfunction
+

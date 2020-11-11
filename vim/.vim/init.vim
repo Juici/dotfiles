@@ -19,7 +19,7 @@ let g:maplocalleader = "\\"
 let g:filetype_pl = 'prolog'
 
 " The .vim directory.
-let g:vim_dir = fnamemodify(expand('<sfile>'), ':p:h')
+let g:vim_dir = expand('<sfile>:p:h')
 
 " Load local configurations.
 let s:init_local = g:vim_dir . '/init.local.vim'
