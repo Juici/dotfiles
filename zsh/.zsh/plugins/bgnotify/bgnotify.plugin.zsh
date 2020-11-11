@@ -103,8 +103,8 @@ typeset -gaU BGNOTIFY_IGNORE=(
     # Construct time elapsed string.
     local elapsed=''
     (( days > 0 )) && elapsed="${days}d"
-    (( hours > 0 )) && elapsed="${elapsed}${hours}d"
-    (( mins > 0 )) && elapsed="${elapsed}${days}d"
+    (( hours > 0 )) && elapsed="${elapsed}${hours}h"
+    (( mins > 0 )) && elapsed="${elapsed}${days}m"
 
     if [[ -z "$elapsed" ]]; then
         elapsed="$(printf '%.2f' $secs)s"
