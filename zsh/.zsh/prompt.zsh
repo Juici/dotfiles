@@ -480,6 +480,7 @@ typeset -gF EPOCHREALTIME
         Prompt[vcs_info]=''
     fi
 
+    setopt prompt_vars
     zle && zle reset-prompt
 }
 
