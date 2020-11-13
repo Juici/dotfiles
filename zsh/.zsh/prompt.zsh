@@ -367,7 +367,7 @@ typeset -gF EPOCHREALTIME
         exec {async_fd}<&-
 
         # Remove the handler.
-        zle -F ${Prompt[async_fd]}
+        zle -F $async_fd
     fi
 
     # No longer within the VCS tree.
@@ -384,7 +384,7 @@ typeset -gF EPOCHREALTIME
     Prompt[async_fd]=$async_fd
 
     # When the file descriptor is readable, run the callback handler.
-    zle -F "${Prompt[async_fd]}" →prompt_async_callback
+    zle -F $async_fd →prompt_async_callback
 }
 
 →prompt_async_callback() {
@@ -392,11 +392,17 @@ typeset -gF EPOCHREALTIME
     setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd no_prompt_vars
 
     integer async_fd=$1
+    # Sanity check for the callback.
+    if [[ -z "${Prompt[async_fd]}" ]] || (( async_fd != Prompt[async_fd] )); then
+        print 'handler callback for wrong fd' >&2
+        return
+    fi
 
     # Read from file descriptor.
     local read_in="$(<&$async_fd)"
 
     # Remove the handler and close the file descriptor.
+    Prompt[async_fd]=''
     zle -F "$async_fd"
     exec {async_fd}<&-
 
