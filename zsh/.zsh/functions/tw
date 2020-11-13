@@ -31,25 +31,65 @@ fi
 # Time warp by setting GIT_AUTHOR_DATE and GIT_COMMITTER_DATE.
 tw() {
     emulate -L zsh
-    setopt extendedglob warncreateglobal typesetsilent noshortloops rcquotes
+    setopt extendedglob warncreateglobal typesetsilent noshortloops rcquotes nopromptvars
+
+    local mbegin mend match
 
     # Check for invalid timewarps.
     if [[ -n "$TW" ]] && [[ "$TW" = *[^[:digit:]\+\-]* ]]; then
-        print -r "error: invalid timewarp currently set '${TW}'" >&2
+        print -Pr "%F{red}tw:%f invalid timewarp currently set %F{yellow}'${TW}'%f" >&2
         return 1
     fi
 
+    local tw_zparseopts_tmp="/tmp/tw.zparseopts.$UID.$$"
+
     # Parse arguments.
     local -A opts
-    zparseopts -D -E -M -A opts - d:=-date -date: c:=-cmd -cmd: 2>/dev/null
+    zparseopts -D -E -M -A opts - h=-help -help d:=-date -date: c:=-cmd -cmd: 2>!$tw_zparseopts_tmp
     if (( $? != 0 )); then
-        # The only argument we are parsing is date, so this is guaranteed.
-        print 'error: missing argument for date' >&2
+        # Read error from temp file.
+        local err=$(<$tw_zparseopts_tmp)
+        rm $tw_zparseopts_tmp
+
+        # Strip prefix from error message.
+        err=${err/#'tw:zparseopts:'[[:digit:]]##':'[[:space:]]#/}
+
+        # Improve error message for missing argument.
+        err=${err/(#b)'missing argument for option: '(*)/"missing argument for %F{yellow}'-${match[1]}'%f"}
+
+        print -Pr "%F{red}tw:%f $err" >&2
         return 1
     fi
+
+    # Help flag.
+    integer help=${+opts[--help]}
+
+    # If help flag is set, print out help information.
+    if (( help )); then
+        local help_info='Timewarp utility.
+
+USAGE:
+    tw [OPTIONS] [TIMEWARP]
+
+OPTIONS:
+    -h, --help         Print help information
+    -c, --cmd <CMD>    Run the command under a timewarp
+
+TIMEWARP:
+    <OFFSET>             Set timewarp from offset specification
+    @<TIMESTAMP>         Set timewarp from unix timestamp
+    -d, --date <DATE>    Set timewarp from exact date specification
+
+If no timewarp is given then the current timewarp will be used.'
+
+        print "$help_info"
+        return 0
+    fi
+
+    # Shift arguments if first argument is '-' or '--'.
+    [[ "$1" = -(#c1,2) ]] && shift
+
     local args="$@"
-    # Strip leading '-' or '--' from the arguments.
-    args=${args/#-(#c1,2)[[:space:]]##/}
 
     # Strip leading '=' from date if present.
     local date=${opts[--date]/#=/}
@@ -62,7 +102,7 @@ tw() {
     cmd=${${cmd/#[[:space:]]#/}/%[[:space:]]#/}
 
     if [[ -n "$cmd" ]] && (( ! ${+commands[faketime]} )); then
-        print 'error: timewarp for arbitrary commands is not supported without libfaketime' >&2
+        print -P '%F{red}tw:%f timewarp for arbitrary commands is not supported without %F{blue}libfaketime%f' >&2
         return 1
     fi
 
@@ -72,7 +112,7 @@ tw() {
     integer tw has_tw=0
 
     if [[ -n "$date" ]] && [[ -n "$args" ]]; then
-        print -r "error: cannot have exact date '$date' and offset '$args' at the same time" >&2
+        print -Pr "%F{red}tw:%f cannot have exact date %F{yellow}'$date'%f and offset %F{yellow}'$args'%f at the same time" >&2
         return 1
     fi
 
@@ -81,13 +121,13 @@ tw() {
         if (( ! ${+commands[date]} )); then
             # FIXME: Currently we don't have much choice but to delegate to gnu
             #        date, due to complexity of date parsing.
-            print 'error: exact date is not supported without gnu date' >&2
+            print -P '%F{red}tw:%f exact date is not supported without gnu coreutils %F{blue}date%f' >&2
             return 1
         fi
 
         # Delegate to gnu date to parse date format and return seconds since
         # Unix epoch, quitting on failure.
-        tw=$(date "--date=$date" '+%s') || return 1
+        tw=$("${commands[date]}" "--date=$date" '+%s') || return 1
         has_tw=1
     elif [[ -n "$args" ]]; then
         integer tw tw_base tw_offset
@@ -96,10 +136,10 @@ tw() {
         # Otherwise parse as offset from current timewarp.
         if [[ "${args:0:1}" = '@' ]]; then
             tw_base=0
-            tw_offset=$(( ${args:1} ))
+            tw_offset=$(( ${args:1} )) # TODO: Error handling for non integer.
         else
             # Parse offset, quitting on failure.
-            tw_offset=$(parseoffset "$args") || return 1
+            tw_offset=$(parseoffset "$args") || return 1 # TODO: Error handling for failure.
 
             if [[ -n "$TW" ]]; then
                 # Use the current timewarp as a base.
@@ -122,28 +162,30 @@ tw() {
                 tw=$TW
                 has_tw=1
             else
-                print 'error: no timewarp given for command' >&2
+                print -Pr "%F{red}tw:%f no timewarp for command %F{yellow}'$cmd'%f, must be in a timewarp or specify a timewarp" >&2
                 return 1
             fi
         fi
 
-        TW="$tw" faketime "@$tw" ${(Qz)cmd}
-        return $?
+        TW="$tw" "${commands[faketime]}" "@$tw" "${(@Qz)cmd}" || return 1
+
+        return 0
     fi
 
     if (( has_tw == 0 )); then
+        local tw_date='none'
+
         # There is no timewarp given, print the current time warp.
         if [[ -n "$TW" ]]; then
             integer tw_epoch=$(( TW ))
 
             # Format timewarp using preferred local date and time.
-            local tw_date
             strftime -s tw_date '%c' $tw_epoch
 
-            print "current timewarp: '$tw_date'"
-        else
-            print 'no timewarp currently set'
+            tw_date="'$tw_date'"
         fi
+
+        print -Pr "tw: %F{yellow}$tw_date%f"
 
         return 0
     fi
@@ -161,13 +203,16 @@ tw() {
         local old_date
         strftime -s old_date '%c' $tw
 
-        print "warping from '$old_date' to '$new_date'"
+        print -Pr "tw: warping from %F{yellow}'$old_date'%f to %F{yellow}'$new_date'%f"
 
         export GIT_AUTHOR_DATE=$git_date
         export GIT_COMMITTER_DATE=$git_date
         export TW=$tw
     else
-        print "spawning subshell with timewarp '$new_date'"
+        print -Pr "tw: spawning subshell with timewarp %F{yellow}'$new_date'%f"
+
+        # If tw is being run as a script then use `exec` to replace the process
+        # instead of spawning a subshell.
 
         GIT_AUTHOR_DATE=$git_date \
         GIT_COMMITTER_DATE=$git_date \
