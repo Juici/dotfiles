@@ -224,7 +224,7 @@ typeset -gF EPOCHREALTIME
     setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
 
     # If command start time was set, calculate elapsed time.
-    if (( ${+Prompt[cmd_start]} )); then
+    if [[ -n "${Prompt[cmd_start]}" ]]; then
         float -F delta secs
         integer days hours mins
 
@@ -259,9 +259,8 @@ typeset -gF EPOCHREALTIME
             elapsed="${elapsed}${int_secs}s"
         fi
 
+        Prompt[cmd_start]=''
         Prompt[cmd_elapsed]="$elapsed"
-
-        unset 'Prompt[cmd_start]'
     else
         Prompt[cmd_elapsed]=''
     fi
@@ -289,7 +288,7 @@ typeset -gF EPOCHREALTIME
     local -A info
 
     # Execute gitstatus query if function loaded and gitstatus is not disabled.
-    if (( gitstatus_crashes != -1 )) && command -v gitstatus_query >/dev/null; then
+    if (( gitstatus_crashes != -1 )) && (( ${+functions[gitstatus_query]} )); then
         # Run the query, if it exits with a failure status the daemon has
         # crashed and needs to be restarted.
         if ! gitstatus_query 'gitprompt' 2>/dev/null; then
