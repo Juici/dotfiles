@@ -14,17 +14,31 @@ zinit ice wait lucid atinit'ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay'
 zinit load zdharma/fast-syntax-highlighting
 
 # Auto suggestions.
-zinit ice wait lucid atload'!_zsh_autosuggest_start'
+zinit ice wait lucid atload'→keybinds_autosuggest && _zsh_autosuggest_start && zle && zle autosuggest-fetch && zle redisplay'
 zinit load zsh-users/zsh-autosuggestions
 
 # }}}
 
 # Settings {{{
 
-# Auto suggestions.
-export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
-export ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
-export ZSH_AUTOSUGGEST_USE_ASYNC=1
-export ZSH_AUTOSUGGEST_MANUAL_REBIND=1          # Fix double acceptance bug with forward-word.
+# Auto suggestions {{{
+
+# General.
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
+ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=40
+ZSH_AUTOSUGGEST_USE_ASYNC=1
+ZSH_AUTOSUGGEST_MANUAL_REBIND=1
+
+# Strategy.
+ZSH_AUTOSUGGEST_STRATEGY=(history)
+#ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+
+# Widgets.
+ZSH_AUTOSUGGEST_ACCEPT_WIDGETS=(end-of-line)
+ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS=(forward-char forward-word)
+ZSH_AUTOSUGGEST_EXECUTE_WIDGETS=()
+
+# }}}
+
 
 # }}}

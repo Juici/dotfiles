@@ -16,7 +16,15 @@ setopt no_flow_control
 # Allow comments in interactive shell.
 setopt interactive_comments
 
-[[ "$TERM" = 'linux' ]] && setopt nobeep
+# Don't beep in linux console.
+if [[ "$TERM" = 'linux' ]]; then
+    setopt nobeep
+fi
+
+# Characters considered as part of words for forward-word and backward-word
+# widgets.
+#WORDCHARS='_-.*?~&!#$%^'
+WORDCHARS='_-.*?~&!#$%^(){}[]<>'
 
 # Autocorrection {{{
 

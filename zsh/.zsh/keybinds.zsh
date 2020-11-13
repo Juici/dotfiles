@@ -43,11 +43,6 @@ bindkey ' ' magic-space
 bindkey '^[[1;5D' backward-word
 
 # Ctrl+Right to jump whole words.
-forward-word() {
-    zle .forward-word
-    zle autosuggest-fetch
-}
-zle -N forward-word
 (( ${+terminfo[kRIT5]} )) && bindkey "${terminfo[kRIT5]}" forward-word
 [[ "$TERM" = 'linux' ]] && bindkey '^[[C' forward-word
 bindkey '^[[1;5C' forward-word
@@ -80,15 +75,26 @@ tab-complete() {
     # Fix autosuggest interaction issues with tab completion.
     zle autosuggest-clear
 
-    #zle -R 'Completing...'
     zle expand-or-complete
 
-    zle autosuggest-fetch
-
-    # Redisplay prompt.
+    # Redisplay buffer.
     zle redisplay
 
     # TODO: Fix highlighting when tab completion fails.
 }
 zle -N tab-complete
 bindkey '^I' tab-complete
+
+# Plugin Keybinds
+
+# Key bindings for zsh-autosuggestions, called when plugin is loaded.
+→keybinds_autosuggest() {
+    # Use Ctrl+Space to accept whole suggestion.
+    bindkey '^ ' autosuggest-accept
+
+    # If zsh-fast-syntax-highlighting is already loaded rebind widgets to fix
+    # highlighting issues from our new keybinds.
+    if (( ${+functions[_zsh_highlight_bind_widgets]} )); then
+        _zsh_highlight_bind_widgets
+    fi
+}
