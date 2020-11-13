@@ -1,13 +1,20 @@
 #compdef tw
 
 local ret=1
-local -a context line state state_descr alts opts
+local -a context state state_descr line alts opts
 local -A opts_args
 
-_arguments -A '-*' : \
-    '(* -d --date)'{-d+,--date=}'[specify an exact date to timewarp to]:date' \
-    '(-c --cmd)'{-c+,--cmd=}'[specify a command to run under a timewarp]:cmd' \
-    '(- --)'{-,--}'[stop parsing options]' \
+# TODO: Fix options being suggested after a single hyphen `-`, appearing in the
+#       buffer.
+
+_arguments -S : \
+    + '(help)' \
+        '(help tw opts)'{-h,--help}'[print help information]' \
+    + '(tw)' \
+        '(help tw)'{-d,--date=}'[specify an exact date to timewarp to]:date' \
+        '(help tw)*:offset:' \
+    + 'opts' \
+        '(help -c --cmd)'{-c,--cmd=}'[specify a command to run under a timewarp]:cmd' \
 && ret=0
 
 return ret

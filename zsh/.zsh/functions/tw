@@ -33,6 +33,7 @@ tw() {
     emulate -L zsh
     setopt extendedglob warncreateglobal typesetsilent noshortloops rcquotes nopromptvars
 
+    # Prevent matches from leaking into global scope.
     local mbegin mend match
 
     # Check for invalid timewarps.
@@ -42,6 +43,13 @@ tw() {
     fi
 
     local tw_zparseopts_tmp="/tmp/tw.zparseopts.$UID.$$"
+
+    # TODO: Custom option parsing, to prevent issues that zparseopts creates.
+    #
+    #       eg. Currently `-cmd` is parsed as `-c md`, this should not be the
+    #           case and should instead result in an error. Instead tw attempts
+    #           to execute the command `md` which could have unexpected
+    #           consequences.
 
     # Parse arguments.
     local -A opts
@@ -135,8 +143,17 @@ If no timewarp is given then the current timewarp will be used.'
         # If the timewarp begins with '@' parse as offset from Unix epoch.
         # Otherwise parse as offset from current timewarp.
         if [[ "${args:0:1}" = '@' ]]; then
+            args=${args:1}
+            if [[ -z "$args" ]]; then
+                print -P '%F{red}tw:%f missing timestamp for timewarp'
+                return 1
+            elif [[ "$args" != [[:digit:]]## ]]; then
+                print -Pr "%F{red}tw:%f invalid timestamp %F{yellow}'$args'%f"
+                return 1
+            fi
+
             tw_base=0
-            tw_offset=$(( ${args:1} )) # TODO: Error handling for non integer.
+            tw_offset=$(( args ))
         else
             # Parse offset, quitting on failure.
             tw_offset=$(parseoffset "$args") || return 1 # TODO: Error handling for failure.
@@ -201,7 +218,7 @@ If no timewarp is given then the current timewarp will be used.'
     if (( ${+TW} )); then
         # Format old timewarp using preferred local date and time.
         local old_date
-        strftime -s old_date '%c' $tw
+        strftime -s old_date '%c' $TW
 
         print -Pr "tw: warping from %F{yellow}'$old_date'%f to %F{yellow}'$new_date'%f"
 
