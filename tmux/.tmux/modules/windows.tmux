@@ -17,3 +17,6 @@ setw -g window-active-style 'bg=default,fg=default'
 # Pane appeareance.
 setw -g pane-border-style 'fg=brightblack'
 setw -g pane-active-border-style 'fg=blue'
+
+# Selection colours.
+setw -g mode-style 'fg=#5c6370,bg=#abb2bf'
