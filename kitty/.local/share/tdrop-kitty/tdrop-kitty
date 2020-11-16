@@ -1,0 +1,29 @@
+#!/bin/sh
+
+script=$(realpath $0)
+dir=$(dirname "$script")
+
+post_map() {
+    if [ -z "$wid" ]; then
+        return
+    fi
+
+    local wid=$(printf '0x%08x' $wid)
+
+    wmctrl -i -r $wid -b add,above,sticky
+    wmctrl -i -r $wid -b add,skip_taskbar,skip_pager
+}
+post_map="$(typeset -f post_map); post_map"
+
+class='kitty-tdrop'
+
+width=60
+height=65
+
+x=$(( (100 - width) / 2 ))
+y=0
+
+# Run tdrop replacing this process.
+SHLVL=0 exec "$dir/tdrop" -ma --class="$class" --name="$class" -w "${width}%" -h "${height}%" -x "${x}%" -y "${y}%" -P "$post_map" kitty --config="$HOME/.config/kitty/kitty-drop.conf" --directory="$HOME" --watcher="$dir/watcher.py" --class="$class" --name="$class"
+
+# vim:tw=0
