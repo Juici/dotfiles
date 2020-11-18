@@ -9,9 +9,9 @@
 # Must be a local (non ssh) session.
 (( ! ( $+SSH_CLIENT || $+SSH_CONNECTION || $+SSH_TTY ) )) || return
 
-# Requires xdotool.
-if (( ! ${+commands[xdotool]} )); then
-    print 'error: xdotool not found' >&2
+# Requires wmutils pfw.
+if (( ! ${+commands[pfw]} )); then
+    print 'error: pfw (wmutils) not found' >&2
     return
 fi
 # Requires notify-send (libnotify).
@@ -62,7 +62,7 @@ typeset -gaU BGNOTIFY_IGNORE=(
 
 # Get the ID of the active window.
 .bgnotify_active_window_id() {
-    xdotool getactivewindow
+    pfw
 }
 
 # Send a background notification.
