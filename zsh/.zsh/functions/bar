@@ -32,7 +32,7 @@ bar() {
     integer BASE_BLOCK=16#2588 N_BLOCKS=8
 
     if (( $# < 1 )); then
-        print -u 2 "usage: $0 <fraction> [width]"
+        print -r "usage: $0 <fraction> [width]" >&2
         return 1
     fi
 
@@ -40,7 +40,7 @@ bar() {
     integer full_width=${2:-4}  # The full width of the bar (default: 4).
 
     if (( fraction < 0 || fraction > 1 )); then
-        print -u 2 'error: value must be between 0 and 1'
+        print 'error: value must be between 0 and 1' >&2
         return 1
     fi
 
@@ -49,10 +49,12 @@ bar() {
 
     fraction=$(( width - full_blocks ))
 
+    local s=''
+
     # Print full blocks.
     integer i
     for (( i = 0; i < full_blocks; i++ )); do
-        print -n "${(#)BASE_BLOCK}"
+        s+="${(#)BASE_BLOCK}"
     done
 
     if (( fraction > 0 )); then
@@ -60,13 +62,15 @@ bar() {
         fraction_block=$(( (N_BLOCKS - 1) * fraction ))
         fraction_block=$(( [#16] BASE_BLOCK + ((N_BLOCKS - 1) - fraction_block) ))
 
-        print -n "${(#)fraction_block}"
+        s+="${(#)fraction_block}"
     fi
 
     integer leftover=$(( full_width - width ))
     for (( i = 0; i < leftover; i++ )); do
-        print -n ' '
+        s+=' '
     done
+
+    print -rn -- $s
 }
 
 bar "$@"
