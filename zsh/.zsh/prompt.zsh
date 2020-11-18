@@ -357,7 +357,7 @@ typeset -gF EPOCHREALTIME
 
     # Note: exec doesn't accept variables in the form of associative arrays, so
     #       we have to go through a intermediate variable 'async_fd'.
-    integer async_fd
+    integer -i 10 async_fd
 
     # If there is a pending task cancel it.
     if [[ -n "${Prompt[async_fd]}" ]] && { true <&${Prompt[async_fd]} } 2>/dev/null; then
