@@ -113,40 +113,50 @@ typeset -gaU BGNOTIFY_IGNORE=(
         elapsed="${elapsed}${int_secs}s"
     fi
 
-    print -- "$elapsed"
+    print -n -- "$elapsed"
 }
 
 →bgnotify_start() {
+    integer active_window
+    active_window=$(.bgnotify_active_window_id 2>/dev/null) || return 1
+
+    BgNotify[window_id]=$active_window
     BgNotify[timestamp]=$EPOCHREALTIME
-    BgNotify[window_id]=$(.bgnotify_active_window_id)
     BgNotify[command]="$1"
 }
 
 →bgnotify_end() {
-    (( ${+BgNotify[command]} )) || return
+    (( ${+BgNotify[command]} )) || return 0
 
-    local prev_status=$?
-    local prev_cmd="${BgNotify[command]}"
+    {
+        local prev_status=$?
+        local prev_cmd="${BgNotify[command]}"
 
-    # TODO: Check if in ignore list.
+        # TODO: Check if in ignore list.
 
-    # Trim command message to 30 characters.
-    (( ${#prev_cmd} > 30 )) && prev_cmd="${prev_cmd:0:27}..."
+        # Trim command message to 30 characters.
+        (( ${#prev_cmd} > 30 )) && prev_cmd="${prev_cmd:0:27}..."
 
-    local threshold=$(( BGNOTIFY_THRESHOLD ))
-    local delta=$(( EPOCHREALTIME - BgNotify[timestamp] ))
+        local threshold=$(( BGNOTIFY_THRESHOLD ))
+        local delta=$(( EPOCHREALTIME - BgNotify[timestamp] ))
 
-    if (( delta > threshold && $(.bgnotify_active_window_id) != BgNotify[window_id] )); then
-        local elapsed=$(.bgnotify_format_time $delta)
+        if (( delta > threshold )); then
+            integer active_window
+            active_window=$(.bgnotify_active_window_id 2>/dev/null) || return 1
 
-        if (( prev_status == 0 )); then
-            .bgnotify_send "Command Succeeded" "Command '$prev_cmd' succeeded after $elapsed" "$prev_status"
-        else
-            .bgnotify_send "Command Failed" "Command '$prev_cmd' failed (exit code $prev_status) after $elapsed" "$prev_status"
+            (( active_window == BgNotify[window_id] )) && return 0
+
+            local elapsed=$(.bgnotify_format_time $delta)
+
+            if (( prev_status == 0 )); then
+                .bgnotify_send "Command Succeeded" "Command '$prev_cmd' succeeded after $elapsed" "$prev_status"
+            else
+                .bgnotify_send "Command Failed" "Command '$prev_cmd' failed (exit code $prev_status) after $elapsed" "$prev_status"
+            fi
         fi
-    fi
-
-    unset BgNotify[command]
+    } always {
+        unset BgNotify[command]
+    }
 }
 
 add-zsh-hook preexec →bgnotify_start
