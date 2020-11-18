@@ -71,24 +71,24 @@ bindkey '^[[3;5~' delete-word
 [[ "$TERM" = 'linux' ]] && bindkey '^[[3~' delete-word
 
 # Clear auto suggestions, expand/complete and fetch auto suggestions.
-tab-complete() {
-    # Fix autosuggest interaction issues with tab completion.
-    zle autosuggest-clear
-
+→keybinds_tab_complete() {
+    # Expand glob or autocomplete.
     zle expand-or-complete
+    # Fetch updated autosuggestion.
+    zle autosuggest-fetch
 
     # Redisplay buffer.
     zle redisplay
 
     # TODO: Fix highlighting when tab completion fails.
 }
-zle -N tab-complete
+zle -N tab-complete →keybinds_tab_complete
 bindkey '^I' tab-complete
 
 # Plugin Keybinds
 
 # Key bindings for zsh-autosuggestions, called when plugin is loaded.
-→keybinds_autosuggest() {
+→keybinds_onload_autosuggestions() {
     # Use Ctrl+Space to accept whole suggestion.
     bindkey '^ ' autosuggest-accept
 
