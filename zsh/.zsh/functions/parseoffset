@@ -21,6 +21,9 @@ fi
 # The script/function contents possibly using $Plugins[FUNCTIONS_DIR].
 
 parseoffset() {
+    emulate -L zsh
+    setopt extendedglob warncreateglobal typesetsilent noshortloops rcquotes nopromptvars
+
     # Don't leak match variables.
     local match mbegin mend
 
@@ -30,35 +33,32 @@ parseoffset() {
     # Strip whitespace.
     input=${input//[[:space:]]/}
 
-    # Make sure there are no decimal points.
-    if [[ "$input" = *.* ]]; then
-        print 'error: decimal points are not supported by parseoffset' >&2
-        return 1
-    fi
+    # Pattern for a number.
+    local num='[[:digit:]]##(.[[:digit:]]##|)'
 
     # Substitute symbols (case-insensitively) for value in seconds, wrapping
     # substitutions in parentheses.
     #
     # Using substitutions with parentheses allows for the construction of more
     # complex expressions.
-    input=${input//(#ib)([[:digit:]]##)s/${match[1]}}
-    input=${input//(#ib)([[:digit:]]##)m/(${match[1]} * 60)}
-    input=${input//(#ib)([[:digit:]]##)h/(${match[1]} * 3600)}
-    input=${input//(#ib)([[:digit:]]##)d/(${match[1]} * 86400)}
-    input=${input//(#ib)([[:digit:]]##)w/(${match[1]} * 86400 * 7)}
-    input=${input//(#ib)([[:digit:]]##)y/(${match[1]} * 86400 * 365)}
+    input=${input//(#ib)(${~num})s/${match[1]}}
+    input=${input//(#ib)(${~num})m/(${match[1]} * 60)}
+    input=${input//(#ib)(${~num})h/(${match[1]} * 3600)}
+    input=${input//(#ib)(${~num})d/(${match[1]} * 86400)}
+    input=${input//(#ib)(${~num})w/(${match[1]} * 86400 * 7)}
+    input=${input//(#ib)(${~num})y/(${match[1]} * 86400 * 365)}
 
     # Debug print statment.
     #print -r -- $input
 
     # Strip input of valid characters to search for invalid characters.
     local invalid=$input
-    invalid=${invalid//[[:space:]]/}
-    invalid=${invalid//[[:digit:]]/}
+    invalid=${invalid//${~num}/}
+    invalid=${invalid//[[:space:]]##/}
     invalid=${invalid//[\+\-\*\/\(\)]}
 
     if [[ -n "$invalid" ]]; then
-        print "error: invalid characters in expression '$invalid'" >&2
+        print -Pr "%F{red}parseoffset:%f invalid characters in expression '$invalid'" >&2
         return 1
     fi
 
