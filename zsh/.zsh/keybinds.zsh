@@ -1,14 +1,14 @@
 # Make sure terminal is in application mode when zle is active, since only then
 # values from $terminfo are valid.
 if (( ${+terminfo[smkx]} && ${+terminfo[rmkx]} )); then
-    zle-line-init() {
+    →keybinds_line_init() {
         echoti smkx
     }
-    zle-line-finish() {
+    →keybinds_line_finish() {
         echoti rmkx
     }
-    zle -N zle-line-init
-    zle -N zle-line-finish
+    zle -N zle-line-init →keybinds_line_init
+    zle -N zle-line-finish →keybinds_line_finish
 fi
 
 # Emacs style bindings
@@ -39,20 +39,19 @@ bindkey ' ' magic-space
 
 # Ctrl+Left to jump whole words.
 (( ${+terminfo[kLFT5]} )) && bindkey "${terminfo[kLFT5]}" backward-word
-[[ "$TERM" = 'linux' ]] && bindkey '^[[D' backward-word
 bindkey '^[[1;5D' backward-word
-
 # Ctrl+Right to jump whole words.
 (( ${+terminfo[kRIT5]} )) && bindkey "${terminfo[kRIT5]}" forward-word
-[[ "$TERM" = 'linux' ]] && bindkey '^[[C' forward-word
 bindkey '^[[1;5C' forward-word
 
-# Ctrl+Up noop, required for some systems.
-[[ "$TERM" = 'linux' ]] && bindkey -s '^[[A' ''
-bindkey -s '^[[1;5A' ''
-# Ctrl+Down noop, required for some systems.
-[[ "$TERM" = 'linux' ]] && bindkey -s '^[[B' ''
-bindkey -s '^[[1;5B' ''
+# Bind variations of [Ctrl]+[Shift]+[Alt]+Up to noop.
+() {
+    integer i
+    for (( i = 3; i <= 8; i++ )); do
+        (( ${+terminfo[kUP$i]} )) && bindkey -s "${terminfo[kUP$i]}" ''
+        (( ${+terminfo[kDN$i]} )) && bindkey -s "${terminfo[kDN$i]}" ''
+    done
+}
 
 # Shift+Tab goes to previous completion.
 (( ${+terminfo[kcbt]} )) && bindkey "${terminfo[kcbt]}" reverse-menu-complete
