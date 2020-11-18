@@ -1,29 +1,95 @@
-#!/bin/sh
+#!/usr/bin/env zsh
 
-script=$(realpath $0)
-dir=$(dirname "$script")
+emulate -LR zsh
+setopt extendedglob warncreateglobal typesetsilent noshortloops rcquotes
+
+zmodload zsh/zutil
+
+fmt_wid() {
+    integer wid=$1
+
+    printf '0x%08x' $wid
+}
+
+pass_fn() {
+    local fn_name=$1
+    local fn=$(typeset -f $fn_name)
+
+    print -n -- "$fn; $fn_name"
+}
 
 post_map() {
-    if [ -z "$wid" ]; then
-        return
-    fi
+    [[ -z "$wid" ]] && return
 
-    local wid=$(printf '0x%08x' $wid)
+    local wid=$(fmt_wid $wid)
 
     wmctrl -i -r $wid -b add,above,sticky
     wmctrl -i -r $wid -b add,skip_taskbar,skip_pager
 }
-post_map="$(typeset -f post_map); post_map"
 
-class='kitty-tdrop'
+toggle_term() {
+    local script=${ZSH_SCRIPT:A}
+    local dir=${script:h}
 
-width=60
-height=65
+    # Hooks.
+    local post_map=$(pass_fn post_map)
 
-x=$(( (100 - width) / 2 ))
-y=0
+    # Window attributes.
+    local class='kitty-tdrop'
+    integer width=60
+    integer height=65
+    integer x=$(( (100 - width) / 2 ))
+    integer y=0
 
-# Run tdrop replacing this process.
-SHLVL=0 exec "$dir/tdrop" -ma --class="$class" --name="$class" -w "${width}%" -h "${height}%" -x "${x}%" -y "${y}%" -P "$post_map" kitty --config="$HOME/.config/kitty/kitty-drop.conf" --directory="$HOME" --watcher="$dir/watcher.py" --class="$class" --name="$class"
+    local tdrop="$dir/tdrop"
+    local config="${XDG_CONFIG_HOME:-$HOME/.config}/kitty/kitty-drop.conf"
+    local watcher="$dir/watcher.py"
+    local start_dir="$HOME"
 
-# vim:tw=0
+    # Run tdrop replacing this process.
+    SHLVL=0 \
+        exec "$tdrop" -ma \
+        --class="$class" --name="$class" \
+        -w "${width}%" -h "${height}%" -x "${x}%" -y "${y}%" \
+        -P "$post_map" \
+        kitty \
+        --class="$class" --name="$class" \
+        --config="$config" --directory="$start_dir" --watcher="$watcher"
+}
+
+# Returns 0 if dropdown should toggle, otherwise returns 1.
+should_toggle() {
+    local action=$1
+    [[ "$action" = 'toggle' ]] && return 0
+
+    # Is the a dropdown window ID file readable?
+    local wid_file="/tmp/tdrop_$USER/kitty"
+    [[ -r "$wid_file" ]] || return 0
+
+    # Get the ID of the dropdown window.
+    local wid=$(<$wid_file)
+    [[ "$wid" = [[:digit:]]## ]] && wid=$(fmt_wid $wid) || return 0
+
+    # Is the dropdown currently shown?
+    wattr m $wid
+    integer mapped=$?
+
+    # Should the dropdown be shown?
+    integer show=1
+    [[ "$action" = 'hide' ]] && show=0
+
+    return $(( mapped != show ))
+}
+
+tdrop-kitty() {
+    local -A opts
+    local -a o_action
+    zparseopts -D -E -M -A opts - -show=o_action -hide=o_action -toggle=o_action
+
+    # Get the action: 'show', 'hide', 'toggle'.
+    local action=${${o_action[1]/#--/}:-toggle}
+
+    should_toggle $action && toggle_term
+}
+
+tdrop-kitty "$@"
