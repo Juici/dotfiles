@@ -15,24 +15,57 @@ pass_fn() {
     local fn_name=$1
     local fn=$(typeset -f $fn_name)
 
-    print -n -- "$fn; $fn_name"
+    # Shift arguments.
+    shift
+
+    print -n -- "$fn;" "$fn_name" "$@"
 }
 
+# This function is evaluated by the tdrop script. We cannot be certain what
+# shell will evaluate it, so it should try to be generic.
+#
+# The `$wid` variable is the window ID.
 post_map() {
-    [[ -z "$wid" ]] && return
+    if [ -z "$wid" ]; then
+        return
+    fi
 
-    local wid=$(fmt_wid $wid)
+    local wid=$(printf '0x%08x' $wid)
 
     wmctrl -i -r $wid -b add,above,sticky
     wmctrl -i -r $wid -b add,skip_taskbar,skip_pager
+
+    local script=$1
+
+    local on_blur=$2
+    local blur_pid_file="/tmp/tdrop_$USER/kitty_on_blur"
+
+    if [ -r "$blur_pid_file" ]; then
+        # We can't rely on `$(<"$blur_pid_file")` here.
+        local old_blur_pid=$(( $(cat "$blur_pid_file") ))
+
+        # Kill old blur process.
+        if [ $old_blur_pid -ne 0 ]; then
+            kill $old_blur_pid 2>/dev/null
+        fi
+        rm -f "$blur_pid_file"
+    fi
+
+    # Run xdotool in background waiting for blur.
+    xdotool behave $wid blur exec --sync "$on_blur" "$script" "$wid" "$blur_pid_file" >/dev/null &
+    local blur_pid=$!
+    # Store blur pid in file.
+    echo -n "$blur_pid" >! "$blur_pid_file"
 }
 
 toggle_term() {
-    local script=${ZSH_SCRIPT:A}
+    local script=${ZSH_SCRIPT:P}
     local dir=${script:h}
 
+    local on_blur="$dir/on_blur"
+
     # Hooks.
-    local post_map=$(pass_fn post_map)
+    local post_map=$(pass_fn post_map "$script" "$on_blur")
 
     # Window attributes.
     local class='kitty-tdrop'

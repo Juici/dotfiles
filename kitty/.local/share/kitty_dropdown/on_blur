@@ -1,0 +1,25 @@
+#!/usr/bin/env zsh
+
+emulate -LR zsh
+setopt extendedglob warncreateglobal typesetsilent noshortloops rcquotes
+
+on_blur() {
+    local kitty_dropdown=$1
+    integer wid=$2
+    local blur_pid_file=$3
+
+    # If the window is focused it was a misfired event.
+    (( $(pfw) == wid )) && return
+
+    {
+        # Remove old PPID file.
+        [[ -f "$blur_pid_file" ]] && rm -f "$blur_pid_file"
+
+        "$kitty_dropdown" --hide
+    } always {
+        # Kill parent process.
+        kill $PPID
+    }
+}
+
+on_blur "$@"
