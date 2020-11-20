@@ -1,21 +1,20 @@
 # Plugins {{{
 
 # Zsh completion functions.
-zinit ice wait lucid blockf atload'zicompinit; zicdreplay' atpull'zinit creinstall -q .'
+zinit ice wait nocd lucid blockf atload'zicompinit; zicdreplay' atpull'zinit creinstall -q .'
 zinit load zsh-users/zsh-completions
 
-
 # Python pip completions.
-zinit ice wait lucid blockf svn as'completion' pick'/dev/null'
+zinit ice wait nocd lucid blockf svn as'completion' pick'/dev/null'
 zinit snippet OMZ::plugins/pip
 
 
 # Rust completions
-zinit ice wait lucid blockf
+zinit ice wait nocd lucid blockf
 zinit load Juici/zsh-rust-completions
 
 # General completions.
-zinit ice wait lucid blockf id-as'local/completions'
+zinit ice wait nocd lucid blockf id-as'local/completions'
 zinit load ${Juici[PLUGINS]}/completions
 
 # }}}
