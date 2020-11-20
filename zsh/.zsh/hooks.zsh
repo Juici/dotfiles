@@ -1,59 +1,57 @@
 autoload -Uz add-zsh-hook
 
-
-.hooks_title() {
+.hooks_set_title() {
     emulate -L zsh
 
-    local cmd="${1:gs/$/\\$}"
-    print -Pn "\e]0;$cmd:q\a"
+    local cmd=$1
+    print -n "\e]0;${(q)cmd}\a"
 }
 
 .hooks_pwd() {
     emulate -L zsh
 
-    print -Pn '%~'
+    print -Drn -- "$PWD"
 }
 
+.hooks_host() {
+    emulate -L zsh
 
-# Keep track of local command history.
-HISTCMD_LOCAL=0
+    print -Prn -- '%m'
+}
 
 →hooks_update_window_title_precmd() {
     emulate -L zsh
 
-    if (( HISTCMD_LOCAL == 0 )); then
-        # HISTCMD_LOCAL not set yet, just show PWD.
-        .hooks_title "$(.hooks_pwd)"
+    local title
+    if [[ -n "$TMUX" ]]; then
+        # Show hostname, tmux will prefix title with session.
+        title=$(.hooks_host)
     else
-        local last
-        print -v last -- "${$(history -1)[2]}"
-
-        if [[ -n "$TMUX" ]]; then
-            # Inside tmux, just show last cmd since tmux will prefix title with
-            # session name.
-            .hooks_title "$last"
-        else
-            # Outside tmux, from PWD followed by last cmd.
-            .hooks_title "$(.hooks_pwd) > $last"
-        fi
+        # Show PWD.
+        title=$(.hooks_pwd)
     fi
+
+    .hooks_set_title "$title"
 }
-add-zsh-hook precmd →hooks_update_window_title_precmd
 
 →hooks_update_window_title_preexec() {
     emulate -L zsh
     setopt extendedglob
 
-    HISTCMD_LOCAL=$(( ++HISTCMD_LOCAL ))
-
-    local trimmed="${2[(wr)^(*=*|ssh|sudo|-*)]}"
+    local title
     if [[ -n "$TMUX" ]]; then
-        # Inside tmux, just show last cmd since tmux will prefix title with
-        # session name.
-        .hooks_title "$trimmed"
+        # Show hostname, tmux will prefix title with session.
+        title=$(.hooks_host)
     else
-        # Outside tmux, from PWD followed by last cmd.
-        .hooks_title "$(.hooks_pwd) > $trimmed"
+        # Command that is running, trimmed of arguments etc.
+        local cmd="${2[(wr)^(*=*|ssh|sudo|-*)]}"
+
+        # Show PWD followed by running command.
+        title="$(.hooks_pwd) - $cmd"
     fi
+
+    .hooks_set_title "$title"
 }
+
+add-zsh-hook precmd →hooks_update_window_title_precmd
 add-zsh-hook preexec →hooks_update_window_title_preexec
