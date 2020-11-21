@@ -8,10 +8,10 @@ function s:CheckColorScheme()
 
   " Set background and colour scheme.
   set background=dark
-  silent! colorscheme onedark   " Fail silently if the colourscheme isn't available.
+  silent! colorscheme onedark   " Fail silently if the colour scheme isn't available.
 
   " Allow for overrides.
-  doautocmd ColorScheme
+  silent! doautocmd ColorScheme
 endfunction
 
 if v:progname !=# 'vi'
