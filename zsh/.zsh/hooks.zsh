@@ -16,7 +16,7 @@ autoload -Uz add-zsh-hook
 .hooks_host() {
     emulate -L zsh
 
-    print -Prn -- '%m'
+    print -Prn -- '@%m'
 }
 
 →hooks_update_window_title_precmd() {
