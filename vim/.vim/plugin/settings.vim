@@ -184,7 +184,7 @@ scriptencoding utf-8
   set textwidth=80              " Hard wrap at 80 columns.
 
   set formatoptions+=n          " Smart auto-indenting inside numbered lists.
-  if v:version > 703 || v:version == 703 && has('patch-5.4.1')
+  if v:version > 703 || v:version == 703 && has('patch541')
     set formatoptions+=j        " Remove comment leader when joining comment
                                 "   lines.
   endif
