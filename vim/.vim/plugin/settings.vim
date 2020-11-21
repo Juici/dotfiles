@@ -178,6 +178,10 @@ scriptencoding utf-8
   set autoindent                " Maintain indent of current line.
 
   set backspace=indent,start,eol    " Unrestricted backspacing in insert mode.
+  if has('patch-8.2.0590')
+    set backspace+=nostop           " Enable 'nostop' for backspace if it is
+                                    "   supported
+  endif
   set whichwrap=b,h,l,s,<,>,[,],~   " Allow <BS>/h/l/<Left>/<Right>/<Space> to
                                     "   cross line boundaries.
 
