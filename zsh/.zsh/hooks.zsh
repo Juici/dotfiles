@@ -4,13 +4,22 @@ autoload -Uz add-zsh-hook
     emulate -L zsh
 
     local cmd=$1
-    print -n "\e]0;${(q)cmd}\a"
+    print -n "\e]2;${(q)cmd}\a"
 }
 
 .hooks_pwd() {
     emulate -L zsh
+    setopt extendedglob
 
-    print -Drn -- "$PWD"
+    local match mbegin mend
+
+    local wd=$(print -Drn -- "$PWD")
+
+    if (( ${#wd} > 20 )); then
+        wd=${wd//(#b)('~'[^\/]#|(.|)[^\/])[^\/]#\//"${match[1]}/"}
+    fi
+
+    print -rn -- "$wd"
 }
 
 .hooks_host() {
