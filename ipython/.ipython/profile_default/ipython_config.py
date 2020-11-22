@@ -11,7 +11,7 @@ c = get_config()
 
 c.TerminalInteractiveShell.true_color = True
 c.TerminalInteractiveShell.term_title = False
-c.TerminalInteractiveShell.editing_mode = 'vi'
+c.TerminalInteractiveShell.editing_mode = 'emacs'
 c.TerminalInteractiveShell.highlighting_style = 'onedark'
 
 c.TerminalIPythonApp.display_banner = False
