@@ -8,8 +8,8 @@ let g:lightline = {
       \   'active': {
       \     'left': [ [ 'mode', 'paste' ],
       \               [ 'filename', 'readonly' ],
-      \               [ 'lint' ],
-      \               [ 'cocstatus' ] ],
+      \               [ 'diagnostics' ],
+      \               [ 'lint' ] ],
       \     'right': [ [ 'lineinfo' ],
       \                [ 'gitbranch' ],
       \                [ 'filetype', 'fileformat', 'fileencoding' ] ],
@@ -30,8 +30,8 @@ let g:lightline = {
       \     'fileformat': 'juici#status#file_format',
       \     'filetype': 'juici#status#file_type',
       \     'gitbranch': 'juici#status#git_branch',
-      \     'lint': 'juici#status#lint',
-      \     'cocstatus': 'coc#status',
+      \     'diagnostics': 'juici#status#diagnostics',
+      \     'lint': 'juici#status#lint_status',
       \   },
       \   'tabline': {
       \     'left': [ [ 'tabs' ] ],

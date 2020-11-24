@@ -8,7 +8,7 @@ function! juici#status#file_name() abort
   let l:filename = fnamemodify(l:filename, ':~:.')
 
   let l:winwidth = winwidth(0)
-  if l:winwidth < 90
+  if l:winwidth < 90 || strwidth(l:filename) > l:winwidth * 0.4
     let l:filename = l:winwidth < 70
           \ ? fnamemodify(l:filename, ':t')
           \ : pathshorten(l:filename)
@@ -31,7 +31,7 @@ function! juici#status#file_type() abort
   return winwidth(0) < 70 ? '' : &filetype
 endfunction
 
-function! juici#status#lint() abort
+function! juici#status#diagnostics() abort
   let l:lint = ''
 
   if winwidth(0) >= 90 && exists('b:coc_diagnostic_info')
@@ -42,6 +42,10 @@ function! juici#status#lint() abort
   endif
 
   return l:lint
+endfunction
+
+function! juici#status#lint_status() abort
+  return winwidth(0) < 100 ? '' : get(g:, 'coc_status', '')
 endfunction
 
 function! juici#status#read_only() abort
