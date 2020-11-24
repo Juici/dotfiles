@@ -1,6 +1,6 @@
 " Don't load plugins as vi,
 " otherwise don't allow compatible mode.
-if v:progname == 'vi'
+if v:progname ==# 'vi'
   set noloadplugins
 elseif &compatible
   set nocompatible
@@ -26,6 +26,9 @@ let s:init_local = g:vim_dir . '/init.local.vim'
 if filereadable(s:init_local)
   execute 'source' s:init_local
 endif
+
+" Load that need to be loaded early, ie. before plugins.
+call juici#settings#load_settings()
 
 " Load plugins.
 if &loadplugins

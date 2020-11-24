@@ -21,7 +21,7 @@ function! juici#util#pwd() abort
   " more presentable to the user.
   let l:pwd = getenv('PWD')
   " If the $PWD environment variable is not set fallback to getcwd().
-  if l:pwd == v:null
+  if l:pwd is v:null
     let l:pwd = getcwd()
   endif
 
@@ -34,7 +34,7 @@ endfunction
 " Get the path to the current open file/directory.
 function! juici#util#file_path() abort
   " Get the path to the open file/directory.
-  if &filetype == 'netrw' && exists('b:netrw_curdir')
+  if &filetype ==# 'netrw' && exists('b:netrw_curdir')
     " The directory open in the current buffer.
     "
     " Prefer this to expand('%') when in netrw due to inconsistencies of the '%'
@@ -73,7 +73,8 @@ function! juici#util#shorten_dirs(path, ...) abort
     "
     " Repeated instances of separators '/' are shortened to single characters.
     " eg. 'the/dir//path/being///shortened' -> 't/d/p/b/s'
-    let l:path = substitute(l:path, '\m\(\_^\|/\@<=\)\(\~[^/]*\|\.\?[^/]\)[^/]*/\+\_$\@!', '\2/', 'g')
+    "let l:path = substitute(l:path, '\m\(\_^\|/\@<=\)\(\~[^/]*\|\.\?[^/]\)[^/]*/\+\_$\@!', '\2/', 'g')
+    let l:path = pathshorten(l:path)
   endif
 
   return l:path

@@ -1,4 +1,7 @@
 if has('termguicolors')
+  " Use guifg/guibg instead of ctermfg/ctermbg in terminal.
+  set termguicolors
+
   " Not needed for xterm-256color, but it is needed inside tmux.
   if &term =~# 'tmux-256color'
     let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"

@@ -15,7 +15,7 @@ function! juici#title#title() abort
   let l:file = juici#util#file_path()
 
   " Remove '/' from the end of the PWD if not at root.
-  if strlen(l:pwd) > 1 && l:pwd[-1:] == '/'
+  if strlen(l:pwd) > 1 && l:pwd[-1:] ==# '/'
     let l:pwd = l:pwd[:-2]
   endif
 

@@ -10,7 +10,7 @@ endfunction
 function! juici#log#warn(msg) abort
   try
     echohl WarningMsg
-    echomsg a:msg
+    echomsg '[Warning] ' . a:msg
   finally
     echohl None
   endtry
@@ -20,7 +20,7 @@ endfunction
 function! juici#log#error(msg) abort
   try
     echohl ErrorMsg
-    echomsg a:msg
+    echomsg '[Error] ' . a:msg
   finally
     echohl None
   endtry

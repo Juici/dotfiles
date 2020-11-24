@@ -1,52 +1,54 @@
 function! juici#status#file_name() abort
-  let l:filename = winwidth(0) > 70 ? expand('%') : expand('%:t')
-  if l:filename =~# 'NERD_tree'
+  let l:filename = expand('%')
+  if l:filename =~# '\VNERD_tree'
     return ''
   endif
+
   let l:modified = &modified ? ' +' : ''
-  return fnamemodify(l:filename, ':~:.') . l:modified
+  let l:filename = fnamemodify(l:filename, ':~:.')
+
+  let l:winwidth = winwidth(0)
+  if l:winwidth < 90
+    let l:filename = l:winwidth < 70
+          \ ? fnamemodify(l:filename, ':t')
+          \ : pathshorten(l:filename)
+  endif
+
+  return l:filename . l:modified
 endfunction
 
 function! juici#status#file_encoding() abort
   " Only show file encoding if it's not 'utf-8'.
-  return &fileencoding ==# 'utf-8' ? '' : &fileencoding
+  return winwidth(0) < 80 || &fileencoding ==# 'utf-8' ? '' : &fileencoding
 endfunction
 
 function! juici#status#file_format() abort
   " Only show file format if it's not 'unix'.
-  let l:format = &fileformat ==# 'unix' ? '' : &fileformat
-  " Don't show format if in narrow terminal.
-  return winwidth(0) > 70 ? format : ''
+  return winwidth(0) < 80 || &fileformat ==# 'unix' ? '' : &fileformat
 endfunction
 
 function! juici#status#file_type() abort
-  " TODO: Use vim-devicons here?
-  return winwidth(0) > 70 ? &filetype : ''
+  return winwidth(0) < 70 ? '' : &filetype
 endfunction
 
-function! juici#status#linter() abort
-  " TODO: Linter hooks.
-  return ''
-endfunction
+function! juici#status#lint() abort
+  let l:lint = ''
 
-function! juici#status#linter_warnings() abort
-  " TODO: Linter hooks.
-  return ''
-endfunction
+  if winwidth(0) >= 90 && exists('b:coc_diagnostic_info')
+    let l:warnings = get(b:coc_diagnostic_info, 'warning', 0)
+    let l:errors = get(b:coc_diagnostic_info, 'error', 0)
 
-function! juici#status#linter_errors() abort
-  " TODO: Linter hooks.
-  return ''
-endfunction
+    let l:lint = ' ' . l:errors . '  ' . l:warnings
+  endif
 
-function! juici#status#linter_ok() abort
-  " TODO: Linter hooks.
-  return ''
+  return l:lint
 endfunction
 
 function! juici#status#read_only() abort
-  " Display a lock for readonly files.
-  return &ft !~# 'help' && &readonly ? '' : ''
+  " Display a lock for readonly files, but only if they are modifiable.
+  "
+  " ie. exclude things like help and netrw.
+  return &readonly && &modifiable ? '' : ''
 endfunction
 
 function! juici#status#line_info() abort
@@ -54,15 +56,6 @@ function! juici#status#line_info() abort
 endfunction
 
 function! juici#status#git_branch() abort
-  if exists('*fugitive#head')
-    " Use vim-fugitive to get branch name.
-    let l:branch = fugitive#head()
-  elseif executable('git')
-    " Fallback to use 'git rev-parse' to get branch name.
-    let l:branch = system('git rev-parse --abbrev-ref HEAD 2>/dev/null')[0:-2]
-  else
-    " Git executable not found in path.
-    let l:branch = ''
-  endif
-  return l:branch !=# '' ? ' ' . l:branch : ''
+  let l:branch = fugitive#head()
+  return l:branch ==# '' ? '' : ' ' . l:branch
 endfunction

@@ -7,24 +7,22 @@ let g:lightline = {
       \   'colorscheme': 'onedark',
       \   'active': {
       \     'left': [ [ 'mode', 'paste' ],
-      \               [ 'filename', 'readonly' ] ],
+      \               [ 'filename', 'readonly' ],
+      \               [ 'lint' ],
+      \               [ 'cocstatus' ] ],
       \     'right': [ [ 'lineinfo' ],
       \                [ 'gitbranch' ],
-      \                [ 'filetype', 'fileformat', 'fileencoding' ],
-      \                [ 'linter_warnings', 'linter_errors' ] ],
+      \                [ 'filetype', 'fileformat', 'fileencoding' ] ],
       \   },
       \   'component_expand': {
       \     'readonly': 'juici#status#read_only',
       \     'lineinfo': 'juici#status#line_info',
-      \     'linter': 'juici#status#Linter',
-      \     'linter_warnings': 'juici#status#linter_warnings',
-      \     'linter_errors': 'juici#status#linter_errors',
-      \     'linter_ok': 'juici#status#linter_ok',
+      \   },
+      \   'component_visible_condition': {
+      \     'readonly': '&readonly',
       \   },
       \   'component_type': {
       \     'readonly': 'error',
-      \     'linter_warnings': 'warning',
-      \     'linter_errors': 'error',
       \   },
       \   'component_function': {
       \     'fileencoding': 'juici#status#file_encoding',
@@ -32,6 +30,8 @@ let g:lightline = {
       \     'fileformat': 'juici#status#file_format',
       \     'filetype': 'juici#status#file_type',
       \     'gitbranch': 'juici#status#git_branch',
+      \     'lint': 'juici#status#lint',
+      \     'cocstatus': 'coc#status',
       \   },
       \   'tabline': {
       \     'left': [ [ 'tabs' ] ],
