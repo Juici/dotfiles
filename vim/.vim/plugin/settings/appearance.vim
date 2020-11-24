@@ -4,7 +4,7 @@ scriptencoding utf-8
 " General.
 "
 
-set cursorline        " Highlight the current line.
+set nocursorline      " Highlight the current line.
 set showmatch         " Show matching brackets, etc.
 
 set laststatus=2      " Always show status line.
