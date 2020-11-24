@@ -38,7 +38,10 @@ function! juici#status#diagnostics() abort
     let l:warnings = get(b:coc_diagnostic_info, 'warning', 0)
     let l:errors = get(b:coc_diagnostic_info, 'error', 0)
 
-    let l:lint = ' ' . l:errors . '  ' . l:warnings
+    let l:error_symbol = g:linux_console ? 'E' : ' '
+    let l:warning_symbol = g:linux_console ? 'W' : ' '
+
+    let l:lint = l:error_symbol . l:errors . ' ' . l:warning_symbol . l:warnings
   endif
 
   return l:lint
@@ -49,10 +52,12 @@ function! juici#status#lint_status() abort
 endfunction
 
 function! juici#status#read_only() abort
+  let l:lock_symbol = g:linux_console ? 'L' : ''
+
   " Display a lock for readonly files, but only if they are modifiable.
   "
   " ie. exclude things like help and netrw.
-  return &readonly && &modifiable ? '' : ''
+  return &readonly && &modifiable ? l:lock_symbol : ''
 endfunction
 
 function! juici#status#line_info() abort
@@ -61,5 +66,6 @@ endfunction
 
 function! juici#status#git_branch() abort
   let l:branch = fugitive#head()
-  return l:branch ==# '' ? '' : ' ' . l:branch
+  let l:branch_symbol = g:linux_console ? '' : ' '
+  return l:branch ==# '' ? '' : l:branch_symbol . l:branch
 endfunction

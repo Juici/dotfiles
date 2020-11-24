@@ -1,4 +1,21 @@
 "
+" Settings.
+"
+
+" Diagnostic icons.
+if g:linux_console
+  call coc#config('diagnostic.errorSign', 'E')
+  call coc#config('diagnostic.warningSign', 'W')
+  call coc#config('diagnostic.infoSign', 'i')
+  call coc#config('diagnostic.infoSign', '?')
+else
+  call coc#config('diagnostic.errorSign', '✘')
+  call coc#config('diagnostic.warningSign', '')
+  call coc#config('diagnostic.infoSign', '')
+  call coc#config('diagnostic.infoSign', '')
+endif
+
+"
 " Custom colours for CoC.
 "
 

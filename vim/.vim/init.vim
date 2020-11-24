@@ -27,6 +27,8 @@ if filereadable(s:init_local)
   execute 'source' s:init_local
 endif
 
+let g:linux_console = $TERM =~# '\V\_^linux'
+
 " Load that need to be loaded early, ie. before plugins.
 call juici#settings#load_settings()
 

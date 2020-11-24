@@ -1,6 +1,6 @@
 let s:middot = '·'
 let s:raquo = '»'
-let s:small_l = 'ℓ'
+let s:small_l = g:linux_console ? '' : 'ℓ'
 
 let s:lines_pad_len = 4   " The number of digits to pad lines number to.
 
@@ -40,7 +40,7 @@ function! juici#fold#text() abort
 
   let l:lines_prefix = '['
   let l:lines_suffix = s:small_l . ']'
-  let l:pad_len = s:lines_pad_len + strlen(l:lines_prefix) + strlen(l:lines_suffix)
+  let l:pad_len = s:lines_pad_len + strwidth(l:lines_prefix) + strwidth(l:lines_suffix)
 
   let l:lines = l:lines_prefix . l:fold_len . l:lines_suffix
   let l:lines = substitute(printf('%' . l:pad_len . 's', l:lines), ' ', l:fold_char, 'g')
