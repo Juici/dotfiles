@@ -12,3 +12,7 @@ map! <C-h> <C-w>
 inoremap <silent><expr> <C-Del>
       \ col('.') == len(getline('.')) + 1 ? "\<C-\>\<C-o>v\"_d"
       \ : "\<C-o>\"_de"
+
+" Use <Up> and <Down> in tab completion in command mode.
+cmap <Up> <C-p>
+cmap <Down> <C-n>
