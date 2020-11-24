@@ -1,10 +1,30 @@
-scriptencoding utf-8
-
 let s:middot = '·'
 let s:raquo = '»'
 let s:small_l = 'ℓ'
 
 let s:lines_pad_len = 4   " The number of digits to pad lines number to.
+
+" Get the set fold character.
+function! juici#fold#fill_char() abort
+  let l:fold_char = s:middot
+
+  if exists('&fillchars')
+    let l:fillchars = split(&fillchars, ',')
+
+    " Reverse the list, since vim uses the value set last.
+    for l:pair in reverse(l:fillchars)
+      let l:split = split(l:pair, ':')
+
+      " Look for `fold` entry.
+      if len(l:split) == 2 && l:split[0] ==# 'fold'
+        let l:fold_char = strcharpart(l:split[1], 0, 1)
+        break
+      endif
+    endfor
+  endif
+
+  return l:fold_char
+endfunction
 
 " Override default `foldtext()`, which produces something like:
 "
@@ -14,7 +34,8 @@ let s:lines_pad_len = 4   " The number of digits to pad lines number to.
 "
 "   »······[2ℓ]·· source $HOME/path/to/file/being/edited ······················
 "
-function! juici#fold#fold_text() abort
+function! juici#fold#text() abort
+  let l:fold_char = juici#fold#fill_char()
   let l:fold_len = v:foldend - v:foldstart + 1
 
   let l:lines_prefix = '['
@@ -22,12 +43,12 @@ function! juici#fold#fold_text() abort
   let l:pad_len = s:lines_pad_len + strlen(l:lines_prefix) + strlen(l:lines_suffix)
 
   let l:lines = l:lines_prefix . l:fold_len . l:lines_suffix
-  let l:lines = substitute(printf('%' . l:pad_len . 's', l:lines), ' ', s:middot, 'g')
+  let l:lines = substitute(printf('%' . l:pad_len . 's', l:lines), ' ', l:fold_char, 'g')
 
   let l:first = s:cleanup_fold_text(getline(v:foldstart))
-  "let l:dashes = substitute(v:folddashes, '-', s:middot, 'g')
+  "let l:dashes = substitute(v:folddashes, '-', l:fold_char, 'g')
 
-  return s:raquo . s:middot . s:middot . l:lines . s:middot . s:middot . ' ' . l:first . ' '
+  return s:raquo . l:fold_char . l:fold_char . l:lines . l:fold_char . l:fold_char . ' ' . l:first . ' '
 endfunction
 
 " Clean up comment markers and fold markers from fold text.
