@@ -1,5 +1,6 @@
 " Custom group colours.
 let s:group_colors = {}
+let s:group_links = {}
 
 function! s:h(group, style) abort
   execute 'highlight' a:group
@@ -10,6 +11,16 @@ function! s:h(group, style) abort
     \ 'ctermfg=' has_key(a:style, 'fg')    ? a:style.fg.cterm : 'NONE'
     \ 'ctermbg=' has_key(a:style, 'bg')    ? a:style.bg.cterm : 'NONE'
     \ 'cterm='   has_key(a:style, 'cterm') ? a:style.cterm    : 'NONE'
+endfunction
+
+function! s:l(group, to) abort
+  let [l:to, l:default] = a:to
+
+  if l:default
+    execute 'highlight' 'default' 'link' a:group l:to
+  else
+    execute 'highlight!' 'link' a:group l:to
+  endif
 endfunction
 
 function! juici#color#set(group, style, ...) abort
@@ -41,9 +52,23 @@ function! juici#color#set(group, style, ...) abort
   call s:h(a:group, l:style)
 endfunction
 
+function! juici#color#link(group, to, ...) abort
+  let l:default = get(a:, 1, v:false)
+  let l:to = [a:to, l:default]
+
+  if !l:default || !has_key(s:group_links, a:group)
+    let s:group_links[a:group] = l:to
+  endif
+
+  call s:l(a:group, l:to)
+endfunction
+
 " Refresh custom colours, such as when the colour scheme changes.
 function! juici#color#refresh() abort
   for [l:group, l:style] in items(s:group_colors)
     call s:h(l:group, l:style)
+  endfor
+  for [l:group, l:to] in items(s:group_links)
+    call s:l(l:group, l:to)
   endfor
 endfunction
