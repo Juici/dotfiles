@@ -1,7 +1,14 @@
+" Make sure lightline is loaded.
+try
+  call lightline#init()
+  let g:juici#_loaded_lightline = v:true
+catch /E117/
+  call juici#log#warn('Lightline is not loaded')
+  finish
+endtry
+
 " Hide modeline if lightline is enabled.
-if &loadplugins
-  set noshowmode
-endif
+set noshowmode
 
 let g:lightline = {
       \   'colorscheme': 'onedark',

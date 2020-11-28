@@ -1,10 +1,7 @@
 " Make sure lightline is loaded.
-try
-  call lightline#init()
-catch /E117/
-  call juici#log#warn('Lightline is not loaded')
+if !get(g:, 'juici#_loaded_lightline', v:false)
   finish
-endtry
+endif
 
 if !has('autocmd')
   finish
