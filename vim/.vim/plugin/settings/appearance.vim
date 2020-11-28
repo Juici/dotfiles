@@ -38,7 +38,11 @@ endif
 
 " Set the character used to denote a deleted line in diff view.
 if has('diff')
-  set fillchars=diff:∙          " BULLET OPERATOR (U+2219).
+  if g:linux_console
+    set fillchars=diff:·        " MIDDLE DOT (U+00B7).
+  else
+    set fillchars=diff:∙        " BULLET OPERATOR (U+2219).
+  endif
 endif
 
 " Set the character used to draw window separators.
@@ -48,7 +52,7 @@ endif
 
 " Suppress ~ at EndOfBuffer.
 if has('nvim-0.3.1')
-  set fillchars+=eob:\          " Fills using a space.
+  set fillchars+=eob:\          " SPACE (U+0020).
 endif
 
 "
@@ -57,7 +61,11 @@ endif
 
 if has('folding')
   " The character to fill fold line with.
-  set fillchars+=fold:·           " MIDDLE DOT (U+00B7).
+  if g:linux_console
+    set fillchars+=fold:·         " MIDDLE DOT (U+00B7).
+  else
+    set fillchars+=fold:∙         " BULLET OPERATOR (U+2219).
+  endif
 
   set foldmethod=marker           " Fold based of markers.
   set foldcolumn=1                " Fold column size.
@@ -73,8 +81,13 @@ endif
 " Show whitespace.
 set list
 
-set listchars=nbsp:⦸      " CIRCLED REVERSE SOLIDUS (U+29B8).
-set listchars+=tab:\     " KEYBOARD TAB (U+F811) + SPACE (U+0020).
+if g:linux_console
+  set listchars=nbsp:%      " PERCENT SIGN (U+0025).
+  set listchars+=tab:>·     " GREATER-THAN SIGN (U+003E) + MIDDLE DOT (U+00B7).
+else
+  set listchars=nbsp:⊘      " CIRCLED DIVISION SLASH (U+2298).
+  set listchars+=tab:🞂∙     " BLACK RIGHT-POINTING ISOSCELES RIGHT TRIANGLE (U+1F782) + BULLET OPERATOR (U+2219).
+endif
 set listchars+=extends:»  " RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK (U+00BB).
 set listchars+=precedes:« " LEFT-POINTING DOUBLE ANGLE QUOTATION MARK (U+00AB).
 set listchars+=trail:•    " BULLET (U+2022).

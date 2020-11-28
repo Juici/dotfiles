@@ -1,12 +1,12 @@
-let s:middot = '·'
-let s:raquo = '»'
-let s:small_l = g:linux_console ? '' : 'ℓ'
+let s:dot = g:linux_console ? '·' : '∙'
+let s:marker = '+'
+let s:ell = g:linux_console ? '' : 'ℓ'
 
 let s:lines_pad_len = 4   " The number of digits to pad lines number to.
 
 " Get the set fold character.
 function! juici#fold#fill_char() abort
-  let l:fold_char = s:middot
+  let l:fold_char = s:dot
 
   if exists('&fillchars')
     let l:fillchars = split(&fillchars, ',')
@@ -28,18 +28,18 @@ endfunction
 
 " Override default `foldtext()`, which produces something like:
 "
-"   +---  2 lines: source $HOME/path/to/file/being/edited----------------------
+"   +---  2 lines: Fold Section Title----------------------
 "
 " Instead returning:
 "
-"   »······[2ℓ]·· source $HOME/path/to/file/being/edited ······················
+"   +∙∙∙∙∙∙[2ℓ]·· Fold Section Title ······················
 "
 function! juici#fold#text() abort
   let l:fold_char = juici#fold#fill_char()
   let l:fold_len = v:foldend - v:foldstart + 1
 
   let l:lines_prefix = '['
-  let l:lines_suffix = s:small_l . ']'
+  let l:lines_suffix = s:ell . ']'
   let l:pad_len = s:lines_pad_len + strwidth(l:lines_prefix) + strwidth(l:lines_suffix)
 
   let l:lines = l:lines_prefix . l:fold_len . l:lines_suffix
@@ -48,7 +48,7 @@ function! juici#fold#text() abort
   let l:first = s:cleanup_fold_text(getline(v:foldstart))
   "let l:dashes = substitute(v:folddashes, '-', l:fold_char, 'g')
 
-  return s:raquo . l:fold_char . l:fold_char . l:lines . l:fold_char . l:fold_char . ' ' . l:first . ' '
+  return s:marker . l:fold_char . l:fold_char . l:lines . l:fold_char . l:fold_char . ' ' . l:first . ' '
 endfunction
 
 " Clean up comment markers and fold markers from fold text.
