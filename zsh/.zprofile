@@ -14,11 +14,14 @@
         )
 
         local file file_path
-        for file in $files[@]; do
-            file_path="$DOT_ZSH/$file.zsh"
+        for file in ${files[@]}; do
+            # Source file.
+            file_path="${DOT_ZSH}/${file}.zsh"
+            [[ -f "$file_path" ]] && source "$file_path"
+
+            # Source local overrides.
+            file_path="${DOT_ZSH}/${file}.local.zsh"
             [[ -f "$file_path" ]] && source "$file_path"
         done
     fi
 }
-
-export PATH="$HOME/.cargo/bin:$PATH"
