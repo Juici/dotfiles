@@ -4,6 +4,7 @@ export PAGER='less -F'
 # Set editor.
 if (( ${+commands[nvim]} )); then
     export VISUAL='nvim'
+    export DIFFPROG='nvim -d'
 else
     export VISUAL='vim'
 fi
