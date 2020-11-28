@@ -1,3 +1,11 @@
+" Make sure CoC is loaded.
+try
+  call coc#status()
+catch /E117/
+  call juici#log#warn('CoC is not loaded')
+  finish
+endtry
+
 "
 " Settings.
 "
