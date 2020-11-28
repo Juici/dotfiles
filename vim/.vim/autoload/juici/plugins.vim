@@ -1,4 +1,5 @@
-let s:plugin_dir = '~/.cache/dein'
+let s:dein_vim_dir = has('nvim') ? 'nvim' : 'vim'
+let s:plugin_dir = '~/.cache/dein/' . s:dein_vim_dir
 let s:dein_dir = s:plugin_dir . '/repos/github.com/Shougo/dein.vim'
 
 function! s:install_dein() abort
