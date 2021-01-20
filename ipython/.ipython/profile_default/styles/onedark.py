@@ -134,3 +134,4 @@ class OneDarkStyle(Style):
 
 # Alias the style.
 OnedarkStyle = OneDarkStyle
+Style = OneDarkStyle
