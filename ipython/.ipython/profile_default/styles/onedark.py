@@ -2,9 +2,8 @@
 OneDark pygments style.
 """
 
+from IPython.terminal.prompts import Token
 from pygments.style import Style
-from pygments.token import Text, Whitespace, Escape, Error, Other, Keyword, \
-    Name, Literal, String, Number, Operator, Punctuation, Comment, Generic
 
 
 red = '#e06c75'
@@ -26,6 +25,8 @@ visual_grey = '#3e4452'
 menu_grey = '#3e4452'
 special_grey = '#3b4048'
 
+prompt_green = '#6fa449'
+
 
 class OneDarkStyle(Style):
     """
@@ -43,92 +44,110 @@ class OneDarkStyle(Style):
     line_number_special_background_color = None
 
     styles = {
-        Text:                           white,
-        Whitespace:                     special_grey,
-        Escape:                         '',
-        Error:                          red,
-        Other:                          '',
+        # Basic.
+        Token.Text:                         white,
+        Token.Whitespace:                   special_grey,
+        Token.Escape:                       '',
+        Token.Error:                        red,
+        Token.Other:                        '',
 
-        Keyword:                        purple,
-        Keyword.Constant:               yellow,
-        Keyword.Declaration:            red,
-        Keyword.Namespace:              red,
-        Keyword.Pseudo:                 '',
-        Keyword.Reserved:               '',
-        Keyword.Type:                   red,
+        # Keywords.
+        Token.Keyword:                      purple,
+        Token.Keyword.Constant:             yellow,
+        Token.Keyword.Declaration:          red,
+        Token.Keyword.Namespace:            red,
+        Token.Keyword.Pseudo:               '',
+        Token.Keyword.Reserved:             '',
+        Token.Keyword.Type:                 red,
 
-        Name:                           white,
-        Name.Attribute:                 yellow,
-        Name.Builtin:                   blue,
-        Name.Builtin.Pseudo:            '',
-        Name.Class:                     blue,
-        Name.Constant:                  cyan,
-        Name.Decorator:                 '',
-        Name.Entity:                    yellow,
-        Name.Exception:                 red,
-        Name.Function:                  blue,
-        Name.Function.Magic:            '',
-        Name.Property:                  '',
-        Name.Label:                     '',
-        Name.Namespace:                 blue,
-        Name.Other:                     yellow,
-        Name.Tag:                       purple,
-        Name.Variable:                  '',
-        Name.Variable.Class:            '',
-        Name.Variable.Global:           '',
-        Name.Variable.Instance:         '',
-        Name.Variable.Magic:            '',
+        # Identifiers.
+        Token.Name:                         white,
+        Token.Name.Attribute:               yellow,
+        Token.Name.Builtin:                 blue,
+        Token.Name.Builtin.Pseudo:          '',
+        Token.Name.Class:                   blue,
+        Token.Name.Constant:                cyan,
+        Token.Name.Decorator:               '',
+        Token.Name.Entity:                  yellow,
+        Token.Name.Exception:               red,
+        Token.Name.Function:                blue,
+        Token.Name.Function.Magic:          '',
+        Token.Name.Property:                '',
+        Token.Name.Label:                   '',
+        Token.Name.Namespace:               blue,
+        Token.Name.Other:                   yellow,
+        Token.Name.Tag:                     purple,
+        Token.Name.Variable:                '',
+        Token.Name.Variable.Class:          '',
+        Token.Name.Variable.Global:         '',
+        Token.Name.Variable.Instance:       '',
+        Token.Name.Variable.Magic:          '',
 
-        Literal:                        dark_yellow,
-        Literal.Date:                   '',
+        # Literals.
+        Token.Literal:                      dark_yellow,
+        Token.Literal.Date:                 '',
 
-        String:                         green,
-        String.Affix:                   '',
-        String.Backtick:                '',
-        String.Char:                    '',
-        String.Delimiter:               '',
-        String.Doc:                     '',
-        String.Double:                  '',
-        String.Escape:                  yellow,
-        String.Heredoc:                 '',
-        String.Interpol:                blue,
-        String.Other:                   '',
-        String.Regex:                   '',
-        String.Single:                  '',
-        String.Symbol:                  '',
+        # Strings.
+        Token.String:                       green,
+        Token.String.Affix:                 '',
+        Token.String.Backtick:              '',
+        Token.String.Char:                  '',
+        Token.String.Delimiter:             '',
+        Token.String.Doc:                   '',
+        Token.String.Double:                '',
+        Token.String.Escape:                yellow,
+        Token.String.Heredoc:               '',
+        Token.String.Interpol:              blue,
+        Token.String.Other:                 '',
+        Token.String.Regex:                 '',
+        Token.String.Single:                '',
+        Token.String.Symbol:                '',
 
-        Number:                         dark_yellow,
-        Number.Bin:                     '',
-        Number.Float:                   '',
-        Number.Hex:                     '',
-        Number.Integer:                 '',
-        Number.Integer.Long:            '',
-        Number.Oct:                     '',
+        # Numbers.
+        Token.Number:                       dark_yellow,
+        Token.Number.Bin:                   '',
+        Token.Number.Float:                 '',
+        Token.Number.Hex:                   '',
+        Token.Number.Integer:               '',
+        Token.Number.Integer.Long:          '',
+        Token.Number.Oct:                   '',
 
-        Operator:                       purple,
-        Operator.Word:                  '',
+        # Operators.
+        Token.Operator:                     purple,
+        Token.Operator.Word:                '',
 
-        Punctuation:                    white,
+        # Punctuation.
+        Token.Punctuation:                  white,
 
-        Comment:                        f'italic {comment_grey}',
-        Comment.Hashbang:               f'noitalic {yellow}',
-        Comment.Multiline:              '',
-        Comment.Preproc:                '',
-        Comment.PreprocFile:            '',
-        Comment.Single:                 '',
-        Comment.Special:                f'noitalic {comment_grey}',
+        # Comments.
+        Token.Comment:                      f'italic {comment_grey}',
+        Token.Comment.Hashbang:             f'noitalic {yellow}',
+        Token.Comment.Multiline:            '',
+        Token.Comment.Preproc:              '',
+        Token.Comment.PreprocFile:          '',
+        Token.Comment.Single:               '',
+        Token.Comment.Special:              f'noitalic {comment_grey}',
 
-        Generic:                        '',
-        Generic.Deleted:                red,
-        Generic.Emph:                   'italic',
-        Generic.Error:                  red,
-        Generic.Heading:                green,
-        Generic.Inserted:               '',
-        Generic.Output:                 '',
-        Generic.Prompt:                 '',
-        Generic.Strong:                 'bold',
-        Generic.Subheading:             green,
-        Generic.Traceback:              '',
+        # General.
+        Token.Generic:                      '',
+        Token.Generic.Deleted:              red,
+        Token.Generic.Emph:                 'italic',
+        Token.Generic.Error:                red,
+        Token.Generic.Heading:              green,
+        Token.Generic.Inserted:             '',
+        Token.Generic.Output:               '',
+        Token.Generic.Prompt:               '',
+        Token.Generic.Strong:               'bold',
+        Token.Generic.Subheading:           green,
+        Token.Generic.Traceback:            '',
+    }
+
+    overrides = {
+        # Prompt.
+        Token.Prompt:                       prompt_green,
+        Token.PromptNum:                    f'bold {green}',
+        Token.OutPrompt:                    dark_red,
+        Token.OutPromptNum:                 f'bold {red}',
     }
 
 

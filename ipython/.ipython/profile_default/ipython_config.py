@@ -33,6 +33,8 @@ def import_style(style: str):
 
     return module.Style
 
+style = import_style('onedark')
+
 
 # pylint: disable=E0602
 c: Config = get_config()
@@ -40,6 +42,8 @@ c: Config = get_config()
 c.TerminalInteractiveShell.true_color = True
 c.TerminalInteractiveShell.term_title = False
 c.TerminalInteractiveShell.editing_mode = 'emacs'
-c.TerminalInteractiveShell.highlighting_style = import_style('onedark')
+c.TerminalInteractiveShell.highlighting_style = style
+if hasattr(style, 'overrides'):
+    c.TerminalInteractiveShell.highlighting_style_overrides = style.overrides
 
 c.TerminalIPythonApp.display_banner = False
