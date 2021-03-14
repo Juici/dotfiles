@@ -17,7 +17,6 @@ path=(
     $HOME/.local/bin
     $HOME/.zsh/bin
     $HOME/.cargo/bin
-    $HOME/.node_modules/bin
     ${^gopath}/bin
     /usr/local/{,s}bin
     /usr/{,s}bin
