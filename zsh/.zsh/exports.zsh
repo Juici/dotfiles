@@ -34,3 +34,6 @@ fi
 
 # Enable command history in IEx.
 export ERL_AFLAGS="-kernel shell_history enabled -kernel shell_history_file_bytes 1024000"
+
+# Allow jupyter-lab to install extensions for the user.
+export JUPYTERLAB_DIR="$HOME/.local/share/jupyter/lab"
