@@ -6,17 +6,46 @@ local CUR_DIR = '.'
 local PAR_DIR = '..'
 local PATH_SEP = ':'
 
+path.sep = SEP
+path.extsep = EXT_SEP
+path.curdir = CUR_DIR
+path.pardir = PAR_DIR
+path.pathsep = PATH_SEP
+
 -- Gets the current working directory.
-function path.cwd()
+function path.getcwd()
   return vim.loop.cwd()
 end
 
--- Check if the path is absolute.
-function path.is_absolute(p)
+-- Checks if the path exists.
+function path.exists(p)
+  return vim.loop.fs_stat(p) ~= nil
+end
+
+-- Checks if the path is absolute.
+function path.isabsolute(p)
   return p:sub(1, 1) == SEP
 end
 
--- Join two or more path components.
+-- Checks if the path is a regular file.
+function path.isfile(p)
+  local st = vim.loop.fs_stat(p)
+  return st ~= nil and st.type == 'file'
+end
+
+-- Checks if the path is a directory.
+function path.isdir(p)
+  local st = vim.loop.fs_stat(p)
+  return st ~= nil and st.type == 'directory'
+end
+
+-- Checks if the path is a symbolic link.
+function path.islink(p)
+  local st = vim.loop.fs_lstat(p)
+  return st ~= nil and st.type == 'link'
+end
+
+-- Joins two or more path components.
 function path.join(p, ...)
   local n = select('#', ...)
   for i = 1, n do
@@ -32,7 +61,7 @@ function path.join(p, ...)
   return p
 end
 
--- Remove trailing '/' characters if path is not a single '/'.
+-- Removes trailing '/' characters if path is not a single '/'.
 local function strip_trailing_sep(p)
   local len = #p
   while len > 1 and p:sub(len, len) == SEP do
@@ -70,18 +99,19 @@ function path.parent(p)
 end
 
 -- Returns the file component of a path.
-function path.file_name(p)
+function path.filename(p)
   local _, file = split(p)
   return file
 end
 
+-- Normalises path components and returns an absolute path.
 function path.normalize(p)
   if #p == 0 then
-    return path.cwd()
+    return path.getcwd()
   end
 
-  if not path.is_absolute(p) then
-    p = path.join(path.cwd(), p)
+  if not path.isabsolute(p) then
+    p = path.join(path.getcwd(), p)
   end
 
   local initial_slashes = 0
@@ -97,7 +127,7 @@ function path.normalize(p)
   end
 
   local comps = {}
-  for _, comp in ipairs(vim.split(p, SEP)) do
+  for comp in vim.gsplit(p, SEP, true) do
     if #comp == 0 or comp == CUR_DIR then
       goto continue
     end
@@ -117,14 +147,9 @@ function path.normalize(p)
   end
 
   if #p == 0 then
-    p = path.cwd()
+    p = path.getcwd()
   end
   return p
-end
-
-function path.realpath(p)
-  p = vim.fn.resolve(p)
-  return path.normalize(p)
 end
 
 return path

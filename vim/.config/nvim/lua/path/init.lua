@@ -6,9 +6,15 @@ else
   path = require('path.windows')
 end
 
--- Returns true if the path is relative.
-function path.is_relative(p)
-  return not path.is_absolute(p)
+-- Checks if the path is relative.
+function path.isrelative(p)
+  return not path.isabsolute(p)
+end
+
+-- Resolves symlinks and normalises the path.
+function path.realpath(p)
+  p = vim.fn.resolve(p)
+  return path.normalize(p)
 end
 
 return path
