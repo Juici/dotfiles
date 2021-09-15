@@ -38,8 +38,8 @@ opt.textwidth = 80  -- Hard wrap at 80 columns.
 --------------------------------------------------
 
 opt.formatoptions:append({
-  'n',  -- Smart auto-indenting in numbered lists.
-  'j',  -- Remove comment leader when joining comment lines.
+  n = true,  -- Smart auto-indenting in numbered lists.
+  j = true,  -- Remove comment leader when joining comment lines.
 })
 
 --------------------------------------------------
@@ -48,15 +48,15 @@ opt.formatoptions:append({
 
 -- Set which characters can cross line boundaries.
 opt.whichwrap = {
-  'b', -- <BS>    (Normal and Visual)
-  's', -- <Space> (Normal and Visual)
-  'h', -- 'h'     (Normal and Visual)
-  'l', -- 'l'     (Normal and Visual)
-  '<', -- <Left>  (Normal and Visual)
-  '>', -- <Right> (Normal and Visual)
-  '[', -- <Left>  (Insert and Replace)
-  ']', -- <Right> (Insert and Replace)
-  '~', -- '~'     (Normal)
+  b = true,     -- <BS>    (Normal and Visual)
+  s = true,     -- <Space> (Normal and Visual)
+  h = true,     -- 'h'     (Normal and Visual)
+  l = true,     -- 'l'     (Normal and Visual)
+  ['<'] = true, -- <Left>  (Normal and Visual)
+  ['>'] = true, -- <Right> (Normal and Visual)
+  ['['] = true, -- <Left>  (Insert and Replace)
+  [']'] = true, -- <Right> (Insert and Replace)
+  ['~'] = true, -- '~'     (Normal)
 }
 
 -- Allow cursor to move where there is no text in visual block mode.

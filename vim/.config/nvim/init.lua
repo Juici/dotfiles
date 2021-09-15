@@ -7,7 +7,7 @@ if juici.g.is_vi then
   vim.opt.loadplugins = false
 end
 
--- TODO: Load settings.
+-- Load settings.
 juici.settings.load()
 
 --------------------------------------------------
@@ -44,6 +44,21 @@ do
       vim.cmd('source ' .. override)
     end
   end
+end
+
+--------------------------------------------------
+-- Legacy (TODO: Remove)
+--------------------------------------------------
+
+vim.g.vim_dir = juici.g.vim_dir
+vim.g.linux_console = juici.g.is_linux_console
+
+-- Load settings the need to be loaded before plugins.
+vim.call('juici#settings#load_settings')
+
+-- Load plugins.
+if vim.o.loadplugins then
+  vim.call('juici#plugins#load')
 end
 
 --------------------------------------------------
