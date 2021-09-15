@@ -1,0 +1,132 @@
+" Vim syntax file
+" Language: ART
+
+if exists('b:current_syntax')
+  finish
+endif
+
+let s:cpo_save = &cpo
+set cpo&vim
+
+syn case ignore
+
+
+" Keywords
+" --------
+
+syn keyword artPrelude prelude nextgroup=artPreludeBlock skipwhite skipempty
+syn keyword artSupport support nextgroup=artSupportBlock skipwhite skipempty
+syn region artPreludeBlock start='{' end='}' contained
+syn region artSupportBlock start='{' end='}' contained
+
+syn keyword artTodo TODO FIXME XXX contained
+
+
+" Comments
+" --------
+
+" artCommentGroup allows adding matches for special things in comments.
+syn cluster artCommentGroup contains=artTodo
+
+" Line comment.
+syn region artCommentL start='//' end='$' keepend contains=@artCommentGroup nextgroup=@artExpr skipwhite skipempty
+" Block comments.
+syn region artComment     matchgroup=artCommentStart      start='/\*' end='\*/' contains=@artCommentGroup,artCommentStartError      extend nextgroup=@artExpr skipwhite skipempty
+syn region artCommentNest matchgroup=artCommentNestStart  start='(\*' end='\*)' contains=@artCommentGroup,artCommentNestStartError  extend nextgroup=@artExpr skipwhite skipempty
+
+" Incomplete comment errors.
+syn match artCommentError           display '\*/'
+syn match artCommentStartError      display '/\*'me=e-1 contained
+syn match artCommentNestError       display '\*)'
+syn match artCommentNestStartError  display '(\*'me=e-1 contained
+
+
+" Statements
+" ----------
+
+syn match artNonterminalDef '\([A-Za-z][A-Za-z0-9_]*\)\s*\(<[^>]*>\)\=\s*\(::=\)' contains=artNonterminal,artVariableDef,artDefineOp nextgroup=@artExpr skipwhite skipempty
+
+syn match artNonterminal '[A-Za-z][A-Za-z0-9_]*' contained
+syn match artDefineOp '::=' nextgroup=@artExpr skipwhite skipempty
+
+syn region artVariableDef matchgroup=artVariableDefAngleToken start='<' matchgroup=artVariableDefAngleToken end='>' contained contains=artVariableDefIdent
+
+syn match artVariableDefIdent '[A-Za-z][A-Za-z0-9_]*' contained nextgroup=artVariableDefDelim
+syn match artVariableDefDelim ':'                     contained nextgroup=artVariableDefType
+syn match artVariableDefType  '[A-Za-z][A-Za-z0-9_]*' contained nextgroup=artVariableDefIdent skipwhite skipempty
+
+syn cluster artExpr contains=artExprNonterminal,artExprLitStr,artExprLitChar,artExprEmptyStr,artExprBlock,artCommentL,artComment,artCommentNest
+
+syn match   artExprNonterminal  '&\=\([A-Za-z][A-Za-z0-9_]*\)\(<\=\|\^{,3}\)' contained contains=artExprBuiltInToken,artExprStmtToken,artExprFoldTearToken nextgroup=@artExpr,artExprDelim,artNonterminalDef skipwhite skipempty
+syn region  artExprLitStr       start=/'/ skip=/\\[\\']/  end=/'\^\{,3}/       contained contains=artExprFoldTear nextgroup=@artExpr,artExprDelim,artNonterxprDelim skipwhite skipempty
+syn match   artExprLitChar      '`[A-Za-z]\^\{,3}'                            contained contains=artExprFoldTear nextgroup=@artExpr,artExprDelim,artNonterxprDelim skipwhite skipempty
+syn match   artExprEmptyStr     '#'                                           contained nextgroup=@artExpr,artExprDelim,artNonterminalDef skipwhite skipempty
+syn region  artExprBlock        start='{'                 end='}'             contained nextgroup=@artExpr,artExprDelim,artNonterminalDef skipwhite skipempty
+
+syn match artExprBuiltInToken   '&'       contained
+syn match artExprStmtToken      '<'       contained
+syn match artExprFoldTearToken  '\^{,3}'  contained
+
+syn match artExprDelim '|' nextgroup=@artExpr skipwhite skipempty
+
+" Links
+" -----
+
+" Keywords
+
+hi def link artPrelude Include
+hi def link artSupport Include
+
+
+" Comments
+
+hi def link artCommentL         artComment
+hi def link artCommentNest      artComment
+hi def link artCommentStart     artComment
+hi def link artCommentNestStart artComment
+hi def link artComment          Comment
+
+hi def link artCommentError           artError
+hi def link artCommentStartError      artError
+hi def link artCommentNestError       artError
+hi def link artCommentNestStartError  artError
+
+
+" Statements
+
+hi def link artNonterminal Constant
+
+hi def link artVariableDefIdent       artVariable
+hi def link artVariableDefDelim       artDelim
+hi def link artVariableDefType        artType
+hi def link artVariableDefAngleToken  artDelim
+
+hi def link artDefineOp   artOperator
+hi def link artAngleToken artDelim
+
+hi def link artExprNonterminal  artNonterminal
+hi def link artExprLitStr       String
+hi def link artExprLitChar      Character
+hi def link artExprEmptyStr     String
+
+hi def link artExprBuiltInToken   artOperator
+hi def link artExprFoldTearToken  artOperator
+hi def link artExprStmtToken      artOperator
+
+hi def link artExprDelim artOperator
+
+
+" Generic
+
+hi def link artVariable Identifier
+hi def link artType     Type
+hi def link artOperator Operator
+hi def link artDelim    Delimiter
+hi def link artTodo     Todo
+hi def link artError    Error
+
+
+let b:current_syntax = 'ART'
+
+let &cpo = s:cpo_save
+unlet s:cpo_save
