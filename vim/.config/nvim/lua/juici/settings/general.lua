@@ -23,7 +23,7 @@ opt.visualbell = true     -- Stop beep for non-error bells.
 
 do
   -- Use the 'SHELL' environment variable if it is present.
-  local shell = vim.env.SHELL
+  local shell = os.getenv('SHELL')
 
   -- Fallbacks if 'SHELL' is not set.
   if shell == nil then
