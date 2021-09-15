@@ -1,9 +1,9 @@
 local path = {}
 
 if package.config:sub(1, 1) == '/' then
-  path = require('path.posix')
+  path = require('juici.path.posix')
 else
-  path = require('path.windows')
+  path = require('juici.path.windows')
 end
 
 -- Checks if the path is relative.

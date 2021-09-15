@@ -6,6 +6,10 @@ local CUR_DIR = '.'
 local PAR_DIR = '..'
 local PATH_SEP = ':'
 
+local R_OK = 4
+local W_OK = 2
+local X_OK = 1
+
 path.sep = SEP
 path.extsep = EXT_SEP
 path.curdir = CUR_DIR
@@ -43,6 +47,21 @@ end
 function path.islink(p)
   local st = vim.loop.fs_lstat(p)
   return st ~= nil and st.type == 'link'
+end
+
+-- Checks if the path is readable.
+function path.isreadable(p)
+  return vim.loop.fs_access(p, R_OK)
+end
+
+-- Checks if the path is writable.
+function path.iswritable(p)
+  return vim.loop.fs_access(p, W_OK)
+end
+
+-- Checks if the path is executable.
+function path.isexecutable(p)
+  return vim.loop.fs_access(p, X_OK)
 end
 
 -- Joins two or more path components.

@@ -5,7 +5,10 @@ local function autoload(base)
   local mt = {
     __index = function(_, key)
       if storage[key] == nil then
-        storage[key] = require(base .. '.' .. key)
+        local ok, val = pcall(require, base .. '.' .. key)
+        if ok then
+          storage[key] = val
+        end
       end
       return storage[key]
     end

@@ -1,7 +1,5 @@
 lua << EOF
 require('juici')
-
-juici.g.config_dir = juici.util.config_dir()
 EOF
 
 " Don't load plugins as vi,
