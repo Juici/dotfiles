@@ -15,11 +15,17 @@ cnoremap('<C-h>', '<C-w>')
 
 -- Bind <C-Del> to delete word forward.
 do
+  -- Use `vim.regex` to support `iskeyword` option.
   local re = vim.regex('\\%#=2\\v^\\s*%(\\k+|[^[:keyword:][:space:]]+)?')
 
   cnoremap('<C-Del>', function()
     local buf = vim.fn.getcmdline()
     local pos = vim.fn.getcmdpos()
+
+    -- If at end of buffer then do nothing.
+    if pos > #buf then
+      return ''
+    end
 
     local left = buf:sub(1, pos - 1)
     local right = buf:sub(pos)

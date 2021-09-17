@@ -6,16 +6,10 @@ inoremap('<C-BS>', '<C-w>')
 inoremap('<C-h>', '<C-w>')
 
 inoremap('<C-Del>', function()
-  -- Get the cursor postiion.
-  -- `line` is one-indexed.
-  -- `col` is zero-indexed.
-  local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-
+  -- Get the cursor column (zero-indexed).
+  local col = vim.api.nvim_win_get_cursor(0)[2]
   -- Get the current line.
-  -- `line` is given one-indexed, and `nvim_buf_get_lines` requires zero-indexed.
-  local buf = vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]
-
-  -- TODO: Use API calls to set text.
+  local buf = vim.api.nvim_get_current_line()
 
   -- If at end of line just delete the line break.
   if col == #buf then
