@@ -2,9 +2,10 @@
 -- Vimscript.
 local function autoload(base)
   local mt = {
-    __index = function(_, key)
+    __index = function(t, key)
       local ok, val = pcall(require, base .. '.' .. key)
       if ok then
+        t[key] = val
         return val
       end
       return nil
