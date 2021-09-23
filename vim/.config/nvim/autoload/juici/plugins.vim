@@ -76,4 +76,10 @@ endfunction
 function! s:load_syntax() abort
   " Load polyglot enhanced syntax.
   call dein#add('sheerun/vim-polyglot')
+
+  " Use treesitter syntax highlighting.
+  call dein#add('nvim-treesitter/nvim-treesitter', {
+        \   'branch': '0.5-compat',
+        \   'hook_post_update': 'TSUpdate'
+        \ })
 endfunction
