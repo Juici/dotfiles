@@ -14,13 +14,13 @@ local function load_module(name)
   modules[name]()
 end
 
-local M = {}
+local settings = {}
 
-M.load = function()
+function settings.load()
   load_module('general')
   load_module('persist')
   load_module('appearance')
   load_module('editing')
 end
 
-return M
+return settings
