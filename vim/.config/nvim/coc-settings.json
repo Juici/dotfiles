@@ -1,4 +1,5 @@
 {
     "sumneko-lua.enableNvimLuaDev": true,
-    "Lua.workspace.ignoreDir": ["nvim/tmp/"]
+    "Lua.workspace.ignoreDir": ["nvim/tmp/"],
+    "Lua.runtime.version": "LuaJIT"
 }
