@@ -1,7 +1,8 @@
-local settings = {}
+local path = juici.path
+local util = juici.util
 
-local src = debug.getinfo(1, 'S').source:sub(2)
-local dir = juici.path.parent(src)
+local src = util.source_file()
+local dir = path.parent(src)
 
 local modules = {}
 
@@ -13,11 +14,13 @@ local function load_module(name)
   modules[name]()
 end
 
-function settings.load()
+local M = {}
+
+M.load = function()
   load_module('general')
   load_module('persist')
   load_module('appearance')
   load_module('editing')
 end
 
-return settings
+return M

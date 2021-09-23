@@ -23,14 +23,14 @@ opt.visualbell = true     -- Stop beep for non-error bells.
 
 do
   -- Use the 'SHELL' environment variable if it is present.
-  local shell = os.getenv('SHELL')
+  local shell = vim.env.SHELL
 
   -- Fallbacks if 'SHELL' is not set.
   if shell == nil then
-    if vim.fn.executable('zsh') then
+    if vim.fn.executable('zsh') == 1 then
       -- Use zsh if it can be found.
       shell = 'zsh'
-    elseif vim.fn.executable('bash') then
+    elseif vim.fn.executable('bash') == 1 then
       -- Try to fallback to bash.
       shell = 'bash'
     else

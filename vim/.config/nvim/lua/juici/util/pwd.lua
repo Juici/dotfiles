@@ -4,7 +4,7 @@ local path = juici.path
 --
 -- Prefers to use 'PWD' environment variable, to preserve symlinks.
 local function pwd()
-  local p = os.getenv('PWD')
+  local p = vim.env.PWD
   if p == nil then
     p = path.getcwd()
   end
