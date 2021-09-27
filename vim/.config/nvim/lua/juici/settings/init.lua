@@ -1,14 +1,13 @@
-local path = juici.path
-local util = juici.util
+local path = require('vfs.path')
 
-local src = util.source_file()
+local src = juici.util.source_file()
 local dir = path.parent(src)
 
 local modules = {}
 
 local function load_module(name)
   if modules[name] == nil then
-    local file = juici.path.join(dir, name .. '.lua')
+    local file = path.join(dir, name .. '.lua')
     modules[name] = assert(loadfile(file))
   end
   modules[name]()

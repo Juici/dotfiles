@@ -1,5 +1,7 @@
+local path = require('vfs.path')
+local fs = require('vfs.fs')
+
 local opt = vim.opt
-local path = juici.path
 
 local tmp_dir = path.join(juici.g.vim_dir, 'tmp')
 
@@ -77,7 +79,7 @@ else
     'n' .. shada_file,  -- Keep shada file out of the way.
   }
 
-  if path.isfile(shada_file) and not path.isreadable(shada_file) then
+  if fs.is_file(shada_file) and not fs.is_readable(shada_file) then
     juici.log.warn('shada file exists but is not readable: ' .. shada_file)
   end
 end

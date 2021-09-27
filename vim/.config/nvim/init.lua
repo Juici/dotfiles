@@ -1,6 +1,7 @@
 require('juici')
 
-local path = juici.path
+local path = require('vfs.path')
+local fs = require('vfs.fs')
 
 -- Don't load plugins as vi.
 if juici.g.is_vi then
@@ -17,7 +18,7 @@ juici.settings.load()
 -- Speed up start by not searching for python executable.
 do
   local python = '/usr/bin/python3'
-  if path.isfile(python) and path.isreadable(python) then
+  if fs.is_file(python) and fs.is_readable(python) then
     vim.g.python3_host_prog = python
   end
 end
@@ -40,7 +41,7 @@ do
     path.join(juici.g.vim_dir, 'init.local.lua'),
   }
   for _, override in ipairs(overrides) do
-    if path.isfile(override) and path.isreadable(override) then
+    if fs.is_file(override) and fs.is_readable(override) then
       vim.cmd('source ' .. override)
     end
   end

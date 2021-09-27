@@ -1,4 +1,4 @@
-local path = juici.path
+local os = juici.os
 
 -- Gets the path to the current working directory.
 --
@@ -6,7 +6,7 @@ local path = juici.path
 local function pwd()
   local p = vim.env.PWD
   if p == nil then
-    p = path.getcwd()
+    p = os.getcwd()
   end
   return p
 end

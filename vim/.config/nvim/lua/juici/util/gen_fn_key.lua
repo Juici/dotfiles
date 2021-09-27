@@ -1,4 +1,5 @@
-local path = juici.path
+local path = require('vfs.path')
+local fs = require('vfs.fs')
 
 -- Tie-breaker index used in the event that multiple registrations happen in the
 -- same file + line.
@@ -11,8 +12,8 @@ local SUFFIX = '.lua'
 local function gen_fn_key(fn, storage)
   local info = debug.getinfo(fn, 'S')
   local key = info.short_src
-  if path.isfile(key) then
-    key = path.realpath(key)
+  if fs.is_file(key) then
+    key = fs.realpath(key)
   end
 
   -- Strip prefix from key.

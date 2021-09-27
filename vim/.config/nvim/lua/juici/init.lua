@@ -5,7 +5,4 @@ local juici = autoload('juici')
 -- even after the last reference to it goes away.
 _G.juici = juici
 
--- Automatically load path module.
-juici.path = require('juici.path')
-
 return juici
