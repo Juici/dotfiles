@@ -21,7 +21,7 @@ local fs = {
 --- Performs a stat system call on the given path.
 ---
 ---@param path string
----@return Stats? status
+---@return Stats?
 function fs.stat(path)
   return Stats:wrap(uv.fs_stat(path))
 end
@@ -29,7 +29,7 @@ end
 --- Performs an lstat system call on the given path.
 ---
 ---@param path string
----@return Stats? status
+---@return Stats?
 function fs.lstat(path)
   return Stats:wrap(uv.fs_lstat(path))
 end
@@ -38,17 +38,76 @@ end
 ---
 ---@param path string
 ---@param mode integer|string
----@return boolean access
+---@return boolean
 function fs.access(path, mode)
   return uv.fs_access(path, mode)
 end
 
---- Checks if a path exists.
+--- Returns `true` if the given path exists.
 ---
 ---@param path string
----@return boolean exists
+---@return boolean
 function fs.exists(path)
   return fs.access(path, F_OK)
+end
+
+--- Returns `true` if the given path is readable.
+---
+---@param path string
+---@return boolean
+function fs.is_readable(path)
+  return fs.access(path, R_OK)
+end
+
+--- Returns `true` if the given path is writable.
+---
+---@param path string
+---@return boolean
+function fs.is_writable(path)
+  return fs.access(path, W_OK)
+end
+
+--- Returns `true` if the given path is executable.
+---
+---@param path string
+---@return boolean
+function fs.is_executable(path)
+  return fs.access(path, X_OK)
+end
+
+--- Returns `true` if the given path is a regular file.
+---
+---@param path string
+---@return boolean
+function fs.is_file(path)
+  local st = fs.stat(path)
+  return st ~= nil and st:is_file()
+end
+
+--- Returns `true` if the given path is a directory.
+---
+---@param path string
+---@return boolean
+function fs.is_dir(path)
+  local st = fs.stat(path)
+  return st ~= nil and st:is_dir()
+end
+
+--- Returns `true` if the given path is a symbolic link.
+---
+---@param path string
+---@return boolean
+function fs.is_link(path)
+  local st = fs.lstat(path)
+  return st ~= nil and st:is_link()
+end
+
+--- Resolves symlinks in the given path and normalises the result.
+---
+---@param path string
+---@return string
+function fs.realpath(path)
+  return vim.fn.resolve(path)
 end
 
 return fs
