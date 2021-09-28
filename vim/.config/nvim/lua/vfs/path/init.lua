@@ -1,4 +1,4 @@
-local os = require('vfs.os')
+local process = require('vfs.process')
 
 -- Character byte values.
 local CHAR_FORWARD_SLASH = string.byte('/')
@@ -158,16 +158,16 @@ function win32.resolve(...)
         goto continue
       end
     elseif #resolved_device == 0 then
-      comp = os.getcwd()
+      comp = process.cwd()
     else
       -- Windows has the concept of drive-specific current working directories.
       -- If we've resolved a drive letter but not yet an absolute path, get cwd
       -- for that drive, or the process cwd if the drive cwd is not available.
       -- We're sure the device is not a UNC path at this points, because UNC
       -- paths are always absolute.
-      comp = os.getenv('=' .. resolved_device)
+      comp = process.env['=' .. resolved_device]
       if comp == nil then
-        comp = os.getcwd()
+        comp = process.cwd()
       end
 
       -- Verify that a cwd was found and that it actually points to our drive.
@@ -277,7 +277,7 @@ function win32.resolve(...)
   end
 
   -- At this point the path should be resolved to a full absolute path, but
-  -- handle relative paths to be safe (in the case that `os.getcwd()` fails).
+  -- handle relative paths to be safe (in the case that `process.cwd()` fails).
 
   -- Normalise the tail path.
   resolved_tail = normalize_string(resolved_tail, not resolved_absolute, '\\', is_sep)
@@ -1148,13 +1148,13 @@ local posix_cwd = (function()
     -- Converts Windows backslash path separators to POSIX forward slashes and
     -- truncates any drive indicator.
     return function()
-      local cwd = os.getcwd():gsub('\\', '/')
+      local cwd = process.cwd():gsub('\\', '/')
       local first_slash = cwd:find('/', 1, true)
       return cwd:sub(first_slash)
     end
   else
     -- Already on POSIX, no need for transformations.
-    return os.getcwd
+    return process.cwd
   end
 end)()
 
@@ -1215,7 +1215,7 @@ function posix.resolve(...)
   local path = table.concat(comps, '/')
 
   -- At this point the path should be an absolute path, but handle relative
-  -- paths to be safe (in the case that `os.getcwd()` fails).
+  -- paths to be safe (in the case that `process.cwd()` fails).
 
   path = normalize_string(path, not is_absolute, '/', is_posix_sep)
 
