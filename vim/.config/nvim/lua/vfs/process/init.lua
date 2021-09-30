@@ -30,10 +30,7 @@ do
 
     -- Handle fallback case of 'VIM' or 'VIMRUNTIME'.
     if name == 'VIM' or name == 'VIMRUNTIME' then
-      value = vim.fn.getenv(name)
-      if value == vim.NIL then
-        value = nil
-      end
+      value = vim.env[name]
     end
 
     return value
@@ -80,6 +77,17 @@ end
 function process.ppid()
   return uv.os_getppid()
 end
+
+--- Returns a current timestamp in milliseconds.
+---
+--- The timestamp increases monotonically from some arbitrary point in time.
+---
+---@return integer
+function process.now()
+  return uv.now()
+end
+
+process.hrtime = require('vfs.process.hrtime')
 
 --------------------------------------------------
 -- Fallback to stdlib
