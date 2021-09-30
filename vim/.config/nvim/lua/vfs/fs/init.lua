@@ -1,6 +1,7 @@
 local uv = vim.loop
+local _path = require('vfs.path')
 
-local Stats = require('vfs.fs.stats')
+local Stat = require('vfs.fs.stat')
 
 local F_OK = 0
 local R_OK = 4
@@ -21,17 +22,25 @@ local fs = {
 --- Performs a stat system call on the given path.
 ---
 ---@param path string
----@return Stats?
+---@return Stat?
 function fs.stat(path)
-  return Stats:wrap(uv.fs_stat(path))
+  return Stat:wrap(uv.fs_stat(path))
 end
 
 --- Performs an lstat system call on the given path.
 ---
 ---@param path string
----@return Stats?
+---@return Stat?
 function fs.lstat(path)
-  return Stats:wrap(uv.fs_lstat(path))
+  return Stat:wrap(uv.fs_lstat(path))
+end
+
+--- Performs an fstat system call on the given file descriptor.
+---
+---@param fd integer
+---@return Stat?
+function fs.fstat(fd)
+  return Stat:wrap(uv.fs_fstat(fd))
 end
 
 --- Uses the uid/gid to test for access to the given path.
@@ -41,6 +50,15 @@ end
 ---@return boolean
 function fs.access(path, mode)
   return uv.fs_access(path, mode)
+end
+
+--- Rename a file or directory.
+---
+---@param path string
+---@param new_path string
+---@return boolean
+function fs.rename(path, new_path)
+  return uv.fs_rename(path, new_path)
 end
 
 --- Returns `true` if the given path exists.
@@ -107,7 +125,8 @@ end
 ---@param path string
 ---@return string
 function fs.realpath(path)
-  return vim.fn.resolve(path)
+  local resolved = vim.fn.resolve(path)
+  return _path.resolve(resolved)
 end
 
 return fs
