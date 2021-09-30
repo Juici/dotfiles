@@ -55,6 +55,20 @@ function os.tmpdir()
   return uv.os_tmpdir()
 end
 
+--- Returns the hostname.
+---
+---@return string
+function os.hostname()
+  return uv.os_hostname()
+end
+
+--- Returns the system uptime in seconds.
+---
+---@return number
+function os.uptime()
+  return uv.uptime()
+end
+
 --------------------------------------------------
 -- Extensions
 --------------------------------------------------
