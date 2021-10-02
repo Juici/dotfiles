@@ -65,7 +65,6 @@ endfunction
 function! s:load_general() abort
   call dein#add('joshdick/onedark.vim')       " OneDark colour scheme.
 
-  call dein#add('itchyny/lightline.vim')      " Status line.
   call dein#add('Yggdroot/indentLine')        " Indent guides.
   call dein#add('editorconfig/editorconfig')  " Support for `.editorconfig` files.
   call dein#add('wincent/terminus')           " Enhanced terminal features.
