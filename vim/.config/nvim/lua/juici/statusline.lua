@@ -21,13 +21,6 @@ local options = {
 
 local filename
 do
-  --local lock
-  --if icons_enabled then
-  --  lock = ''  -- LOCK OUTLINE (U+F840).
-  --else
-  --  lock = '[R]'
-  --end
-
   -- Cached file path, this is updated everytime `cond` is called and thus is
   -- set before every `display` call.
   local file_path
@@ -51,16 +44,10 @@ do
       end
     end
 
-    local s = { file }
-    --if vim.bo.modifiable and vim.bo.readonly then
-    --  -- We only consider a file readonly if it is modifiable but marked
-    --  -- readonly. This excludes things like 'help' and 'netrw'.
-    --  table.insert(s, lock)
-    --end
     if vim.bo.modified then
-      table.insert(s, '*')
+      return file .. ' *'
     end
-    return table.concat(s, ' ')
+    return file
   end
 
   local function has_file_path()
@@ -76,6 +63,10 @@ do
     }
   }
 end
+
+--------------------------------------------------
+-- Readonly
+--------------------------------------------------
 
 local readonly
 do
@@ -143,7 +134,8 @@ end
 local fileencoding = {
   'encoding',
   cond = function()
-    return vim.bo.fileencoding ~= 'utf-8'
+    local enc = vim.bo.fileencoding
+    return #enc > 0 and enc ~= 'utf-8'
   end
 }
 
