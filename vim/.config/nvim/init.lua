@@ -66,9 +66,9 @@ end
 -- Plugins
 --------------------------------------------------
 
---if vim.o.loadplugins then
---  juici.plugins.load()
---end
+if vim.o.loadplugins then
+  juici.plugins.load()
+end
 
 -- Automatic, language-dependent indentation, syntax coloring and other
 -- functionality.

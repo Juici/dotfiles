@@ -25,7 +25,7 @@ function plugins.load()
 
   -- Status line.
   use {
-    'shadmansaleh/lualine.nvim',
+    'nvim-lualine/lualine.nvim',
     config = 'juici.statusline.load()',
     event = 'VimEnter',
     requires = { 'kyazdani42/nvim-web-devicons', opt = true },
