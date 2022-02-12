@@ -54,7 +54,7 @@ function! juici#plugins#load() abort
       call s:load_general()         " Load general plugins.
       call s:load_syntax()          " Load syntax plugins.
 
-      call dein#add('neoclide/coc.nvim', { 'branch': 'release' }) " Load CoC.
+      call dein#add('neoclide/coc.nvim', { 'rev': 'release' }) " Load CoC.
 
       call dein#end()
       call dein#save_state()

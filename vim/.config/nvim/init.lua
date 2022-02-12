@@ -55,12 +55,12 @@ vim.g.vim_dir = juici.g.vim_dir
 vim.g.linux_console = juici.g.is_linux_console
 
 -- Load settings the need to be loaded before plugins.
-vim.call('juici#settings#load_settings')
+--vim.call('juici#settings#load_settings')
 
 -- Load plugins.
-if vim.o.loadplugins then
-  vim.call('juici#plugins#load')
-end
+--if vim.o.loadplugins then
+--  vim.call('juici#plugins#load')
+--end
 
 --------------------------------------------------
 -- Plugins

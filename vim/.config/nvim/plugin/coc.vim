@@ -3,7 +3,7 @@ try
   call coc#status()
   let g:juici#_loaded_coc = v:true
 catch /E117/
-  call juici#log#warn('CoC is not loaded')
+  " call juici#log#warn('CoC is not loaded')
   finish
 endtry
 

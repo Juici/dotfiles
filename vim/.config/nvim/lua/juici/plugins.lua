@@ -6,6 +6,49 @@ local initialized = false
 
 local plugins = {}
 
+-- TODO: Split these into separate modules?
+
+local function appearance()
+  local use = packer.use
+
+  -- Colour scheme.
+  use { 'joshdick/onedark.vim' }
+
+  -- Status line.
+  use {
+    'nvim-lualine/lualine.nvim',
+    config = 'juici.statusline.load()',
+    event = 'VimEnter',
+    requires = { 'kyazdani42/nvim-web-devicons', opt = true },
+  }
+end
+
+local function general()
+  local use = packer.use
+
+  -- Support for `.editorconfig` files.
+  use { 'editorconfig/editorconfig-vim' }
+
+  -- Indent guides.
+  use { 'Yggdroot/indentLine' }
+
+  -- Enhanced terminal features.
+  use { 'wincent/terminus' }
+
+  -- Git wrapper.
+  use { 'tpope/vim-fugitive' }
+end
+
+local function syntax()
+  local use = packer.use
+
+  -- Enhanced syntax.
+  use { 'sheerun/vim-polyglot' }
+
+  -- Use treesitter for syntax highlighting.
+  use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
+end
+
 function plugins.load()
   if not initialized then
     packer.init {
@@ -23,13 +66,12 @@ function plugins.load()
   -- Packer can manage itself.
   use { 'wbthomason/packer.nvim', opt = true }
 
-  -- Status line.
-  use {
-    'nvim-lualine/lualine.nvim',
-    config = 'juici.statusline.load()',
-    event = 'VimEnter',
-    requires = { 'kyazdani42/nvim-web-devicons', opt = true },
-  }
+  appearance()
+  general()
+  syntax()
+
+  -- CoC
+  --use { 'neoclide/coc.nvim', branch = 'release' }
 end
 
 -- TODO: Recompile on file modified or hash changed.
