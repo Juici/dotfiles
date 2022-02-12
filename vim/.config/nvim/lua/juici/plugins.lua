@@ -42,8 +42,11 @@ end
 local function syntax()
   local use = packer.use
 
-  -- Enhanced syntax.
+  -- Enhanced syntax highlighting.
   use { 'sheerun/vim-polyglot' }
+
+  -- ZI syntax highlighting.
+  use { 'z-shell/zi-vim-syntax' }
 
   -- Use treesitter for syntax highlighting.
   use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
