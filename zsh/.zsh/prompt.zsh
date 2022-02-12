@@ -8,8 +8,8 @@ autoload -Uz colors
 colors
 
 # Load gitstatus plugin and start daemon.
-zinit ice wait nocd lucid atload'gitstatus_stop "gitprompt" && gitstatus_start "gitprompt"; .prompt_async_tasks'
-zinit load romkatv/gitstatus
+zi ice wait nocd lucid atload'gitstatus_stop "gitprompt" && gitstatus_start "gitprompt"; .prompt_async_tasks'
+zi load romkatv/gitstatus
 
 # http://zsh.sourceforge.net/Doc/Release/User-Contributions.html#Version-Control-Information
 autoload -Uz vcs_info

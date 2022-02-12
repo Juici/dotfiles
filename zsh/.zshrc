@@ -1,7 +1,7 @@
 # Global Vars {{{
 
 # Create a hashtable to store global variables without polluting scope.
-typeset -gA Juici
+declare -gA Juici
 
 Juici[RC]="$HOME/.zshrc"
 Juici[RC_LOCAL]="$HOME/.zshrc.local"
@@ -11,54 +11,78 @@ Juici[CONFIGS]="${Juici[DOT_ZSH]}/configs"
 
 # }}}
 
-# Load zinit {{{
+# Load ZI {{{
 
-# Declare $ZINIT global.
-typeset -gA ZINIT
+maybe_exit() {
+    print -P -- '%F{yellow}%Bwarning%b%f: errors may occur if loading continues'
 
-ZINIT[HOME_DIR]="$HOME/.zinit"
+    # Prompt the user if they want to exit the shell.
+    # Gives the user time to read the error and the option continue.
+    local yesno
+    read -k 1 'yesno?Do you wish to continue? [y/N]'
 
-# Load zsh compile module.
-module_path+=( "${ZINIT[HOME_DIR]}/bin/zmodules/Src" )
-zmodload -s zdharma/zplugin || echo 'error: zdharma/zplugin module not found' >&2
+    case $yesno in
+        [yY])
+            # Do nothing on yes.
+            ;;
+        *)
+            # Exit shell by default.
+            exit 1
+            ;;
+    esac
+}
 
-ZINIT[ZERO]="${ZINIT[HOME_DIR]}/bin/zinit.zsh"
+if (( ! ${+commands[git]} )); then
+    print -P -- '%F{red}%Berror%b%f: no %F{green}%Bgit%b%f available, cannot proceed'
+    maybe_exit
+fi
 
-# Install zinit if missing.
-if [[ ! -f "${ZINIT[ZERO]}" ]]; then
+# Declare $ZI global.
+declare -gA ZI
+
+ZI[HOME_DIR]="$HOME/.zi"
+ZI[BIN_DIR]="${ZI[HOME_DIR]}/bin"
+
+# Install ZI if missing.
+if [[ ! -d "${ZI[BIN_DIR]}/.git" ]]; then
+    # Get the download-progress bar tool
     if (( ${+commands[curl]} )); then
-        sh -c "$(curl -fsSL https://raw.githubusercontent.com/zdharma/zinit/master/doc/install.sh)"
+        command mkdir -p /tmp/zi
+        cd /tmp/zi || return
+        command curl -fsSLO https://raw.githubusercontent.com/z-shell/zi/main/lib/zsh/git-process-output.zsh &&
+            command chmod a+x /tmp/zi/git-process-output.zsh
+    elif (( ${+commands[wget]} )); then
+        command mkdir -p /tmp/zi
+        cd /tmp/zi || return
+        command wget -q https://raw.githubusercontent.com/z-shell/zi/main/lib/zsh/git-process-output.zsh &&
+            command chmod a+x /tmp/zi/git-process-output.zsh
+    fi
+
+    print -P -- "installing %F{cyan}%B(z-shell/zi)%b%f %F{yellow}%Bplugin manager%b%f at %F{magenta}%B${ZI[BIN_DIR]}%b%f"
+
+    { command git clone --progress https://github.com/z-shell/zi.git "${ZI[BIN_DIR]}" 2>&1 |
+        { /tmp/zi/git-process-output.zsh || cat; }; } 2>/dev/null
+
+    if [[ -d "${ZI[BIN_DIR]}" ]]; then
+        print -P -- "successfully installed at %F{green}%B%b%f"
     else
-        print 'error: could not install zinit: curl not found' >&2
-        print 'zinit must be installed manually, or curl must be installed' >&2
-
-        print ''
-        print 'errors may occur if loading continues'
-
-        # Anonymous function to avoid leaking variables.
-        () {
-            # Prompt the user if they want to exit the shell.
-            # Gives the user time to read the error and the option continue.
-            local yesno
-            read -k 1 'yesno?Do you wish to continue? [y/N]'
-
-            case $yesno in
-                [yY])
-                    # Do nothing on yes.
-                    ;;
-                *)
-                    # Exit shell by default.
-                    exit 1
-                    ;;
-            esac
-        }
+        print -P -- "%F{red}%Berror%b%f: something went wrong, failed to install ZI at %F{magenta}%B${ZI[BIN_DIR]}%b%f"
+        maybe_exit
     fi
 fi
 
-# Load zinit.
-source "${ZINIT[ZERO]}"
-autoload -Uz _zinit
-(( ${+_comps} )) && _comps[zinit]=_zinit
+unfunction maybe_exit
+
+# Load ZI.
+source "${ZI[BIN_DIR]}/zi.zsh"
+autoload -Uz _zi
+(( ${+_comps} )) && _comps[zi]=_zi
+
+zi light-mode for \
+    z-shell/z-a-meta-plugins \
+    @annexes
+
+zicompinit
 
 # }}}
 
@@ -67,7 +91,6 @@ autoload -Uz _zinit
 setopt extended_glob
 
 # Async workers.
-#zinit light Juici/zsh-async
 #zinit light mafredri/zsh-async
 
 # }}}

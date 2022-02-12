@@ -2,10 +2,10 @@
 # Must be agnostic to source environment.
 
 # Paths.
-typeset -gU cdpath fpath mailpath manpath path
+declare -gU cdpath fpath mailpath manpath path
 
-typeset -gUT INFOPATH infopath
-typeset -gUT GOPATH gopath
+declare -gUT INFOPATH infopath
+declare -gUT GOPATH gopath
 
 # Set GOPATH.
 gopath=(
