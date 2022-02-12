@@ -6,7 +6,6 @@ declare -gA Juici
 Juici[RC]="$HOME/.zshrc"
 Juici[RC_LOCAL]="$HOME/.zshrc.local"
 Juici[DOT_ZSH]="$HOME/.zsh"
-Juici[PLUGINS]="${Juici[DOT_ZSH]}/plugins"
 Juici[CONFIGS]="${Juici[DOT_ZSH]}/configs"
 
 # }}}
@@ -40,7 +39,7 @@ fi
 # Declare $ZI global.
 declare -gA ZI
 
-ZI[HOME_DIR]="$HOME/.zi"
+ZI[HOME_DIR]="${Juici[DOT_ZSH]}/zi"
 ZI[BIN_DIR]="${ZI[HOME_DIR]}/bin"
 
 # Install ZI if missing.
@@ -80,9 +79,8 @@ autoload -Uz _zi
 
 zi light-mode for \
     z-shell/z-a-meta-plugins \
+    z-shell/z-a-bin-gem-node \
     @annexes
-
-zicompinit
 
 # }}}
 

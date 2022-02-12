@@ -1,0 +1,11 @@
+/bin/
+/completions/
+/polaris/
+/services/
+/snippets/
+/zmodules/
+
+# Ignore all non-local plugins, expect zi.
+/plugins/*
+!/plugins/_local---*
+/plugins/_local---zi

@@ -1,35 +1,37 @@
 # Programs {{{
 
-# Replacement for ls.
-zi ice wait lucid if'(( ! ${+commands[exa]} ))' from'gh-r' as'program' mv'exa* -> exa' atclone'curl -o _exa https://raw.githubusercontent.com/ogham/exa/master/contrib/completions.zsh' atpull'%atclone'
-zi light ogham/exa
-
-# Replacement for grep.
-zi ice wait lucid if'(( ! ${+commands[rg]} ))' from'gh-r' as'program' mv'*/rg -> rg'
-zi light BurntSushi/ripgrep
-
-# Replacement for find.
-zi ice wait lucid if'(( ! ${+commands[fd]} ))' from'gh-r' as'program' mv'*/fd -> fd'
-zi light sharkdp/fd
-
-# Replacement for cat.
-zi ice wait lucid if'(( ! ${+commands[bat]} ))' from'gh-r' as'program' mv'*/bat -> bat' atclone'mv */autocomplete/bat.zsh _bat' atpull'%atclone'
-zi light sharkdp/bat
-
-# Hex viewer.
-zi ice wait lucid if'(( ! ${+commands[hexyl]} ))' from'gh-r' as'program' mv'*/hexyl -> hexyl'
-zi light sharkdp/hexyl
-
-# Replacement for vim.
-zi ice wait lucid if'(( ! ${+commands[nvim]} ))' from'gh-r' as'program' pick'*/bin/nvim'
-zi light neovim/neovim
+# rg: Replacement for grep.
+# exa: Replacement for ls.
+# fd: Replacement for find.
+# bat: Replacement for cat.
+# hexyl: Command-line hex viewer.
+# hyperfine: Command-line benchmarking tool.
+# vivid: LS_COLORS generator.
+# neovim: Replacement for vim.
+zi wait lucid as'program' from'gh-r' for \
+    if'(( ! ${+commands[rg]} ))' sbin'**/rg' \
+        BurntSushi/ripgrep \
+    if'(( ! ${+commands[exa]} ))' sbin'**/exa' cp'completions/exa.zsh _exa' \
+        ogham/exa \
+    if'(( ! ${+commands[fd]} ))' sbin'**/fd' \
+        @sharkdp/fd \
+    if'(( ! ${+commands[bat]} ))' sbin'**/bat' \
+        @sharkdp/bat \
+    if'(( ! ${+commands[hexyl]} ))' sbin'**/hexyl' \
+        @sharkdp/hexyl \
+    if'(( ! ${+commands[hyperfine]} ))' sbin'**/hyperfine' \
+        @sharkdp/hyperfine \
+    if'(( ! ${+commands[vivid]} ))' sbin'**/vivid' \
+        @sharkdp/vivid \
+    if'(( ! ${+commands[nvim]} ))' sbin'**/bin/nvim' \
+        neovim/neovim
 
 # }}}
 
 # Configs {{{
 
 # Tweaks and configurations for bat.
-zi ice wait lucid id-as'local/bat'
-zi load ${Juici[CONFIGS]}/bat
+zi wait lucid for \
+    _local/config-bat
 
 # }}}

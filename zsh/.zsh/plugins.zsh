@@ -1,21 +1,18 @@
 # Load Plugins {{{
 
-# Keychain SSH/GPG agent.
-zi ice wait nocd lucid id-as'local/keychain'
-zi load ${Juici[PLUGINS]}/keychain
+# keychain: Keychain SSH/GPG agent.
+# bgnotify: Background notifier for long running commands.
+zi wait lucid for \
+    _local/keychain \
+    _local/bgnotify
 
-# Background notifier for long running commands.
-zi ice wait nocd lucid id-as'local/bgnotify'
-zi load ${Juici[PLUGINS]}/bgnotify
-
-
-# Syntax highlighting.
-zi ice wait nocd lucid atinit'ZI[COMPINIT_OPTS]=-C; zicompinit; zicdreplay'
-zi load z-shell/fast-syntax-highlighting
-
-# Auto suggestions.
-zi ice wait nocd lucid atload'→keybinds_onload_autosuggestions && _zsh_autosuggest_start && zle && zle autosuggest-fetch && zle redisplay'
-zi load zsh-users/zsh-autosuggestions
+# F-Sy-H: Syntax highlighting.
+# zsh-autosuggestions: Auto suggestions.
+zi wait lucid for \
+    atinit"ZI[COMPINIT_OPTS]=-C; zicompinit; zicdreplay" \
+        z-shell/F-Sy-H \
+    atload"→keybinds_onload_autosuggestions && _zsh_autosuggest_start && zle && zle autosuggest-fetch && zle redisplay" \
+        zsh-users/zsh-autosuggestions
 
 # }}}
 

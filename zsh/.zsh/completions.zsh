@@ -1,22 +1,24 @@
 # Plugins {{{
 
 # Zsh completion functions.
-zi ice lucid wait blockf atload'zicompinit; zicdreplay' atpull'zi creinstall -q .'
-zi load zsh-users/zsh-completions
+zi wait lucid blockf for \
+    atpull'zi creinstall -q .' \
+    zsh-users/zsh-completions
 
 # Python pip completions.
 zi wait lucid blockf for \
-    OMZP::pip \
     as'completion' \
-    OMZP::pip/_pip
+    OMZP::pip/_pip \
+    atload'unalias pipreq; unalias pipir' \
+    OMZP::pip
 
-# Rust completions
-zi ice lucid wait blockf
-zi load Juici/zsh-rust-completions
+# Rust completions.
+zi wait lucid blockf for \
+    Juici/zsh-rust-completions
 
 # General completions.
-zi ice lucid wait id-as'local/completions' blockf
-zi load ${Juici[PLUGINS]}/completions
+zi wait lucid blockf for \
+    id-as'local/completions' ${Juici[PLUGINS]}/completions
 
 # }}}
 
