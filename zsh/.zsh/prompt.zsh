@@ -8,8 +8,9 @@ autoload -Uz colors
 colors
 
 # Load gitstatus plugin and start daemon.
-zi ice wait nocd lucid atload'gitstatus_stop "gitprompt" && gitstatus_start "gitprompt"; .prompt_async_tasks'
-zi load romkatv/gitstatus
+zi wait lucid for \
+    atload'.prompt_gitstatus_restart && .prompt_async_tasks' \
+    romkatv/gitstatus
 
 # http://zsh.sourceforge.net/Doc/Release/User-Contributions.html#Version-Control-Information
 autoload -Uz vcs_info
@@ -105,7 +106,7 @@ typeset -gA Prompt
     fi
 
     # Repeat the suffix character to represent shell level.
-    local suffix_chars="$(printf "${suffix_char}%.0s" {1..$lvl})"
+    local suffix_chars=$(printf "${suffix_char}%.0s" {1..$lvl})
     # Suffix with extra information for root.
     #
     # Displays in bold yellow with username for privileged shells.
@@ -215,7 +216,7 @@ typeset -gF EPOCHREALTIME
     setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
 
     # Set command start time.
-    Prompt[cmd_elapsed]=''
+    Prompt[cmd_elapsed]=
     Prompt[cmd_start]=$EPOCHREALTIME
 }
 
@@ -225,29 +226,21 @@ typeset -gF EPOCHREALTIME
 
     # If command start time was set, calculate elapsed time.
     if [[ -n "${Prompt[cmd_start]}" ]]; then
-        float -F delta secs
-        integer days hours mins
+        local -F delta secs
+        local -i days hours mins
 
-        # Delta time for command in seconds.
-        delta=$(( EPOCHREALTIME - Prompt[cmd_start] ))
-
-        # Days as an integer.
-        days=$(( delta / 86400 ))
-        delta=$(( delta - (days * 86400) ))
-
-        # Hours as an integer.
-        hours=$(( delta / 3600 ))
-        delta=$(( delta - (hours * 3600) ))
-
-        # Minutes as an integer.
-        mins=$(( delta / 60 ))
-        delta=$(( delta - (mins * 60) ))
-
-        # Seconds as a floating point.
-        secs=$(( delta ))
+        ((
+            delta = EPOCHREALTIME - Prompt[cmd_start],
+            secs = delta % 60,
+            delta /= 60,
+            mins = delta % 60,
+            delta /= 60,
+            hours = delta % 24,
+            days = delta / 24
+        ))
 
         # Construct time elapsed string.
-        local elapsed=''
+        local elapsed=
         (( days > 0 )) && elapsed="${days}d"
         (( hours > 0 )) && elapsed="${elapsed}${hours}h"
         (( mins > 0 )) && elapsed="${elapsed}${days}m"
@@ -255,14 +248,13 @@ typeset -gF EPOCHREALTIME
         if [[ -z "$elapsed" ]]; then
             elapsed="$(printf '%.2f' $secs)s"
         elif (( days == 0 )); then
-            integer int_secs=$(( secs ))
-            elapsed="${elapsed}${int_secs}s"
+            elapsed="${elapsed}$(( secs | 0 ))s"
         fi
 
-        Prompt[cmd_start]=''
-        Prompt[cmd_elapsed]="$elapsed"
+        Prompt[cmd_start]=
+        Prompt[cmd_elapsed]=$elapsed
     else
-        Prompt[cmd_elapsed]=''
+        Prompt[cmd_elapsed]=
     fi
 }
 
@@ -274,74 +266,80 @@ typeset -gF EPOCHREALTIME
     emulate -L zsh
     setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
 
+    local path=$1
+
     # Change directory to the target.
-    if [[ -d "$1" ]]; then
-        builtin cd -q $1
+    if [[ -d $path ]]; then
+        builtin cd -q $path
     else
         # The path is not an existing directory, it may have been removed.
         return 1
     fi
 
-    # The number of times the gitstatus daemon has crashed this prompt.
-    integer gitstatus_crashes=$2
-
+    local -i gitstatus_crashes=$2
     local -A info
 
     # Execute gitstatus query if function loaded and gitstatus is not disabled.
     if (( gitstatus_crashes != -1 )) && (( ${+functions[gitstatus_query]} )); then
         # Run the query, if it exits with a failure status the daemon has
         # crashed and needs to be restarted.
-        if ! gitstatus_query 'gitprompt' 2>/dev/null; then
+        if ! gitstatus_query 'prompt' 2>/dev/null; then
             export VCS_STATUS_RESULT='crashed'
         fi
     else
         export VCS_STATUS_RESULT='norepo-sync'
     fi
 
-    case "$VCS_STATUS_RESULT" in
+    case $VCS_STATUS_RESULT in
         ok-sync)
-            info[root]="$VCS_STATUS_WORKDIR"
+            info[root]=$VCS_STATUS_WORKDIR
 
             # Branch or tag name.
-            if [[ -n "$VCS_STATUS_LOCAL_BRANCH" ]]; then
-                info[branch]="$VCS_STATUS_LOCAL_BRANCH"
-            elif [[ -n "$VCS_STATUS_TAG" ]]; then
-                info[branch]="$VCS_STATUS_TAG"
-            else
-                info[branch]=''
-            fi
+            info[branch]=${VCS_STATUS_LOCAL_BRANCH:-$VCS_STATUS_TAG}
 
-            info[revision]="$VCS_STATUS_COMMIT"
-            info[action]="$VCS_STATUS_ACTION"
-            info[misc]=''
+            info[revision]=$VCS_STATUS_COMMIT
+            info[action]=$VCS_STATUS_ACTION
+            info[misc]=
 
-            info[staged]=$(( VCS_STATUS_HAS_STAGED ))
-            info[unstaged]=$(( VCS_STATUS_HAS_UNSTAGED == 1 )) # Ignore unknown (-1).
-            info[untracked]=$(( VCS_STATUS_HAS_UNTRACKED == 1 )) # Ignore unknown (-1).
+            ((
+                info[staged] = VCS_STATUS_HAS_STAGED,
+                info[unstaged] = VCS_STATUS_HAS_UNSTAGED == 1,
+                info[untracked] = VCS_STATUS_HAS_UNTRACKED == 1
+            ))
             ;;
         norepo-sync)
             # Check other VCS.
             vcs_info >&2
 
-            info[root]="$vcs_info_msg_0_"
-            info[branch]="$vcs_info_msg_1_"
+            info[root]=$vcs_info_msg_0_
+            info[branch]=$vcs_info_msg_1_
 
-            info[revision]="$vcs_info_msg_2_"
-            info[action]="$vcs_info_msg_7_"
-            info[misc]="$vcs_info_msg_3_"
+            info[revision]=$vcs_info_msg_2_
+            info[action]=$vcs_info_msg_7_
+            info[misc]=$vcs_info_msg_3_
 
-            info[staged]=$(( vcs_info_msg_4_ ))
-            info[unstaged]=$(( vcs_info_msg_5_ ))
-            info[untracked]=$(( vcs_info_msg_6_ ))
+            ((
+                info[staged] = vcs_info_msg_4_,
+                info[unstaged] = vcs_info_msg_5_,
+                info[untracked] = vcs_info_msg_6_
+            ))
             ;;
         crashed)
-            info[gitstatus_crashes]=$(( gitstatus_crashes + 1 ))
+            (( info[gitstatus_crashes] = gitstatus_crashes + 1 ))
             ;;
     esac
 
-    info[pwd]="$PWD"
+    info[pwd]=$PWD
 
     builtin print -r -- "${(@kvq)info}"
+}
+
+.prompt_gitstatus_restart() {
+    emulate -L zsh
+    setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
+
+    gitstatus_stop 'prompt' 2>/dev/null
+    gitstatus_start 'prompt'
 }
 
 .prompt_async_tasks() {
@@ -353,14 +351,14 @@ typeset -gF EPOCHREALTIME
     #
     # This is to prevent an infinite cycle of restarting the daemon only for it
     # to crash.
-    integer gitstatus_crashes=${${Prompt[gitstatus_disabled]:+-1}:-$1}
+    local -i gitstatus_crashes=${${Prompt[gitstatus_disabled]:+-1}:-$1}
 
     # Note: exec doesn't accept variables in the form of associative arrays, so
     #       we have to go through a intermediate variable 'async_fd'.
-    integer -i 10 async_fd
+    local -i async_fd
 
     # If there is a pending task cancel it.
-    if [[ -n "${Prompt[async_fd]}" ]] && { true <&${Prompt[async_fd]} } 2>/dev/null; then
+    if [[ -n ${Prompt[async_fd]} ]] && { true <&${Prompt[async_fd]} } 2>/dev/null; then
         # Close the file descriptor.
         async_fd=${Prompt[async_fd]}
         exec {async_fd}<&-
@@ -371,14 +369,14 @@ typeset -gF EPOCHREALTIME
 
     # No longer within the VCS tree.
     if [[ -n ${Prompt[vcs_root]} ]] && [[ "$PWD" != "${Prompt[vcs_root]}"* ]]; then
-        Prompt[vcs_root]=''
-        Prompt[vcs_info]=''
+        Prompt[vcs_root]=
+        Prompt[vcs_info]=
     fi
 
     # Fork a process to fetch VCS info and open a pipe to read from it.
     exec {async_fd}< <(
         # Fetch and print VCS info.
-        .prompt_async_vcs_info "$PWD" $gitstatus_crashes
+        .prompt_async_vcs_info $PWD $gitstatus_crashes
     )
     Prompt[async_fd]=$async_fd
 
@@ -390,11 +388,18 @@ typeset -gF EPOCHREALTIME
     emulate -L zsh
     setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd no_prompt_vars
 
-    integer async_fd=$1
+    local -i async_fd=$1
     # Sanity check for the callback.
-    if [[ -z "${Prompt[async_fd]}" ]] || (( async_fd != Prompt[async_fd] )); then
-        print 'handler callback for wrong fd' >&2
-        return
+    if [[ -z ${Prompt[async_fd]} ]] || (( async_fd != Prompt[async_fd] )); then
+        # If in ZLE move to first column and clear line. The prompt will be
+        # reset when the callback chain finishes.
+        #
+        # This prevents the message from getting garbled.
+        zle && print -n "${terminfo[cr]}${terminfo[el]}"
+
+        print -Pru2 '%F{red}prompt%f: handler callback for wrong fd'
+
+        return 1
     fi
 
     # Read from file descriptor.
@@ -402,7 +407,7 @@ typeset -gF EPOCHREALTIME
 
     # Remove the handler and close the file descriptor.
     Prompt[async_fd]=''
-    zle -F "$async_fd"
+    zle -F $async_fd
     exec {async_fd}<&-
 
     # Check if data read from file descriptor was empty, if so abort.
@@ -413,15 +418,13 @@ typeset -gF EPOCHREALTIME
     # Parse output (z) and unquote as array (Q@).
     info=( "${(Q@)${(z)read_in}}" )
 
-    integer gitstatus_crashes=${info[gitstatus_crashes]}
+    local -i gitstatus_crashes=${info[gitstatus_crashes]}
 
     # The gitstatus daemon has crashed and needs restarting.
     if (( gitstatus_crashes > 0 )); then
-        integer gitstatus_crash_threshold=3
-
         # If the daemon has crashed a threshold number of times this prompt,
         # there is probably an underlying issue.
-        if (( gitstatus_crashes >= gitstatus_crash_threshold )); then
+        if (( gitstatus_crashes >= 3 )); then
             # If in ZLE move to first column and clear line. The prompt will be
             # reset when the callback chain finishes.
             #
@@ -429,52 +432,49 @@ typeset -gF EPOCHREALTIME
             zle && print -n "${terminfo[cr]}${terminfo[el]}"
 
             # Notify the user of the crashes.
-            print -P "%F{red}prompt%f: gitstatus daemon crashed %F{yellow}${gitstatus_crashes}%f times in one prompt cycle"
-            print -P '%F{blue}prompt%f: switching to %F{green}vcs_info%f backup'
+            print -Pru2 "%F{red}prompt%f: gitstatus daemon crashed %F{yellow}${gitstatus_crashes}%f times in one prompt cycle"
+            print -Pru2 '%F{blue}prompt%f: switching to %F{green}vcs_info%f backup'
 
             # Disable gitstatus for the session.
             Prompt[gitstatus_disabled]=1
 
             # Retrieve enabled vcs_info backends.
-            local -aU vi_enabled_backends
-            zstyle -a ':vcs_info:*' enable vi_enabled_backends
+            local -aU vcs_backends
+            zstyle -a ':vcs_info:*' enable vcs_backends
 
             # Add git to array of enabled vcs_info backends.
-            vi_enabled_backends+=( git )
-            zstyle ':vcs_info:*' enable $vi_enabled_backends
+            vcs_backends+=( git )
+            zstyle ':vcs_info:*' enable $vcs_backends
         else
             # Restart the gitstatus daemon.
-            gitstatus_stop 'gitprompt' 2>/dev/null
-            gitstatus_start 'gitprompt'
+            .prompt_gitstatus_restart
         fi
 
         # Rerun the async prompt tasks, keeping track of number of crashes.
         .prompt_async_tasks $gitstatus_crashes
 
-        return
+        return 1
     fi
 
     # Check if the path has changed since the job started, if so abort.
     [[ "${info[pwd]}" != "$PWD" ]] && return
 
-    Prompt[vcs_root]="${info[root]}"
-    Prompt[vcs_pwd]="${info[pwd]}"
+    Prompt[vcs_root]=${info[root]}
+    Prompt[vcs_pwd]=${info[pwd]}
 
-    if [[ -n "${info[root]}" ]]; then
-        local branch action='' misc='' staged='' unstaged='' untracked=''
+    if [[ -n ${info[root]} ]]; then
+        local branch=${info[branch]} action= misc= staged= unstaged= untracked=
 
         # Use branch, tag, or revision.
-        if [[ -n "${info[branch]}" ]]; then
-            branch="${info[branch]}"
-        else
-            branch="${info[revision]:0:9}"
+        if (( $#branch > 32 )); then
+            # Trim long branch names.
+            branch="${branch:0:12}...${branch:0-12}"
+        elif [[ -z $branch ]]; then
+            branch=${info[revision]:0:9}
         fi
 
-        # Trim long branch names.
-        (( ${#branch} > 32 )) && branch="${branch:0:12}...${branch:0-12}"
-
-        [[ -n "${info[action]}" ]] && action="|${info[action]}"
-        [[ -n "${info[misc]}" ]] && misc="(${info[misc]})"
+        [[ -n ${info[action]} ]] && action="|${info[action]}"
+        [[ -n ${info[misc]} ]] && misc="(${info[misc]})"
 
         (( info[staged] )) && staged="%F{green}●%f"
         (( info[unstaged] )) && unstaged="%F{red}●%f"
@@ -482,7 +482,7 @@ typeset -gF EPOCHREALTIME
 
         Prompt[vcs_info]="[${branch}${action}${misc}${staged}${unstaged}${untracked}]"
     else
-        Prompt[vcs_info]=''
+        Prompt[vcs_info]=
     fi
 
     setopt prompt_vars
