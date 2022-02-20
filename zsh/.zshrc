@@ -42,6 +42,12 @@ declare -gA ZI
 ZI[HOME_DIR]="${Juici[DOT_ZSH]}/zi"
 ZI[BIN_DIR]="${ZI[HOME_DIR]}/bin"
 
+# Load ZI zpmod.
+if [[ -d "${ZI[HOME_DIR]}/zmodules/zpmod" ]]; then
+    module_path+=( "${ZI[HOME_DIR]}/zmodules/zpmod/Src" )
+    zmodload zi/zpmod
+fi
+
 # Install ZI if missing.
 if [[ ! -d "${ZI[BIN_DIR]}/.git" ]]; then
     # Get the download-progress bar tool
