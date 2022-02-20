@@ -3,7 +3,7 @@
 # keychain: Keychain SSH/GPG agent.
 # bgnotify: Background notifier for long running commands.
 zi wait lucid for \
-    _local/keychain \
+    has'keychain' _local/keychain \
     _local/bgnotify
 
 # F-Sy-H: Syntax highlighting.
