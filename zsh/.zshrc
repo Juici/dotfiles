@@ -1,82 +1,73 @@
-# Global Vars {{{
+# Setup {{{
 
 # Create a hashtable to store global variables without polluting scope.
-declare -gA Juici
+typeset -gA Juici
 
-Juici[RC]="$HOME/.zshrc"
-Juici[RC_LOCAL]="$HOME/.zshrc.local"
-Juici[DOT_ZSH]="$HOME/.zsh"
-Juici[CONFIGS]="${Juici[DOT_ZSH]}/configs"
+Juici[rc]="$HOME/.zshrc"
+Juici[rc_local]="$HOME/.zshrc.local"
+Juici[dot_zsh]="$HOME/.zsh"
+
+# Load zsh builtins for common file access commands.
+zmodload zsh/files
 
 # }}}
 
 # Load ZI {{{
 
-maybe_exit() {
-    print -P -- '%F{yellow}%Bwarning%b%f: errors may occur if loading continues'
+{
+    .maybe_continue() {
+        # Prompt the user if they want to exit the shell.
+        # Gives the user time to read the error and the option continue.
+        local yesno prompt='%F{yellow}%Bwarning%b%f: errors may occur if loading continues, do you wish to continue? [y/N] '
+        read -sk 1 "yesno?${(%)prompt}"
+        # Add a newline.
+        print
 
-    # Prompt the user if they want to exit the shell.
-    # Gives the user time to read the error and the option continue.
-    local yesno
-    read -k 1 'yesno?Do you wish to continue? [y/N]'
+        case $yesno in
+            [yY])
+                print -P -- '%F{yellow}%Bwarning%b%f: continuing loading configs'
+                return 0
+                ;;
+            *)
+                # Default to no.
+                print -P -- '%F{blue}%Binfo%b%f: stopping loading configs'
+                return 1
+                ;;
+        esac
+    }
 
-    case $yesno in
-        [yY])
-            # Do nothing on yes.
-            ;;
-        *)
-            # Exit shell by default.
-            exit 1
-            ;;
-    esac
+    if (( ! ${+commands[git]} )); then
+        print -Pu2 -- '%F{red}%Berror%b%f: no %F{green}%Bgit%b%f available, cannot proceed'
+        .maybe_continue || return
+    fi
+
+    # Declare $ZI global.
+    typeset -gA ZI
+
+    ZI[HOME_DIR]="${Juici[dot_zsh]}/zi"
+    ZI[BIN_DIR]="${ZI[HOME_DIR]}/bin"
+
+    # Load ZI zpmod.
+    if [[ -d "${ZI[HOME_DIR]}/zmodules/zpmod" ]]; then
+        module_path+=( "${ZI[HOME_DIR]}/zmodules/zpmod/Src" )
+        zmodload zi/zpmod
+    fi
+
+    # Install ZI if missing.
+    if [[ ! -d "${ZI[BIN_DIR]}/.git" ]]; then
+        print -Pr -- "installing %F{cyan}%B(z-shell/zi)%b%f %F{yellow}%Bplugin manager%b%f at %F{magenta}%B${ZI[BIN_DIR]}%b%f"
+        git clone --progress https://github.com/z-shell/zi.git "${ZI[BIN_DIR]}"
+
+        if [[ -d "${ZI[BIN_DIR]}" ]]; then
+            print -P -- "successfully installed at %F{green}%B%b%f"
+        else
+            print -Pr -- "%F{red}%Berror%b%f: something went wrong, failed to install ZI at %F{magenta}%B${ZI[BIN_DIR]}%b%f"
+            .maybe_continue || return
+        fi
+    fi
+} always {
+    unfunction .maybe_continue
 }
-
-if (( ! ${+commands[git]} )); then
-    print -P -- '%F{red}%Berror%b%f: no %F{green}%Bgit%b%f available, cannot proceed'
-    maybe_exit
-fi
-
-# Declare $ZI global.
-declare -gA ZI
-
-ZI[HOME_DIR]="${Juici[DOT_ZSH]}/zi"
-ZI[BIN_DIR]="${ZI[HOME_DIR]}/bin"
-
-# Load ZI zpmod.
-if [[ -d "${ZI[HOME_DIR]}/zmodules/zpmod" ]]; then
-    module_path+=( "${ZI[HOME_DIR]}/zmodules/zpmod/Src" )
-    zmodload zi/zpmod
-fi
-
-# Install ZI if missing.
-if [[ ! -d "${ZI[BIN_DIR]}/.git" ]]; then
-    # Get the download-progress bar tool
-    if (( ${+commands[curl]} )); then
-        command mkdir -p /tmp/zi
-        cd /tmp/zi || return
-        command curl -fsSLO https://raw.githubusercontent.com/z-shell/zi/main/lib/zsh/git-process-output.zsh &&
-            command chmod a+x /tmp/zi/git-process-output.zsh
-    elif (( ${+commands[wget]} )); then
-        command mkdir -p /tmp/zi
-        cd /tmp/zi || return
-        command wget -q https://raw.githubusercontent.com/z-shell/zi/main/lib/zsh/git-process-output.zsh &&
-            command chmod a+x /tmp/zi/git-process-output.zsh
-    fi
-
-    print -P -- "installing %F{cyan}%B(z-shell/zi)%b%f %F{yellow}%Bplugin manager%b%f at %F{magenta}%B${ZI[BIN_DIR]}%b%f"
-
-    { command git clone --progress https://github.com/z-shell/zi.git "${ZI[BIN_DIR]}" 2>&1 |
-        { /tmp/zi/git-process-output.zsh || cat; }; } 2>/dev/null
-
-    if [[ -d "${ZI[BIN_DIR]}" ]]; then
-        print -P -- "successfully installed at %F{green}%B%b%f"
-    else
-        print -P -- "%F{red}%Berror%b%f: something went wrong, failed to install ZI at %F{magenta}%B${ZI[BIN_DIR]}%b%f"
-        maybe_exit
-    fi
-fi
-
-unfunction maybe_exit
 
 # Load ZI.
 source "${ZI[BIN_DIR]}/zi.zsh"
@@ -103,7 +94,9 @@ setopt extended_glob
 
 # Anonymous function to avoid leaking variables.
 () {
-    if [[ -d "${Juici[DOT_ZSH]}" ]]; then
+    local dot_zsh=${Juici[dot_zsh]}
+
+    if [[ -d $dot_zsh ]]; then
         local -aU files
 
         # List of possible files to load.
@@ -128,12 +121,12 @@ setopt extended_glob
         local file file_path
         for file in ${files[@]}; do
             # Source file.
-            file_path="${Juici[DOT_ZSH]}/${file}.zsh"
-            [[ -f "$file_path" ]] && source "$file_path"
+            file_path="$dot_zsh/$file.zsh"
+            [[ -f $file_path ]] && source $file_path
 
             # Source local overrides.
-            file_path="${Juici[DOT_ZSH]}/${file}.local.zsh"
-            [[ -f "$file_path" ]] && source "$file_path"
+            file_path="$dot_zsh/$file.local.zsh"
+            [[ -f $file_path ]] && source $file_path
         done
     fi
 }
@@ -143,6 +136,6 @@ setopt extended_glob
 # Finalise {{{
 
 # Load local overrides.
-[[ -f "${Juici[RC_LOCAL]}" ]] && source "${Juici[RC_LOCAL]}"
+[[ -f ${Juici[rc_local]} ]] && source ${Juici[rc_local]}
 
 # }}}
