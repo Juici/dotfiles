@@ -227,7 +227,7 @@ typeset -gF EPOCHREALTIME
     # If command start time was set, calculate elapsed time.
     if [[ -n "${Prompt[cmd_start]}" ]]; then
         local -F delta secs
-        local -i days hours mins
+        local -i 10 days hours mins
 
         ((
             delta = EPOCHREALTIME - Prompt[cmd_start],
@@ -276,7 +276,7 @@ typeset -gF EPOCHREALTIME
         return 1
     fi
 
-    local -i gitstatus_crashes=$2
+    local -i 10 gitstatus_crashes=$2
     local -A info
 
     # Execute gitstatus query if function loaded and gitstatus is not disabled.
@@ -351,11 +351,11 @@ typeset -gF EPOCHREALTIME
     #
     # This is to prevent an infinite cycle of restarting the daemon only for it
     # to crash.
-    local -i gitstatus_crashes=${${Prompt[gitstatus_disabled]:+-1}:-$1}
+    local -i 10 gitstatus_crashes=${${Prompt[gitstatus_disabled]:+-1}:-$1}
 
     # Note: exec doesn't accept variables in the form of associative arrays, so
     #       we have to go through a intermediate variable 'async_fd'.
-    local -i async_fd
+    local -i 10 async_fd
 
     # If there is a pending task cancel it.
     if [[ -n ${Prompt[async_fd]} ]] && { true <&${Prompt[async_fd]} } 2>/dev/null; then
@@ -388,7 +388,7 @@ typeset -gF EPOCHREALTIME
     emulate -L zsh
     setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd no_prompt_vars
 
-    local -i async_fd=$1
+    local -i 10 async_fd=$1
     # Sanity check for the callback.
     if [[ -z ${Prompt[async_fd]} ]] || (( async_fd != Prompt[async_fd] )); then
         # If in ZLE move to first column and clear line. The prompt will be
@@ -418,7 +418,7 @@ typeset -gF EPOCHREALTIME
     # Parse output (z) and unquote as array (Q@).
     info=( "${(Q@)${(z)read_in}}" )
 
-    local -i gitstatus_crashes=${info[gitstatus_crashes]}
+    local -i 10 gitstatus_crashes=${info[gitstatus_crashes]}
 
     # The gitstatus daemon has crashed and needs restarting.
     if (( gitstatus_crashes > 0 )); then
