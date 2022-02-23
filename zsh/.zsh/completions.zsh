@@ -18,7 +18,7 @@ zi wait lucid blockf for \
 
 # General completions.
 zi wait lucid blockf for \
-    id-as'local/completions' ${Juici[PLUGINS]}/completions
+    _local/completions
 
 # }}}
 
