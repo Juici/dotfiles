@@ -8,7 +8,8 @@ Juici[rc_local]="$HOME/.zshrc.local"
 Juici[dot_zsh]="$HOME/.zsh"
 
 # Load zsh builtins for common file access commands.
-zmodload zsh/files
+# Don't override chmod since, the syntax of the zsh builtin differs.
+zmodload -F zsh/files -b:chmod
 
 # }}}
 
