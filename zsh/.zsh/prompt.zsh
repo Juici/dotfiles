@@ -7,14 +7,9 @@ setopt prompt_subst
 autoload -Uz colors
 colors
 
-# Load gitstatus plugin and start daemon.
-zi wait lucid for \
-    atload'.prompt_gitstatus_restart && .prompt_async_tasks' \
-    romkatv/gitstatus
-
 # http://zsh.sourceforge.net/Doc/Release/User-Contributions.html#Version-Control-Information
 autoload -Uz vcs_info
-zstyle ':vcs_info:*' enable svn
+zstyle ':vcs_info:*' enable git svn
 zstyle ':vcs_info:*' check-for-changes true
 zstyle ':vcs_info:*' get-revision true
 zstyle ':vcs_info:*' stagedstr '1' # Boolean value.
@@ -54,7 +49,7 @@ zstyle ':vcs_info:git+set-message:*' hooks git-untracked
         # Untracked files are marked by lines starting '??', so we filter on
         # those lines.
         local -a untracked
-        untracked=( ${(@M)${(@f)"$(git status --porcelain --ignore-submodules=all --untracked-files=all 2>/dev/null)"}##'??'*} )
+        untracked=( ${(@M)${(@f)"$(git status --porcelain --no-ahead-behind --no-renames --ignore-submodules=all --untracked-files=all 2>/dev/null)"}##'??'*} )
 
         # If there are untracked files update the message.
         if (( ${#untracked} > 0 )); then
@@ -71,6 +66,8 @@ zstyle ':vcs_info:git+set-message:*' hooks git-untracked
 # Prompt {{{
 
 typeset -gA Prompt
+
+Prompt[gitstatus_disabled]=1
 
 # Anonymous function to avoid leaking variables.
 () {
@@ -90,13 +87,11 @@ typeset -gA Prompt
             ;;
     esac
 
+    integer lvl
+
     # Check for tmux by looking at $TERM, because $TMUX won't be propagated to any
     # nested sudo shells but $TERM will.
-    local tmuxing
-    [[ "$TERM" = *tmux* ]] && tmuxing='tmux'
-
-    integer lvl
-    if [[ ( -n "$tmuxing" ) && ( -n "$TMUX" ) ]]; then
+    if [[ "$TERM" = *tmux* ]] || [[ -n "$TMUX" ]]; then
         # In a a tmux session created in a non-root or root shell.
         lvl=$(( SHLVL - 1 ))
     else
@@ -262,96 +257,9 @@ typeset -gF EPOCHREALTIME
 
 # VCS {{{
 
-.prompt_async_vcs_info() {
-    emulate -L zsh
-    setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
-
-    local path=$1
-
-    # Change directory to the target.
-    if [[ -d $path ]]; then
-        builtin cd -q $path
-    else
-        # The path is not an existing directory, it may have been removed.
-        return 1
-    fi
-
-    local -i 10 gitstatus_crashes=$2
-    local -A info
-
-    # Execute gitstatus query if function loaded and gitstatus is not disabled.
-    if (( gitstatus_crashes != -1 )) && (( ${+functions[gitstatus_query]} )); then
-        # Run the query, if it exits with a failure status the daemon has
-        # crashed and needs to be restarted.
-        if ! gitstatus_query 'prompt' 2>/dev/null; then
-            export VCS_STATUS_RESULT='crashed'
-        fi
-    else
-        export VCS_STATUS_RESULT='norepo-sync'
-    fi
-
-    case $VCS_STATUS_RESULT in
-        ok-sync)
-            info[root]=$VCS_STATUS_WORKDIR
-
-            # Branch or tag name.
-            info[branch]=${VCS_STATUS_LOCAL_BRANCH:-$VCS_STATUS_TAG}
-
-            info[revision]=$VCS_STATUS_COMMIT
-            info[action]=$VCS_STATUS_ACTION
-            info[misc]=
-
-            ((
-                info[staged] = VCS_STATUS_HAS_STAGED,
-                info[unstaged] = VCS_STATUS_HAS_UNSTAGED == 1,
-                info[untracked] = VCS_STATUS_HAS_UNTRACKED == 1
-            ))
-            ;;
-        norepo-sync)
-            # Check other VCS.
-            vcs_info >&2
-
-            info[root]=$vcs_info_msg_0_
-            info[branch]=$vcs_info_msg_1_
-
-            info[revision]=$vcs_info_msg_2_
-            info[action]=$vcs_info_msg_7_
-            info[misc]=$vcs_info_msg_3_
-
-            ((
-                info[staged] = vcs_info_msg_4_,
-                info[unstaged] = vcs_info_msg_5_,
-                info[untracked] = vcs_info_msg_6_
-            ))
-            ;;
-        crashed)
-            (( info[gitstatus_crashes] = gitstatus_crashes + 1 ))
-            ;;
-    esac
-
-    info[pwd]=$PWD
-
-    builtin print -r -- "${(@kvq)info}"
-}
-
-.prompt_gitstatus_restart() {
-    emulate -L zsh
-    setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
-
-    gitstatus_stop 'prompt' 2>/dev/null
-    gitstatus_start 'prompt'
-}
-
 .prompt_async_tasks() {
     emulate -L zsh
     setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
-
-    # The number of times the gitstatus daemon has crashed this prompt.
-    # If gitstatus is disabled this value should be -1.
-    #
-    # This is to prevent an infinite cycle of restarting the daemon only for it
-    # to crash.
-    local -i 10 gitstatus_crashes=${${Prompt[gitstatus_disabled]:+-1}:-$1}
 
     # Note: exec doesn't accept variables in the form of associative arrays, so
     #       we have to go through a intermediate variable 'async_fd'.
@@ -367,7 +275,7 @@ typeset -gF EPOCHREALTIME
         zle -F $async_fd
     fi
 
-    # No longer within the VCS tree.
+    # Probably no longer within the VCS tree.
     if [[ -n ${Prompt[vcs_root]} ]] && [[ "$PWD" != "${Prompt[vcs_root]}"* ]]; then
         Prompt[vcs_root]=
         Prompt[vcs_info]=
@@ -375,8 +283,35 @@ typeset -gF EPOCHREALTIME
 
     # Fork a process to fetch VCS info and open a pipe to read from it.
     exec {async_fd}< <(
-        # Fetch and print VCS info.
-        .prompt_async_vcs_info $PWD $gitstatus_crashes
+        # Change directory to the target.
+        if [[ -d $PWD ]]; then
+            builtin cd -q $PWD
+        else
+            # The path is not an existing directory, it may have been removed.
+            return 1
+        fi
+
+        # Fetch VCS info.
+        vcs_info >&2
+
+        local -A info
+
+        info[root]=$vcs_info_msg_0_
+        info[branch]=$vcs_info_msg_1_
+
+        info[revision]=$vcs_info_msg_2_
+        info[action]=$vcs_info_msg_7_
+        info[misc]=$vcs_info_msg_3_
+
+        ((
+            info[staged] = vcs_info_msg_4_,
+            info[unstaged] = vcs_info_msg_5_,
+            info[untracked] = vcs_info_msg_6_
+        ))
+
+        info[pwd]=$PWD
+
+        builtin print -r -- "${(@kvq)info}"
     )
     Prompt[async_fd]=$async_fd
 
@@ -417,44 +352,6 @@ typeset -gF EPOCHREALTIME
 
     # Parse output (z) and unquote as array (Q@).
     info=( "${(Q@)${(z)read_in}}" )
-
-    local -i 10 gitstatus_crashes=${info[gitstatus_crashes]}
-
-    # The gitstatus daemon has crashed and needs restarting.
-    if (( gitstatus_crashes > 0 )); then
-        # If the daemon has crashed a threshold number of times this prompt,
-        # there is probably an underlying issue.
-        if (( gitstatus_crashes >= 3 )); then
-            # If in ZLE move to first column and clear line. The prompt will be
-            # reset when the callback chain finishes.
-            #
-            # This prevents the message from getting garbled.
-            zle && print -n "${terminfo[cr]}${terminfo[el]}"
-
-            # Notify the user of the crashes.
-            print -Pru2 "%F{red}prompt%f: gitstatus daemon crashed %F{yellow}${gitstatus_crashes}%f times in one prompt cycle"
-            print -Pru2 '%F{blue}prompt%f: switching to %F{green}vcs_info%f backup'
-
-            # Disable gitstatus for the session.
-            Prompt[gitstatus_disabled]=1
-
-            # Retrieve enabled vcs_info backends.
-            local -aU vcs_backends
-            zstyle -a ':vcs_info:*' enable vcs_backends
-
-            # Add git to array of enabled vcs_info backends.
-            vcs_backends+=( git )
-            zstyle ':vcs_info:*' enable $vcs_backends
-        else
-            # Restart the gitstatus daemon.
-            .prompt_gitstatus_restart
-        fi
-
-        # Rerun the async prompt tasks, keeping track of number of crashes.
-        .prompt_async_tasks $gitstatus_crashes
-
-        return 1
-    fi
 
     # Check if the path has changed since the job started, if so abort.
     [[ "${info[pwd]}" != "$PWD" ]] && return
