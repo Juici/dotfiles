@@ -67,8 +67,6 @@ zstyle ':vcs_info:git+set-message:*' hooks git-untracked
 
 typeset -gA Prompt
 
-Prompt[gitstatus_disabled]=1
-
 # Anonymous function to avoid leaking variables.
 () {
     emulate -L zsh
@@ -283,13 +281,8 @@ typeset -gF EPOCHREALTIME
 
     # Fork a process to fetch VCS info and open a pipe to read from it.
     exec {async_fd}< <(
-        # Change directory to the target.
-        if [[ -d $PWD ]]; then
-            builtin cd -q $PWD
-        else
-            # The path is not an existing directory, it may have been removed.
-            return 1
-        fi
+        # Check the path is an existing directory, it may have been removed.
+        [[ -d $PWD ]] || return 1
 
         # Fetch VCS info.
         vcs_info >&2
