@@ -15,7 +15,9 @@ if [[ $PMSPEC != *f* ]] {
     fpath+=( "${0:h}/functions" )
 }
 
-autoload -Uz bar tw parseoffset jump
+autoload -Uz bar tw parseoffset jump diffp
+
+compdef _diff diffp
 
 alias j='jump'
 

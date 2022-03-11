@@ -155,7 +155,9 @@ typeset -gaU BGNOTIFY_IGNORE=(
             fi
         fi
     } always {
-        unset BgNotify[command]
+        if (( ${+BgNotify[command]} )); then
+            unset BgNotify[command]
+        fi
     }
 }
 
