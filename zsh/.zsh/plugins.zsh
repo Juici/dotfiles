@@ -8,7 +8,7 @@ zi wait lucid for \
 
 # F-Sy-H: Syntax highlighting.
 # zsh-autosuggestions: Auto suggestions.
-zi wait'0b' lucid for \
+zi wait'0b' lucid nocd for \
     atinit"ZI[COMPINIT_OPTS]=-C; zicompinit; zicdreplay" \
         z-shell/F-Sy-H \
     wait'0c' atload"→keybinds_onload_autosuggestions && _zsh_autosuggest_start && zle && zle autosuggest-fetch && zle redisplay" \
