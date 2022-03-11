@@ -1,3 +1,5 @@
+if has('coc#refresh')
+
 " Use <Tab> to trigger completion or go to next completion.
 inoremap <silent><expr> <Tab>
       \ pumvisible() ? "\<C-n>"
@@ -66,3 +68,5 @@ function! s:show_documentation() abort
     silent call CocActionAsync('doHover')
   endif
 endfunction
+
+endif
