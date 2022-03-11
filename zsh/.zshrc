@@ -1,5 +1,7 @@
 # Setup {{{
 
+[[ -o interactive ]] || return
+
 # Create a hashtable to store global variables without polluting scope.
 typeset -gA Juici
 
