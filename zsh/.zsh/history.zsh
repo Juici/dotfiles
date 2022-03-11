@@ -1,7 +1,7 @@
 # Environment {{{
 
 # Set history file.
-export HISTFILE="$HOME/.zsh_history"
+export HISTFILE="$HOME/.zhistory"
 
 # Set history size.
 export HISTSIZE=100000
