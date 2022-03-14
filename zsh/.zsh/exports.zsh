@@ -33,11 +33,6 @@ export SYSTEMD_LESS='-FRSMK --mouse --wheel-lines=3'
 # Fix electron wastebin problem.
 export ELECTRON_TRASH=kioclient5
 
-# Use sccache wrapper for cargo.
-if (( ${+commands[sccache]} )); then
-    export RUSTC_WRAPPER="${commands[sccache]}"
-fi
-
 # Enable command history in IEx.
 export ERL_AFLAGS="-kernel shell_history enabled -kernel shell_history_file_bytes 1024000"
 
