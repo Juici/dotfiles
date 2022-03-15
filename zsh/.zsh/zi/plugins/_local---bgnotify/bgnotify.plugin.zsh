@@ -4,30 +4,34 @@
 [[ -o interactive ]] || return
 
 # Must have a display server.
-(( $+DISPLAY )) || return
+[[ -v DISPLAY ]] || return
 
 # Must be a local (non ssh) session.
-(( ! ( $+SSH_CLIENT || $+SSH_CONNECTION || $+SSH_TTY ) )) || return
+[[ ! ( -v SSH_CLIENT || -v SSH_CONNECTION || -v SSH_TTY ) ]] || return
 
 # Requires wmutils pfw.
 if (( ! ${+commands[pfw]} )); then
-    print 'error: pfw (wmutils) not found' >&2
-    return
+    print -u2 'bgnotify: pfw (wmutils) not found'
+    return 1
 fi
 # Requires notify-send (libnotify).
 if (( ! ${+commands[notify-send]} )); then
-    print 'error: notify-send (libnotify) not found' >&2
-    return
+    print -u2 'bgnotify: notify-send (libnotify) not found'
+    return 1
 fi
 
 # Load zsh modules and functions.
 zmodload zsh/datetime || {
-    print 'error: failed to load zsh/datetime' >&2
-    return
+    print -u2 'bgnotify: failed to load zsh/datetime'
+    return 1
 }
 autoload -Uz add-zsh-hook || {
-    print 'error: failed to load add-zsh-hook' >&2
-    return
+    print -u2 'bgnotify: failed to load add-zsh-hook'
+    return 1
+}
+autoload -Uz throw || {
+    print -u2 'bgnotify: failed to load throw'
+    return 1
 }
 
 # }}}
@@ -62,91 +66,82 @@ typeset -gaU BGNOTIFY_IGNORE=(
 
 # Get the ID of the active window.
 .bgnotify_active_window_id() {
-    pfw
+    integer -i 10 window_id
+    window_id=$(pfw 2>/dev/null) || throw
+    return $window_id
 }
+functions -M bgnotify_active_window_id 0 0 .bgnotify_active_window_id
 
 # Send a background notification.
 .bgnotify_send() {
+    emulate -L zsh
+    setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
+
     local summary=$1 body=$2 exit_status=$3
 
     local urgency='normal'
     (( exit_status != 0 )) && urgency='critical'
 
-    local timeout=$BGNOTIFY_TIMEOUT
+    integer -i 10 timeout=$BGNOTIFY_TIMEOUT
 
     notify-send "$summary" "$body" --app-name=zsh "--urgency=$urgency" "--expire-time=$timeout"
 }
 
-# Pretty-print elapsed time.
-.bgnotify_format_time() {
-    local -F delta secs
-    integer days hours mins
-
-    # Delta time for command in seconds.
-    delta=$(( $1 ))
-
-    # Days as an integer.
-    days=$(( delta / 86400 ))
-    delta=$(( delta - (days * 86400) ))
-
-    # Hours as an integer.
-    hours=$(( delta / 3600 ))
-    delta=$(( delta - (hours * 3600) ))
-
-    # Minutes as an integer.
-    mins=$(( delta / 60 ))
-    delta=$(( delta - (mins * 60) ))
-
-    # Seconds as a floating point.
-    secs=$(( delta ))
-
-    # Construct time elapsed string.
-    local elapsed=''
-    (( days > 0 )) && elapsed="${days}d"
-    (( hours > 0 )) && elapsed="${elapsed}${hours}h"
-    (( mins > 0 )) && elapsed="${elapsed}${days}m"
-
-    if [[ -z "$elapsed" ]]; then
-        elapsed="$(printf '%.2f' $secs)s"
-    elif (( days == 0 )); then
-        integer int_secs=$(( secs ))
-        elapsed="${elapsed}${int_secs}s"
-    fi
-
-    print -n -- "$elapsed"
-}
-
 →bgnotify_start() {
-    integer active_window
-    active_window=$(.bgnotify_active_window_id 2>/dev/null) || return 1
+    emulate -L zsh
+    setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
 
-    BgNotify[window_id]=$active_window
-    BgNotify[timestamp]=$EPOCHREALTIME
+    ((
+        BgNotify[window_id] = bgnotify_active_window_id(),
+        BgNotify[timestamp] = EPOCHREALTIME
+    )) || return 1
+
     BgNotify[command]="$1"
 }
 
 →bgnotify_end() {
-    (( ${+BgNotify[command]} )) || return 0
+    emulate -L zsh
+    setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
+
+    [[ -v BgNotify[command] ]] || return 0
 
     {
         local prev_status=$?
-        local prev_cmd="${BgNotify[command]}"
+        local prev_cmd=${BgNotify[command]}
 
         # TODO: Check if in ignore list.
 
         # Trim command message to 30 characters.
         (( ${#prev_cmd} > 30 )) && prev_cmd="${prev_cmd:0:27}..."
 
-        local threshold=$(( BGNOTIFY_THRESHOLD ))
-        local delta=$(( EPOCHREALTIME - BgNotify[timestamp] ))
+        float -F delta
+        (( delta = EPOCHREALTIME - BgNotify[timestamp] ))
 
-        if (( delta > threshold )); then
-            integer active_window
-            active_window=$(.bgnotify_active_window_id 2>/dev/null) || return 1
+        if (( delta > BGNOTIFY_THRESHOLD && bgnotify_active_window_id() != BgNotify[window_id] )); then
+            local -F delta secs
+            local -i 10 days hours mins
 
-            (( active_window == BgNotify[window_id] )) && return 0
+            ((
+                delta = $1,
+                secs = delta % 60,
+                delta /= 60,
+                mins = delta % 60,
+                delta /= 60,
+                hours = delta % 24,
+                days = delta / 24
+            ))
 
-            local elapsed=$(.bgnotify_format_time $delta)
+            # Construct time elapsed string.
+            local elapsed=
+            (( days > 0 )) && elapsed="${days}d"
+            (( hours > 0 )) && elapsed="${elapsed}${hours}h"
+            (( mins > 0 )) && elapsed="${elapsed}${days}m"
+
+            if [[ -z "$elapsed" ]]; then
+                elapsed="$(printf '%.2f' $secs)s"
+            elif (( days == 0 )); then
+                elapsed="${elapsed}$(( secs | 0 ))s"
+            fi
 
             if (( prev_status == 0 )); then
                 .bgnotify_send "Command Succeeded" "Command '$prev_cmd' succeeded after $elapsed" "$prev_status"
@@ -155,9 +150,7 @@ typeset -gaU BGNOTIFY_IGNORE=(
             fi
         fi
     } always {
-        if (( ${+BgNotify[command]} )); then
-            unset BgNotify[command]
-        fi
+        unset 'BgNotify[command]'
     }
 }
 
