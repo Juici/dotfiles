@@ -69,23 +69,16 @@ if [[ "$TERM" == "xterm-kitty" ]]; then
 fi
 # }}}
 
-# Alias functions when using cross. {{{
-if (( ${+commands[cross]} )); then
-    # Wrap cross in a sudo call due to docker needing root.
-    cross() {
-        sudo -E cross "$@"
-    }
-fi
-# }}}
-
 # Alias for zathura. {{{
 if (( ${+commands[zathura]} && !${+commands[pdf]} )); then
     alias pdf='zathura --fork'
 fi
 # }}}
 
-# Rizin alias. {{{
-if (( ${+commands[rizin]} )); then
-    alias rz='rizin'
+# Mimic docker with podman. {{{
+if (( ${+commands[podman]} )); then
+    alias docker='podman'
 fi
+# }}}
+
 # }}}
