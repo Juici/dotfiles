@@ -364,7 +364,7 @@ typeset -gF EPOCHREALTIME
         fi
 
         [[ -n ${info[action]} ]] && action="|${info[action]}"
-        [[ -n ${info[misc]} ]] && misc="(${info[misc]})"
+        #[[ -n ${info[misc]} ]] && misc="(${info[misc]})"
 
         (( info[staged] )) && staged="%F{green}●%f"
         (( info[unstaged] )) && unstaged="%F{red}●%f"
