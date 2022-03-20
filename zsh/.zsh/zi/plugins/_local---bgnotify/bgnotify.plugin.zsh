@@ -118,11 +118,10 @@ functions -M bgnotify_active_window_id 0 0 .bgnotify_active_window_id
         (( delta = EPOCHREALTIME - BgNotify[timestamp] ))
 
         if (( delta > BGNOTIFY_THRESHOLD && bgnotify_active_window_id() != BgNotify[window_id] )); then
-            local -F delta secs
+            local -F secs
             local -i 10 days hours mins
 
             ((
-                delta = $1,
                 secs = delta % 60,
                 delta /= 60,
                 mins = delta % 60,
