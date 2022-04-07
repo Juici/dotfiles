@@ -11,6 +11,17 @@ fmt_wid() {
     printf '0x%08x' $wid
 }
 
+primary_monitor() {
+    local -a lines
+    lines=( ${(f)"$(xrandr -q)"} )
+    lines=( ${(M)lines:#*primary*} )
+    if (( ${#lines} == 0 )); then
+        return 1
+    fi
+    print -- "${lines[1]/[[:space:]]##*(#e)}"
+    return 0
+}
+
 pass_fn() {
     local fn_name=$1
     local fn=$(typeset -f $fn_name)
@@ -72,16 +83,19 @@ toggle_term() {
     integer width=70
     integer height=65
     integer x=$(( (100 - width) / 2 ))
-    integer y=0
+    integer y=1
 
     local tdrop="$dir/tdrop"
     local config="${XDG_CONFIG_HOME:-$HOME/.config}/kitty/kitty-drop.conf"
     local watcher="$dir/watcher.py"
     local start_dir="$HOME"
 
+    local monitor monitor_opt=
+    monitor=$(primary_monitor) && monitor_opt="--monitor=${monitor}"
+
     # Run tdrop replacing this process.
     SHLVL=0 \
-        exec "$tdrop" -ma \
+        exec "$tdrop" -ma "${monitor_opt}" \
         --class="$class" --name="$class" \
         -w "${width}%" -h "${height}%" -x "${x}%" -y "${y}%" \
         -P "$post_map" \
