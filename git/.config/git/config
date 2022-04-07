@@ -40,3 +40,5 @@
 	defaultBranch = master
 
 # vim:ft=gitconfig
+[fetch]
+	prune = true
