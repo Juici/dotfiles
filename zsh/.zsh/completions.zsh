@@ -76,11 +76,11 @@ zstyle ':completion:*:*:*:*:processes' list-colors '=(#b) #([0-9]#) ([0-9a-z-]#)
 # Don't complete user pollution.
 zstyle ':completion:*:*:*:*:users' ignored-patterns \
     avahi bin brltty clamav colord cups daemon dbus dhcpcd dnsmasq flatpak ftp \
-    geoclue git gluster http mail mpd nm-openconnect nm-openvpn nobody ntp \
-    openvpn polkitd postgres rpc rtkit saned sddm systemd-bus-proxy \
-    systemd-coredump systemd-journal-gateway systemd-journal-remote \
-    systemd-network systemd-oom systemd-resolve systemd-timesync tor usbmux \
-    uuidd
+    geoclue git gluster http libvirt-qemu mail mpd nm-openconnect nm-openvpn \
+    nobody ntp nvidia-persistenced openvpn polkitd postgres qemu rpc rtkit \
+    saned sddm systemd-bus-proxy systemd-coredump systemd-journal-gateway \
+    systemd-journal-remote systemd-network systemd-oom systemd-resolve \
+    systemd-timesync tor tss usbmux uuidd
 # Unless we really want to.
 zstyle ':completion:*' single-ignored show
 
