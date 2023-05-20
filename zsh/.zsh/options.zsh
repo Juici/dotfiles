@@ -1,9 +1,13 @@
-# Improved directory navigation.
-setopt auto_cd
-setopt auto_pushd
-setopt pushd_minus
-setopt pushd_ignore_dups
+setopt auto_cd              # use cd by typing directory name
+setopt auto_list            # automatically list choices on ambiguous completion
+setopt auto_pushd           # make cd push the old directory onto the stack
+setopt pushd_ignore_dups    # don't push duplicate directories onto the stack
+setopt pushd_minus          # swap the meaning of `cd +1` and `cd -1`
 setopt pushd_silent
+
+setopt bang_hist            # treat the `!` character
+setopt interactive_comments # allow comments in interactive shell
+setopt multios              # implicit tees or cats for multiple redirections
 
 #setopt auto_param_slash
 
@@ -13,17 +17,11 @@ setopt no_clobber
 # Disabled ^S and ^Q.
 setopt no_flow_control
 
-# Allow comments in interactive shell.
-setopt interactive_comments
-
 # Don't beep in linux console.
-if [[ "$TERM" = 'linux' ]]; then
-    setopt nobeep
-fi
+[[ "$TERM" = 'linux' ]] && setopt no_beep
 
 # Characters considered as part of words for forward-word and backward-word
 # widgets.
-#WORDCHARS='_-.*?~&!#$%^'
 WORDCHARS='_-.*?~&!#$%^(){}[]<>'
 
 # Autocorrection {{{

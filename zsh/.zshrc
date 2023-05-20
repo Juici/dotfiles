@@ -9,6 +9,13 @@ Juici[rc]="$HOME/.zshrc"
 Juici[rc_local]="$HOME/.zshrc.local"
 Juici[dot_zsh]="$HOME/.zsh"
 
+# Declare $ZI global.
+typeset -gA ZI
+
+ZI[HOME_DIR]="${Juici[dot_zsh]}/zi"
+ZI[BIN_DIR]="${ZI[HOME_DIR]}/bin"
+ZI[ZMODULES_DIR]="${ZI[HOME_DIR]}/zmodules"
+
 # Load zsh builtins for common file access commands.
 # Don't override chmod since, the syntax of the zsh builtin differs.
 zmodload -F zsh/files -b:chmod
@@ -39,43 +46,47 @@ zmodload -F zsh/files -b:chmod
         esac
     }
 
+    .pp_path() {
+        local path
+        print -D -v path "$1"
+        print -Pr -- "%F{magenta}%B${path}%b%f"
+    }
+
     if (( ! ${+commands[git]} )); then
         print -Pu2 -- '%F{red}%Berror%b%f: no %F{green}%Bgit%b%f available, cannot proceed'
         .maybe_continue || return
     fi
 
-    # Declare $ZI global.
-    typeset -gA ZI
-
-    ZI[HOME_DIR]="${Juici[dot_zsh]}/zi"
-    ZI[BIN_DIR]="${ZI[HOME_DIR]}/bin"
-
     # Load ZI zpmod.
-    if [[ -f "${ZI[HOME_DIR]}/zmodules/zpmod/Src/zi/zpmod.so" ]]; then
-        module_path+=( "${ZI[HOME_DIR]}/zmodules/zpmod/Src" )
-        zmodload zi/zpmod
+    if [[ -f "${ZI[ZMODULES_DIR]}/zpmod/Src/zi/zpmod.so" ]]; then
+        module_path+=( "${ZI[ZMODULES_DIR]}/zpmod/Src" )
+        zmodload zi/zpmod &>/dev/null
+        ZI[ZPMOD_ENABLED]=1
     fi
 
     # Install ZI if missing.
     if [[ ! -d "${ZI[BIN_DIR]}/.git" ]]; then
-        print -Pr -- "installing %F{cyan}%B(z-shell/zi)%b%f %F{yellow}%Bplugin manager%b%f at %F{magenta}%B${ZI[BIN_DIR]}%b%f"
+        print -Pr -- "installing %F{cyan}%B(z-shell/zi)%b%f %F{yellow}%Bplugin manager%b%f at $(.pp_path ${ZI[BIN_DIR]})"
         git clone --progress https://github.com/z-shell/zi.git "${ZI[BIN_DIR]}"
 
-        if [[ -d "${ZI[BIN_DIR]}" ]]; then
-            print -P -- "successfully installed at %F{green}%B%b%f"
+        if [[ -d "${ZI[BIN_DIR]}/.git" ]]; then
+            print -Pr -- "%F{green}successfully installed at $(.pp_path ${ZI[BIN_DIR]})"
         else
-            print -Pr -- "%F{red}%Berror%b%f: something went wrong, failed to install ZI at %F{magenta}%B${ZI[BIN_DIR]}%b%f"
+            print -Pr -- "%F{red}%Berror%b%f: something went wrong, failed to install ZI at $(.pp_path ${ZI[BIN_DIR]})"
             .maybe_continue || return
         fi
     fi
 } always {
     unfunction .maybe_continue
+    unfunction .pp_path
 }
 
 # Load ZI.
 source "${ZI[BIN_DIR]}/zi.zsh"
+# Load ZI completions.
 autoload -Uz _zi
 (( ${+_comps} )) && _comps[zi]=_zi
+ZI[COMPS_ENABLED]=1
 
 zi light-mode for \
     z-shell/z-a-meta-plugins \
