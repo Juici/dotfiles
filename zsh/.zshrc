@@ -15,7 +15,7 @@ zmodload -F zsh/files -b:chmod
 
 # }}}
 
-# Load ZI {{{
+# Load Zinit {{{
 
 {
     .maybe_continue() {
@@ -39,32 +39,33 @@ zmodload -F zsh/files -b:chmod
         esac
     }
 
+    .pp_path() {
+        local path
+        print -D -v path "$1"
+        print -Pr -- "%F{magenta}%B${path}%b%f"
+    }
+
     if (( ! ${+commands[git]} )); then
         print -Pu2 -- '%F{red}%Berror%b%f: no %F{green}%Bgit%b%f available, cannot proceed'
         .maybe_continue || return
     fi
 
-    # Declare $ZI global.
-    typeset -gA ZI
+    # Declare $ZINIT global.
+    typeset -gA ZINIT
 
-    ZI[HOME_DIR]="${Juici[dot_zsh]}/zi"
-    ZI[BIN_DIR]="${ZI[HOME_DIR]}/bin"
+    ZINIT[HOME_DIR]="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit"
+    ZINIT[BIN_DIR]="${ZINIT[HOME_DIR]}/zinit.git"
 
-    # Load ZI zpmod.
-    if [[ -f "${ZI[HOME_DIR]}/zmodules/zpmod/Src/zi/zpmod.so" ]]; then
-        module_path+=( "${ZI[HOME_DIR]}/zmodules/zpmod/Src" )
-        zmodload zi/zpmod
-    fi
+    # Install Zinit if missing.
+    if [[ ! -d "${ZINIT[BIN_DIR]}/.git" ]]; then
+        mkdir -p "${ZINIT[BIN_DIR]:h}"
+        print -Pr -- "installing %F{cyan}%B(zdharma-continuum/zinit)%b%f %F{yellow}%Bplugin manager%b%f at $(.pp_path ${ZINIT[BIN_DIR]})"
+        git clone https://github.com/zdharma-continuum/zinit.git "${ZINIT[BIN_DIR]}"
 
-    # Install ZI if missing.
-    if [[ ! -d "${ZI[BIN_DIR]}/.git" ]]; then
-        print -Pr -- "installing %F{cyan}%B(z-shell/zi)%b%f %F{yellow}%Bplugin manager%b%f at %F{magenta}%B${ZI[BIN_DIR]}%b%f"
-        git clone --progress https://github.com/z-shell/zi.git "${ZI[BIN_DIR]}"
-
-        if [[ -d "${ZI[BIN_DIR]}" ]]; then
-            print -P -- "successfully installed at %F{green}%B%b%f"
+        if [[ -d "${ZINIT[BIN_DIR]}/.git" ]]; then
+            print -P -- "%F{green}successfully installed at $(.pp_path ${ZINIT[BIN_DIR]})"
         else
-            print -Pr -- "%F{red}%Berror%b%f: something went wrong, failed to install ZI at %F{magenta}%B${ZI[BIN_DIR]}%b%f"
+            print -Pr -- "%F{red}%Berror%b%f: something went wrong, failed to install ZI at $(.pp_path ${ZINIT[BIN_DIR]})"
             .maybe_continue || return
         fi
     fi
@@ -72,15 +73,20 @@ zmodload -F zsh/files -b:chmod
     unfunction .maybe_continue
 }
 
-# Load ZI.
-source "${ZI[BIN_DIR]}/zi.zsh"
-autoload -Uz _zi
-(( ${+_comps} )) && _comps[zi]=_zi
+# Load ZI zpmod.
+if [[ -f "${ZINIT[HOME_DIR]}/module/Src/zi/zpmod.so" ]]; then
+    module_path+=( "${ZINIT[HOME_DIR]}/module/Src" )
+    zmodload zi/zpmod
+fi
+
+# Load Zinit.
+source "${ZINIT[BIN_DIR]}/zinit.zsh"
+autoload -Uz _zinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
 
 zi light-mode for \
     z-shell/z-a-meta-plugins \
-    z-shell/z-a-bin-gem-node \
-    @annexes
+    zdharma-continuum/zinit-annex-bin-gem-node
 
 # }}}
 
