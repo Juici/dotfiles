@@ -78,6 +78,7 @@ fi
 # Mimic docker with podman. {{{
 if (( ${+commands[podman]} )); then
     alias docker='podman'
+    (( ${+commands[podman-compose]} )) && alias 'docker-compose'='podman-compose'
 fi
 # }}}
 
