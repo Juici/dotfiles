@@ -9,6 +9,7 @@
 	autoCorrect = 50
 [push]
 	default = simple
+	autoSetupRemote = true
 [user]
 	signingKey = 5283B069B646BDF63B6C0C27F03278A61EEDB2CA
 	name = James Whaley

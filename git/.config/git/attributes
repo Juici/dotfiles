@@ -209,3 +209,4 @@ package-lock.json   text -diff
 *.rb    text diff=ruby
 *.ruby  text diff=ruby
 
+# vim:ft=gitattributes
