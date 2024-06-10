@@ -1,8 +1,11 @@
+# vim:ft=gitconfig
+
 [color]
 	ui = auto
 	pager = true
 [core]
 	autocrlf = false
+	eolf = lf
 	fscache = true
 	whitespace = 'tabwidth=4'
 [help]
@@ -26,6 +29,8 @@
 	rebase = false
 [advice]
 	addEmptyPathspec = false
+[fetch]
+	prune = true
 
 [diff "pdf"]
 	binary = true
@@ -39,7 +44,3 @@
 
 [init]
 	defaultBranch = master
-
-# vim:ft=gitconfig
-[fetch]
-	prune = true
