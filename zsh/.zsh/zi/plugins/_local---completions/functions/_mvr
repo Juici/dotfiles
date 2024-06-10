@@ -1,4 +1,4 @@
-#compdef mvr
+#compdef _mvr mvr
 
 autoload -U is-at-least
 

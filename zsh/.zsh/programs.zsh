@@ -11,8 +11,8 @@
 zi wait lucid as'program' from'gh-r' for \
     if'(( ! ${+commands[rg]} ))' sbin'**/rg' \
         BurntSushi/ripgrep \
-    if'(( ! ${+commands[exa]} ))' sbin'**/exa' cp'completions/exa.zsh _exa' \
-        ogham/exa \
+    if'(( ! ${+commands[eza]} ))' sbin'**/eza' cp'completions/eza.zsh _eza' \
+        eza-community/eza \
     if'(( ! ${+commands[fd]} ))' sbin'**/fd' \
         @sharkdp/fd \
     if'(( ! ${+commands[bat]} ))' sbin'**/bat' \
