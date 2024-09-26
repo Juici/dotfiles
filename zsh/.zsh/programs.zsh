@@ -1,7 +1,7 @@
 # Programs {{{
 
 # rg: Replacement for grep.
-# exa: Replacement for ls.
+# eza: Replacement for ls.
 # fd: Replacement for find.
 # bat: Replacement for cat.
 # hexyl: Command-line hex viewer.
