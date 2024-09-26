@@ -9,15 +9,14 @@ setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes 
 0="${ZERO:-${${0:#$ZSH_ARGZERO}:-${(%):-%N}}}"
 0="${${(M)0:#/*}:-$PWD/$0}"
 
-# Then ${0:h} to get plugin's directory
-
+if [[ $PMSPEC != *b* ]] {
+    path+=( "${0:h}/bin" )
+}
 if [[ $PMSPEC != *f* ]] {
     fpath+=( "${0:h}/functions" )
 }
 
 autoload -Uz bar tw parseoffset jump diffp
-
-compdef _diff diffp
 
 alias j='jump'
 
