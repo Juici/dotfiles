@@ -1,0 +1,26 @@
+#compdef _toggle-touchpad toggle-touchpad
+
+_toggle-touchpad() {
+    local -a opts
+    opts=(
+        '(- 1 *)'{-h,--help}'[print help information]'
+    )
+
+    _arguments -S -C $opts \
+        ':: :_toggle-touchpad_subcommands' \
+        && ret=0
+}
+
+_toggle-touchpad_subcommands() {
+    local -a subcommands
+    subcommands=(
+        'toggle:toggles the touchpad'
+        'enable:enables the touchpad'
+        'disable:disables the touchpad'
+    )
+    _describe -t subcommands 'subcommands' subcommands "$@"
+}
+
+if [[ "${funcstack[1]}" = '_toggle-touchpad' ]]; then
+    _toggle-touchpad "$@"
+fi

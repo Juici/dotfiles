@@ -1,0 +1,35 @@
+#compdef jump
+
+_jump() {
+    emulate -L zsh
+    setopt extendedglob warncreateglobal typesetsilent rcquotes
+
+    local ret=1
+    local -a context line state state_descr alts opts
+    local -A opts_args
+
+    _arguments -s -S \
+        '(1 -l --list -e --edit)'{-l,--list}'[list the available jump targets]' \
+        '(1 -l --list -e --edit)'{-e,--edit}'[edit the jump points file]' \
+        '(1 -l --list -e --edit)1: :_jump_targets' \
+    && ret=0
+
+    return ret
+}
+
+_jump_targets() {
+    emulate -L zsh
+    setopt extendedglob warncreateglobal typesetsilent rcquotes
+
+    local match mstart mend
+
+    local -a targets
+    targets=( ${(f)"$(_call_program targets jump -l)"} )
+
+    # Split target name and path.
+    targets=( ${targets/(#b)([^=]##)=(*)/"${match[1]}[${(QQ)match[2]}]"} )
+
+    _values 'targets' $targets
+}
+
+_jump "$@"

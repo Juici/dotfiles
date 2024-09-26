@@ -1,0 +1,246 @@
+#!/usr/bin/env zsh
+# -*- mode: sh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+
+# Set the base and typically useful options
+emulate -LR zsh
+setopt extendedglob warncreateglobal typesetsilent noshortloops rcquotes
+
+zmodload zsh/datetime
+zmodload zsh/zutil
+
+# Run as script? ZSH_SCRIPT is a Zsh 5.3 addition
+if [[ $0 != bar || -n $ZSH_SCRIPT ]]; then
+    # Handle $0 according to the Zsh Plugin Standard:
+    # http://zdharma.org/Zsh-100-Commits-Club/Zsh-Plugin-Standard.html
+    0=${${ZERO:-${0:#$ZSH_ARGZERO}}:-${(%):-%N}}
+    0=${${(M)0##/*}:-$PWD/$0}
+
+    # Such global variable is expected to be typeset'd -g in the plugin.zsh
+    # file. Here it's restored in case of the function being run as a script.
+    typeset -gA Plugins
+    Plugins[FUNCTIONS_DIR]=${0:h}
+
+    # In case of the script using other scripts from the plugin, either set up
+    # $fpath and autoload, or add the directory to $PATH.
+    fpath+=( $Plugins[FUNCTIONS_DIR] )
+    autoload -Uz parseoffset
+fi
+
+# The script/function contents possibly using $Plugins[FUNCTIONS_DIR].
+
+# Time warp by setting GIT_AUTHOR_DATE and GIT_COMMITTER_DATE.
+tw() {
+    emulate -L zsh
+    setopt extendedglob warncreateglobal typesetsilent noshortloops rcquotes nopromptvars
+
+    # Prevent matches from leaking into global scope.
+    local mbegin mend match
+
+    # Check for invalid timewarps.
+    if [[ -n "$TW" ]] && [[ "$TW" = *[^[:digit:]\+\-]* ]]; then
+        print -Pr "%F{red}tw:%f invalid timewarp currently set %F{yellow}'${TW}'%f" >&2
+        return 1
+    fi
+
+    local tw_zparseopts_tmp="/tmp/tw.zparseopts.$UID.$$"
+
+    # TODO: Custom option parsing, to prevent issues that zparseopts creates.
+    #
+    #       eg. Currently `-cmd` is parsed as `-c md`, this should not be the
+    #           case and should instead result in an error. Instead tw attempts
+    #           to execute the command `md` which could have unexpected
+    #           consequences.
+
+    # Parse arguments.
+    local -A opts
+    zparseopts -D -E -M -A opts - h=-help -help d:=-date -date: c:=-cmd -cmd: 2>!$tw_zparseopts_tmp
+    if (( $? != 0 )); then
+        # Read error from temp file.
+        local err=$(<$tw_zparseopts_tmp)
+        rm $tw_zparseopts_tmp
+
+        # Strip prefix from error message.
+        err=${err/#'tw:zparseopts:'[[:digit:]]##':'[[:space:]]#/}
+
+        # Improve error message for missing argument.
+        err=${err/(#b)'missing argument for option: '(*)/"missing argument for %F{yellow}'-${match[1]}'%f"}
+
+        print -Pr "%F{red}tw:%f $err" >&2
+        return 1
+    fi
+
+    # Help flag.
+    integer help=${+opts[--help]}
+
+    # If help flag is set, print out help information.
+    if (( help )); then
+        local help_info='Timewarp utility.
+
+USAGE:
+    tw [OPTIONS] [TIMEWARP]
+
+OPTIONS:
+    -h, --help         Print help information
+    -c, --cmd <CMD>    Run the command under a timewarp
+
+TIMEWARP:
+    <OFFSET>             Set timewarp from offset specification
+    @<TIMESTAMP>         Set timewarp from unix timestamp
+    -d, --date <DATE>    Set timewarp from exact date specification
+
+If no timewarp is given then the current timewarp will be used.'
+
+        print "$help_info"
+        return 0
+    fi
+
+    # Shift arguments if first argument is '-' or '--'.
+    [[ "$1" = -(#c1,2) ]] && shift
+
+    local args="$@"
+
+    # Strip leading '=' from date if present.
+    local date=${opts[--date]/#=/}
+    # Strip leading and trailing whitespace.
+    date=${${date/#[[:space:]]#/}/%[[:space:]]#/}
+
+    # Strip leading '=' from cmd if present.
+    local cmd=${opts[--cmd]/#=/}
+    # Strip leading and trailing whitespace.
+    cmd=${${cmd/#[[:space:]]#/}/%[[:space:]]#/}
+
+    if [[ -n "$cmd" ]] && (( ! ${+commands[faketime]} )); then
+        print -P '%F{red}tw:%f timewarp for arbitrary commands is not supported without %F{blue}libfaketime%f' >&2
+        return 1
+    fi
+
+    # Debug print statement.
+    #print "date: $date\ncmd: $cmd\noffset: $args"
+
+    integer tw has_tw=0
+
+    if [[ -n "$date" ]] && [[ -n "$args" ]]; then
+        print -Pr "%F{red}tw:%f cannot have exact date %F{yellow}'$date'%f and offset %F{yellow}'$args'%f at the same time" >&2
+        return 1
+    fi
+
+    if [[ -n "$date" ]]; then
+        # Timewarp to an exact date.
+        if (( ! ${+commands[date]} )); then
+            # FIXME: Currently we don't have much choice but to delegate to gnu
+            #        date, due to complexity of date parsing.
+            print -P '%F{red}tw:%f exact date is not supported without gnu coreutils %F{blue}date%f' >&2
+            return 1
+        fi
+
+        # Delegate to gnu date to parse date format and return seconds since
+        # Unix epoch, quitting on failure.
+        tw=$("${commands[date]}" "--date=$date" '+%s') || return 1
+        has_tw=1
+    elif [[ -n "$args" ]]; then
+        integer tw tw_base tw_offset
+
+        # If the timewarp begins with '@' parse as offset from Unix epoch.
+        # Otherwise parse as offset from current timewarp.
+        if [[ "${args:0:1}" = '@' ]]; then
+            args=${args:1}
+            if [[ -z "$args" ]]; then
+                print -P '%F{red}tw:%f missing timestamp for timewarp'
+                return 1
+            elif [[ "$args" != [[:digit:]]## ]]; then
+                print -Pr "%F{red}tw:%f invalid timestamp %F{yellow}'$args'%f"
+                return 1
+            fi
+
+            tw_base=0
+            tw_offset=$(( args ))
+        else
+            # Parse offset, quitting on failure.
+            tw_offset=$(parseoffset "$args") || return 1 # TODO: Error handling for failure.
+
+            if [[ -n "$TW" ]]; then
+                # Use the current timewarp as a base.
+                tw_base=$TW
+            else
+                # Use the current time as a base.
+                tw_base=$EPOCHSECONDS
+            fi
+        fi
+
+        # Calculate the new timewarp.
+        tw=$(( tw_base + tw_offset ))
+        has_tw=1
+    fi
+
+    if [[ -n "$cmd" ]]; then
+        # Get the value of the timewarp to use for the command.
+        if (( has_tw == 0 )); then
+            if [[ -n "$TW" ]]; then
+                tw=$TW
+                has_tw=1
+            else
+                print -Pr "%F{red}tw:%f no timewarp for command %F{yellow}'$cmd'%f, must be in a timewarp or specify a timewarp" >&2
+                return 1
+            fi
+        fi
+
+        TW="$tw" "${commands[faketime]}" "@$tw" "${(@Qz)cmd}" || return 1
+
+        return 0
+    fi
+
+    if (( has_tw == 0 )); then
+        local tw_date='none'
+
+        # There is no timewarp given, print the current time warp.
+        if [[ -n "$TW" ]]; then
+            integer tw_epoch=$(( TW ))
+
+            # Format timewarp using preferred local date and time.
+            strftime -s tw_date '%c' $tw_epoch
+
+            tw_date="'$tw_date'"
+        fi
+
+        print -Pr "tw: %F{yellow}$tw_date%f"
+
+        return 0
+    fi
+
+    # Format the timewarp for git.
+    local git_date
+    strftime -s git_date '%s %z' $tw
+
+    # Format new timewarp using preferred local date and time.
+    local new_date
+    strftime -s new_date '%c' $tw
+
+    if (( ${+TW} )); then
+        # Format old timewarp using preferred local date and time.
+        local old_date
+        strftime -s old_date '%c' $TW
+
+        print -Pr "tw: warping from %F{yellow}'$old_date'%f to %F{yellow}'$new_date'%f"
+
+        export GIT_AUTHOR_DATE=$git_date
+        export GIT_COMMITTER_DATE=$git_date
+        export TW=$tw
+    else
+        print -Pr "tw: spawning subshell with timewarp %F{yellow}'$new_date'%f"
+
+        # If tw is being run as a script then use `exec` to replace the process
+        # instead of spawning a subshell.
+
+        GIT_AUTHOR_DATE=$git_date \
+        GIT_COMMITTER_DATE=$git_date \
+        TW=$tw \
+        ${ZSH_SCRIPT:+exec} zsh
+    fi
+}
+
+tw "$@"
+
+# Use alternate marks [[[ and ]]] as the original ones can confuse nested
+# substitutions, e.g.: ${${${VAR}}}
+
+# vim:ft=zsh:tw=80:sw=4:sts=4:et:foldmarker=[[[,]]]
