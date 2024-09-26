@@ -5,20 +5,32 @@
 # Create a hashtable to store global variables without polluting scope.
 typeset -gA Juici
 
+Juici[debug]=0
 Juici[rc]="$HOME/.zshrc"
 Juici[rc_local]="$HOME/.zshrc.local"
 Juici[dot_zsh]="$HOME/.zsh"
-
-# Declare $ZI global.
-typeset -gA ZI
-
-ZI[HOME_DIR]="${Juici[dot_zsh]}/zi"
-ZI[BIN_DIR]="${ZI[HOME_DIR]}/bin"
-ZI[ZMODULES_DIR]="${ZI[HOME_DIR]}/zmodules"
+Juici[zpmod]="${Juici[dot_zsh]}/zpmod"
 
 # Load zsh builtins for common file access commands.
 # Don't override chmod since, the syntax of the zsh builtin differs.
 zmodload -F zsh/files -b:chmod
+
+# }}}
+
+# Utils {{{
+
+.log::debug() {
+    (( Juici[debug] )) && print -Pr -- "%B%F{8}debug%f:%b $1%f"
+}
+.log::info() {
+    print -Pr -- "%B%F{blue}info%f:%b $1%f"
+}
+.log::warn() {
+    print -Pr -- "%B%F{yellow}warning%f:%b $1%f"
+}
+.log::error() {
+    print -Pru2 -- "%B%F{red}error%f:%b $1%f"
+}
 
 # }}}
 
@@ -28,32 +40,86 @@ zmodload -F zsh/files -b:chmod
     .maybe_continue() {
         # Prompt the user if they want to exit the shell.
         # Gives the user time to read the error and the option continue.
-        local yesno prompt='%F{yellow}%Bwarning%b%f: errors may occur if loading continues, do you wish to continue? [y/N] '
+        local yesno prompt='%B%F{yellow}warning%f:%b errors may occur if loading continues, do you wish to continue? [y/N] '
         read -sk 1 "yesno?${(%)prompt}"
         # Add a newline.
         print
 
         case $yesno in
             [yY])
-                print -P -- '%F{yellow}%Bwarning%b%f: continuing loading configs'
+                .log::warning 'continuing loading configs'
                 return 0
                 ;;
             *)
                 # Default to no.
-                print -P -- '%F{blue}%Binfo%b%f: stopping loading configs'
+                .log::info 'stopping loading configs'
                 return 1
                 ;;
         esac
     }
 
     .pp_path() {
-        local path
-        print -D -v path "$1"
-        print -Pr -- "%F{magenta}%B${path}%b%f"
+        local path=$1
+        print -Pr -- "%B%F{magenta}${(D)path}%f%b"
+    }
+
+    .maybe_build_zpmod() {
+        local module_dir=$1 old_pwd=$PWD
+
+        # Verify zsh version is at least 5.8.1.
+        autoload -Uz is-at-least
+        is-at-least 5.8.1 || return 1
+
+        # Make must be available.
+        # (( ${+commands[make] } )) || return 1
+
+        # Prompt the user if they want to build zpmod.
+        local yesno prompt='%B%F{blue}info%f:%b zpmod has not been built, do you wish to build it now? [y/N] '
+        read -sk 1 "yesno?${(%)prompt}"
+        # Add a newline.
+        print
+
+        case $yesno in
+            [yY])
+                ;;
+            *)
+                # Default to no.
+                .log::info 'zpmod will not be built'
+                return 1
+                ;;
+        esac
+
+        {
+            # Change directory to build zpmod.
+            cd "$module_dir" || return 1
+
+            .log::info "building zpmod at $(.pp_path $module_dir)"
+
+            if [[ -f "$module_dir/Makefile" ]]; then
+                .log::debug 'runnning make clean'
+                make clean
+            fi
+
+            "$module_dir/configure" --enable-cflags='-g -Wall -Wextra -O3' --disable-gdbm --without-tcsetpgrp --quiet
+            .log::debug 'runnning make'
+
+            local cores=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
+            if command make --jobs="$cores" && [[ -f "$module_dir/Src/zi/zpmod.so" ]]; then
+                cp -f "$module_dir/Src/zi/zpmod.so"  "$module_dir/Src/zi/zpmod.bundle"
+                .log::info '%F{green}zpmod has been built correctly'
+                return 0
+            else
+                .log::error 'zpmod failed to build correctly'
+                return 1
+            fi
+        } always {
+            # Restore current directory.
+            cd "$old_pwd"
+        }
     }
 
     if (( ! ${+commands[git]} )); then
-        print -Pu2 -- '%F{red}%Berror%b%f: no %F{green}%Bgit%b%f available, cannot proceed'
+        .log::error 'no %B%F{green}git%f%b available, cannot proceed'
         .maybe_continue || return
     fi
 
@@ -66,24 +132,30 @@ zmodload -F zsh/files -b:chmod
     # Install Zinit if missing.
     if [[ ! -d "${ZINIT[BIN_DIR]}/.git" ]]; then
         mkdir -p "${ZINIT[BIN_DIR]:h}"
-        print -Pr -- "installing %F{cyan}%B(zdharma-continuum/zinit)%b%f %F{yellow}%Bplugin manager%b%f at $(.pp_path ${ZINIT[BIN_DIR]})"
+        .log::info "installing %B%F{cyan}(zdharma-continuum/zinit)%f%b %B%F{yellow}plugin manager%f%b at $(.pp_path ${ZINIT[BIN_DIR]})"
         git clone https://github.com/zdharma-continuum/zinit.git "${ZINIT[BIN_DIR]}"
 
         if [[ -d "${ZINIT[BIN_DIR]}/.git" ]]; then
-            print -P -- "%F{green}successfully installed at $(.pp_path ${ZINIT[BIN_DIR]})"
+            .log::info "%F{green}successfully installed at $(.pp_path ${ZINIT[BIN_DIR]})"
         else
-            print -Pr -- "%F{red}%Berror%b%f: something went wrong, failed to install ZI at $(.pp_path ${ZINIT[BIN_DIR]})"
+            .log::error "something went wrong, failed to install Zinit at $(.pp_path ${ZINIT[BIN_DIR]})"
             .maybe_continue || return
         fi
+    fi
+
+    # Build zpmod if not built.
+    if [[ ! -f "${Juici[zpmod]}/Src/zi/zpmod.so" ]]; then
+        .maybe_build_zpmod "${Juici[zpmod]}"
     fi
 } always {
     unfunction .maybe_continue
     unfunction .pp_path
+    unfunction .maybe_build_zpmod
 }
 
-# Load ZI zpmod.
-if [[ -f "${ZINIT[HOME_DIR]}/module/Src/zi/zpmod.so" ]]; then
-    module_path+=( "${ZINIT[HOME_DIR]}/module/Src" )
+# Load zpmod.
+if [[ -f "${Juici[zpmod]}/Src/zi/zpmod.so" ]]; then
+    module_path+=( "${Juici[zpmod]}/Src" )
     zmodload zi/zpmod
 fi
 
@@ -92,7 +164,7 @@ source "${ZINIT[BIN_DIR]}/zinit.zsh"
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 
-zi light-mode for \
+zinit light-mode for \
     zdharma-continuum/zinit-annex-meta-plugins \
     zdharma-continuum/zinit-annex-bin-gem-node
 

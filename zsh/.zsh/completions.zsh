@@ -1,29 +1,29 @@
 # Plugins {{{
 
 # Zsh completion functions.
-zi wait lucid blockf for \
-    atpull'zi creinstall -q .' \
+zinit wait lucid blockf for \
+    atpull'zinit creinstall -q .' \
     zsh-users/zsh-completions
 
 # Python pip completions.
-zi wait lucid blockf for \
+zinit wait lucid blockf for \
     as'completion' \
     OMZP::pip/_pip \
     atload'unalias pipreq; unalias pipir' \
     OMZP::pip
 
 # Rust completions.
-zi wait lucid blockf for \
+zinit wait lucid blockf for \
     Juici/zsh-rust-completions
 
 # Pnpm completions.
-zi wait lucid blockf for \
+zinit wait lucid blockf for \
     atclone'./zplug.zsh' \
     atpull'%atclone' \
     g-plane/pnpm-shell-completion
 
 # General completions.
-zi wait lucid blockf for \
+zinit wait lucid blockf for \
     _local/completions
 
 # }}}

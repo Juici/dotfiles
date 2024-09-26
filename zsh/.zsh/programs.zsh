@@ -8,7 +8,7 @@
 # hyperfine: Command-line benchmarking tool.
 # vivid: LS_COLORS generator.
 # neovim: Replacement for vim.
-zi wait lucid as'program' from'gh-r' for \
+zinit wait lucid as'program' from'gh-r' for \
     if'(( ! ${+commands[rg]} ))' sbin'**/rg' \
         BurntSushi/ripgrep \
     if'(( ! ${+commands[eza]} ))' sbin'**/eza' cp'completions/eza.zsh _eza' \
@@ -31,7 +31,7 @@ zi wait lucid as'program' from'gh-r' for \
 # Configs {{{
 
 # Tweaks and configurations for bat.
-zi wait lucid for \
+zinit wait lucid for \
     _local/config-bat
 
 # }}}
