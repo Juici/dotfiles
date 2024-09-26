@@ -1,5 +1,6 @@
--- Provides a mechanism for lazy autoloading, similar to mechanism in
--- Vimscript.
+---Provides a mechanism for lazy autoloading, similar to mechanism in Vimscript.
+---@param base string
+---@return table
 local function autoload(base)
   local mt = {
     __index = function(t, key)

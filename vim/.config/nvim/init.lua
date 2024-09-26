@@ -1,3 +1,7 @@
+if vim.loader then
+  vim.loader.enable()
+end
+
 require('juici')
 
 local path = require('vfs.path')
