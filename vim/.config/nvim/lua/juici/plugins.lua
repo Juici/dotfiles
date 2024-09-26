@@ -49,7 +49,13 @@ local function syntax()
   use { 'z-shell/zi-vim-syntax' }
 
   -- Use treesitter for syntax highlighting.
-  use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
+  use {
+    'nvim-treesitter/nvim-treesitter',
+    run = function()
+      local ts_update = require('nvim-treesitter.install').update({ with_sync = true })
+      ts_update()
+    end
+  }
 end
 
 function plugins.load()

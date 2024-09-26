@@ -9,6 +9,13 @@ Juici[rc]="$HOME/.zshrc"
 Juici[rc_local]="$HOME/.zshrc.local"
 Juici[dot_zsh]="$HOME/.zsh"
 
+# Declare $ZI global.
+typeset -gA ZI
+
+ZI[HOME_DIR]="${Juici[dot_zsh]}/zi"
+ZI[BIN_DIR]="${ZI[HOME_DIR]}/bin"
+ZI[ZMODULES_DIR]="${ZI[HOME_DIR]}/zmodules"
+
 # Load zsh builtins for common file access commands.
 # Don't override chmod since, the syntax of the zsh builtin differs.
 zmodload -F zsh/files -b:chmod
@@ -71,6 +78,7 @@ zmodload -F zsh/files -b:chmod
     fi
 } always {
     unfunction .maybe_continue
+    unfunction .pp_path
 }
 
 # Load ZI zpmod.
@@ -85,7 +93,7 @@ autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 
 zi light-mode for \
-    z-shell/z-a-meta-plugins \
+    zdharma-continuum/zinit-annex-meta-plugins \
     zdharma-continuum/zinit-annex-bin-gem-node
 
 # }}}

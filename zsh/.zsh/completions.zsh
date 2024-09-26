@@ -16,6 +16,12 @@ zi wait lucid blockf for \
 zi wait lucid blockf for \
     Juici/zsh-rust-completions
 
+# Pnpm completions.
+zi wait lucid blockf for \
+    atclone'./zplug.zsh' \
+    atpull'%atclone' \
+    g-plane/pnpm-shell-completion
+
 # General completions.
 zi wait lucid blockf for \
     _local/completions

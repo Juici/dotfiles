@@ -1,14 +1,18 @@
+# vim:ft=gitconfig
+
 [color]
 	ui = auto
 	pager = true
 [core]
 	autocrlf = false
+	eolf = lf
 	fscache = true
 	whitespace = 'tabwidth=4'
 [help]
 	autoCorrect = 50
 [push]
 	default = simple
+	autoSetupRemote = true
 [user]
 	signingKey = 5283B069B646BDF63B6C0C27F03278A61EEDB2CA
 	name = James Whaley
@@ -25,6 +29,8 @@
 	rebase = false
 [advice]
 	addEmptyPathspec = false
+[fetch]
+	prune = true
 
 [diff "pdf"]
 	binary = true
@@ -38,7 +44,3 @@
 
 [init]
 	defaultBranch = master
-
-# vim:ft=gitconfig
-[fetch]
-	prune = true

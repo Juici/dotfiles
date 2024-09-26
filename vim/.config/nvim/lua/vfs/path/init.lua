@@ -1385,14 +1385,13 @@ function posix.relative(from, to)
   end
 
   local base = {}
-  for i = from_start + last_common_sep + 1, from_end do
-    if i == from_end or from:byte(i) == CHAR_FORWARD_SLASH then
+  for j = from_start + last_common_sep + 1, from_end do
+    if j == from_end or from:byte(j) == CHAR_FORWARD_SLASH then
       table.insert(base, '..')
     end
   end
-  base = table.concat(base, '/')
 
-  return base .. to:sub(to_start + last_common_sep)
+  return table.concat(base, '/') .. to:sub(to_start + last_common_sep)
 end
 
 --- Returns the parent directory of the given path. Similar to the Unix

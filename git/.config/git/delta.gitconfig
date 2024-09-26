@@ -1,0 +1,46 @@
+[core]
+	pager = delta
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta "onedark"]
+	bg0 = "#282c34"
+	bg1 = "#31353e"
+	bg2 = "#393e48"
+
+	dark = true
+	hunk-header-decoration-style = black box ul
+	hunk-header-file-style = white
+	hunk-header-line-number-style = bold white
+	hunk-header-style = file line-number syntax
+	minus-style = syntax "#523b43"      # 10:3 bg:red
+	minus-emph-style = normal "#7a4851" # 10:8 bg:red
+	plus-style = syntax "#323a3a"       # 10:1 bg:green
+	plus-emph-style = syntax "#4d5e4b"  # 10:3 bg:green
+	line-numbers-minus-style = red
+	line-numbers-plus-style = green
+	line-numbers-zero-style = black
+	line-numbers-left-style = blue
+	line-numbers-left-format = "{nm:>4} "
+	line-numbers-right-style = blue
+	line-numbers-right-format = "{np:>4} "
+	blame-separator-format = " {n:>4} "
+	blame-palette = onedark.bg0 onedark.bg1 onedark.bg2
+	syntax-theme = OneHalfDark
+	whitespace-error-style = reverse red
+	zero-style = dim syntax
+
+[delta]
+	navigate = true
+	line-numbers = true
+	file-style = omit
+	features = onedark
+
+[merge]
+	conflictstyle = diff3
+
+[diff]
+	colorMoved = default
+
+# https://colordesigner.io/color-mixer/?mode=rgb#282C34%7B0%7D-E06C75%7B0%7D-BE5046%7B0%7D-98C379%7B0%7D-5C6370%7B0%7D

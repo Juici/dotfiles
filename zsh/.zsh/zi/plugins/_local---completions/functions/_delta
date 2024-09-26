@@ -1,0 +1,172 @@
+#compdef _delta delta
+
+# shellcheck disable=all
+
+    # _arguments -s -S -C \
+    #     {-h,--help}'[Print help information]' \
+    #     {-V,--version}'[Print version information]' \
+    #     '--blame-code-style=[Style string for the code section of a git blame line]:STYLE' \
+    #     '--blame-format=[Format string for git blame commit metadata \[default: "{timestamp:<15} {author:<15.14} {commit:<8}"\]]:FMT' \
+    #     '--blame-palette=[Background colors used for git blame lines (space-separated string)]:COLORS' \
+    #     '--blame-separator-format=[Separator between the blame format and the code section of a git blame line [default: │{n:^4}│]]:FMT' \
+    #     '--blame-separator-style=[Style string for the blame-separator-format]:STYLE' \
+    #     '--blame-timestamp-format=[Format of `git blame` timestamp in raw git output received by delta \[default: "%Y-%m-%d %H:%M:%S %z"\]]:FMT' \
+    #     '--blame-timestamp-output-format=[Format string for git blame timestamp output]:FMT' \
+    #     '--color-only[Do not alter the input structurally in any way]' \
+    #     '--commit-decoration-style=[Style string for the commit hash decoration \[default: \]]:STYLE' \
+    #     '--commit-regex=[Regular expression used to identify the commit line when parsing git output \[default: "^commit "\]]:REGEX' \
+    #     '--commit-style=[Style string for the commit hash line \[default: raw\]]:STYLE' \
+    #     '--dark[Use default colors appropriate for a dark terminal background]' \
+    #     '--default-language=[Default language used for syntax highlighting]:LANG' \
+    #     '--diff-highlight[Emulate diff-highlight]' \
+    #     '--diff-so-fancy[Emulate diff-so-fancy]' \
+    #     '--diff-stat-align-width=[Width allocated for file paths in a diff stat section \[default: 48\]]:N' \
+    #     '--features=[Names of delta features to activate (space-separated)]:FEATURES' \
+    #     '--file-added-label=[Text to display before an added file path \[default: added:\]]:STRING' \
+    #     '--file-copied-label=[Text to display before a copied file path \[default: copied:\]]:STRING' \
+    #     '--file-decoration-style=[Style string for the file decoration \[default: "blue ul"\]]:STYLE' \
+    #     '--file-modified-label=[Text to display before a modified file path \[default: \]]:STRING' \
+    #     '--file-removed-label=[Text to display before a removed file path \[default: removed:\]]:STRING' \
+    #     '--file-renamed-label=[Text to display before a renamed file path \[default: renamed:\]]:STRING' \
+    #     '--file-style=[Style string for the file section \[default: blue\]]:STYLE' \
+    #     '--file-transformation=[Sed-style command transforming file paths for display]:SED_CMD' \
+    #     '--grep-context-line-style=[Style string for non-matching lines of grep output]:STYLE' \
+    #     '--grep-file-style=[Style string for file paths in grep output]:STYLE' \
+    #     '--grep-line-number-style=[Style string for line numbers in grep output]:STYLE' \
+    #     '--grep-match-line-style=[Style string for matching lines of grep output]:STYLE' \
+    #     '--grep-match-word-style=[Style string for the matching substrings within a matching line of grep output]:STYLE' \
+    #     '--grep-separator-symbol=[Separator symbol printed after the file path and line number in grep output \[default: :\]]:STRING' \
+    #     '--hunk-header-decoration-style=[Style string for the hunk-header decoration \[default: "blue box"\]]:STYLE' \
+    #     '--hunk-header-file-style=[Style string for the file path part of the hunk-header \[default: blue\]]:STYLE' \
+    #     '--hunk-header-line-number-style=[Style string for the line number part of the hunk-header \[default: blue\]]:STYLE' \
+    #     '--hunk-header-style[Style string for the hunk-header [default: "line-number syntax"]]:STYLE' \
+    #     '--hunk-label[Text to display before a hunk header [default: ]]:STRING' \
+    #     '--hyperlinks[Render commit hashes, file names, and line numbers as hyperlinks]' \
+    #     '--hyperlinks-commit-link-format[Format string for commit hyperlinks (requires --hyperlinks)]:FMT' \
+    #     '--hyperlinks-file-link-format[Format string for file hyperlinks (requires --hyperlinks) [default: file://{path}]]:FMT' \
+    #     '--inline-hint-style[Style string for short inline hint text [default: blue]]:STYLE' \
+    #     '--inspect-raw-lines[Kill-switch for --color-moved support [default: true]]:(true false)' \
+    #     '--keep-plus-minus-markers[Prefix added/removed lines with a +/- character, as git does]' \
+    #     '--light[Use default colors appropriate for a light terminal background]' \
+    #     '--line-buffer-size[Size of internal line buffer [default: 32]]:N' \
+    #     '--line-fill-method[Line-fill method in side-by-side mode]:STRING' \
+    #     {-n,--line-numbers}'[Display line numbers next to the diff]' \
+    #     '--line-numbers-left-format[Format string for the left column of line numbers [default: {nm:^4}⋮]]:FMT' \
+    #     '--line-numbers-left-style[Style string for the left column of line numbers [default: auto]]:STYLE' \
+    #     '--line-numbers-minus-style[Style string for line numbers in the old (minus) version of the file [default: auto]]:STYLE' \
+    #     '--line-numbers-plus-style[Style string for line numbers in the new (plus) version of the file [default: auto]]:STYLE' \
+    #     '--line-numbers-right-format[Format string for the right column of line numbers [default: {np:^4}│]]:FMT' \
+    #     '--line-numbers-right-style[Style string for the right column of line numbers [default: auto]]:STYLE' \
+    #     '--line-numbers-zero-style[Style string for line numbers in unchanged (zero) lines [default: auto]]:STYLE' \
+    #     '--list-languages[List supported languages and associated file extensions]' \
+    #     '--list-syntax-themes[List available syntax-highlighting color themes]' \
+    #     '--map-styles[Map styles encountered in raw input to desired output styles]:STYLES_MAP' \
+    #     '--max-line-distance[Maximum line pair distance parameter in within-line diff algorithm [default: 0.6]]:DIST' \
+    #     '--max-line-length[Truncate lines longer than this [default: 512]]:N' \
+    #     '--merge-conflict-begin-symbol[String marking the beginning of a merge conflict region [default: ▼]]:STRING' \
+    #     '--merge-conflict-end-symbol[String marking the end of a merge conflict region [default: ▲]]:STRING' \
+    #     '--merge-conflict-ours-diff-header-decoration-style[Style string for the decoration of the header above the 'ours' merge conflict diff [default: box]]:STYLE' \
+    #     '--merge-conflict-ours-diff-header-style[Style string for the header above the 'ours' branch merge conflict diff [default: normal]]:STYLE' \
+    #     '--merge-conflict-theirs-diff-header-decoration-style[Style string for the decoration of the header above the 'theirs' merge conflict diff [default: box]]:STYLE' \
+    #     '--merge-conflict-theirs-diff-header-style[Style string for the header above the 'theirs' branch merge conflict diff [default: normal]]:STYLE' \
+    #     '--minus-empty-line-marker-style[Style string for removed empty line marker [default: "normal auto"]]:STYLE' \
+    #     '--minus-emph-style[Style string for emphasized sections of removed lines [default: "normal auto"]]:STYLE' \
+    #     '--minus-non-emph-style[Style string for non-emphasized sections of removed lines that have an emphasized section [default: minus-style]]:STYLE' \
+    #     '--minus-style[Style string for removed lines [default: "normal auto"]]:STYLE' \
+    #     '--navigate[Activate diff navigation]' \
+    #     '--navigate-regex[Regular expression defining navigation stop points]:REGEX' \
+    #     '--no-gitconfig[Do not read any settings from git config]' \
+    #     '--pager[Which pager to use]:CMD:_command_names' \
+    #     '--paging[Whether to use a pager when displaying output [default: auto]]:(auto always never)' \
+    #     '--parse-ansi[Display ANSI color escape sequences in human-readable form]' \
+    #     '--plus-emph-style[Style string for emphasized sections of added lines [default: "syntax auto"]]:STYLE' \
+    #     '--plus-empty-line-marker-style[Style string for added empty line marker [default: "normal auto"]]:STYLE' \
+    #     '--plus-non-emph-style[Style string for non-emphasized sections of added lines that have an emphasized section [default: plus-style]]:STYLE' \
+    #     '--plus-style[Style string for added lines [default: "syntax auto"]]:STYLE' \
+    #     '--raw[Do not alter the input in any way]:' \
+    #     '--relative-paths[Output all file paths relative to the current directory]:' \
+    #     '--right-arrow[Text to display with a changed file path [default: "⟶  "]]:STRING' \
+    #     '--show-colors[Show available named colors]:' \
+    #     '--show-config[Display the active values for all Delta options]:' \
+    #     '--show-syntax-themes[Show example diff for available syntax-highlighting themes]:' \
+    #     '--show-themes[Show example diff for available delta themes]:' \
+    #     {-s,--side-by-side}'[Display diffs in side-by-side layout]:' \
+    #     '--syntax-theme[The syntax-highlighting theme to use]:SYNTAX_THEME' \
+    #     '--tabs[The number of spaces to replace tab characters with [default: 4]]:N' \
+    #     '--true-color[Whether to emit 24-bit ("true color") RGB color codes [default: auto]]:auto|always|never' \
+    #     '--whitespace-error-style[Style string for whitespace errors [default: "auto auto"]]:STYLE' \
+    #     {-w,--width}'[The width of underline/overline decorations]:N' \
+    #     '--word-diff-regex[Regular expression defining a 'word' in within-line diff algorithm [default: \w+]]:REGEX' \
+    #     '--wrap-left-symbol[End-of-line wrapped content symbol (left-aligned) [default: ↵]]:STRING' \
+    #     '--wrap-max-lines[How often a line should be wrapped if it does not fit [default: 2]]:N' \
+    #     '--wrap-right-percent[Threshold for right-aligning wrapped content [default: 37.0]]:PERCENT' \
+    #     '--wrap-right-prefix-symbol[Pre-wrapped content symbol (right-aligned) [default: …]]:STRING' \
+    #     '--wrap-right-symbol[End-of-line wrapped content symbol (right-aligned) [default: ↴]]:STRING' \
+    #     '--zero-style[Style string for unchanged lines [default: "syntax normal"]]:STYLE' \
+    #     '--24-bit-color[Deprecated: use --true-color]:auto|always|never' \
+    #     '1:first file to be compared:_files' \
+    #     '2:second file to be compared:_files' \
+    #     && ret=0
+
+_delta() {
+    local -A opt_args
+
+    local ret=1
+    local context curcontext="$curcontext" state line
+
+    local -a lines
+
+    # Get delta help.
+    lines=( "${(@f)$(_call_program help delta -h)}" )
+    # Strip ANSI escapes.
+    lines=( "${(@)lines//$'\x1b'\[[0-9]#m/}" )
+    # Get only lines after "OPTIONS:".
+    lines=( "${(@)lines:${lines[(i)(#i)[[:space:]]#OPTIONS:[[:space:]]#]}}" )
+    # Get only options.
+    lines=( "${(@M)lines:#[[:space:]]#(('-'[^-])(','[[:space:]]#|)|)('--'[^[:space:]]##)*}" )
+
+    local nul=$'\0'
+
+    # Break options into components.
+    lines=( "${(@)lines/(#b)[[:space:]]#(('-'[^-])(','[[:space:]]#|)|)('--'[^[:space:]]#)[[:space:]]#('<'([^>]#)'>'|)[[:space:]]#(*)/"${match[2]}$nul${match[4]}$nul${match[6]}$nul${match[7]}"}" )
+
+    local -a opts
+
+    local opt short long arg desc
+    for short long arg desc in "${(@0)lines}"; do
+        desc="[${${desc//"["/"\["}//"]"/"\]"}]"
+
+        case $arg in
+            ('N')
+                desc="${desc}:N"
+                ;;
+            ('CMD')
+                desc="${desc}:CMD:_path_commands"
+                ;;
+            (*'|'*)
+                desc="${desc}: :(${arg//|/ })"
+                ;;
+            ("")
+                ;;
+            (*)
+                desc="${desc}:${arg}"
+                ;;
+        esac
+
+        [[ -n "$short" ]] && opts+=( "${short}${desc}" )
+        [[ -n "$long" ]] && opts+=( "${long}${arg:+=}${desc}" )
+    done
+
+    _arguments -s -S -C $opts \
+        '1:first file to be compared:_files' \
+        '2:second file to be compared:_files' \
+        && ret=0
+
+}
+
+# Don't run the completion function when source'd or eval'd
+if [ "${funcstack[1]}" = "_delta" ]; then
+    _delta
+fi
+
+# vim: ft=zsh

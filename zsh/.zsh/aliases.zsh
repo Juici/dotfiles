@@ -18,11 +18,11 @@ alias diff='diff -u --color=auto'
 alias vim='nvim'
 
 # Exa aliases. {{{
-alias exa='exa --colour=auto --extended --git'
-alias e='exa'
-alias ea='exa --all'
-alias el='exa --long'
-alias eal='exa --all --long'
+alias exa='eza --colour=auto --extended --git'
+alias e='eza'
+alias ea='eza --all'
+alias el='eza --long'
+alias eal='eza --all --long'
 # }}}
 
 # Git aliases (sorted alphabetically). {{{

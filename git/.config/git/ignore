@@ -47,10 +47,8 @@ tags
 ### VirtualEnv ###
 
 # VirtualEnv directory
-.env
-.venv
-env
-venv
+.venv/
+venv/
 
 ### Cargo ###
 .cargo-ok

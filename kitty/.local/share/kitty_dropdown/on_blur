@@ -8,8 +8,12 @@ on_blur() {
     integer wid=$2
     local blur_pid_file=$3
 
+    local focused=$(pfw)
+
     # If the window is focused it was a misfired event.
-    (( $(pfw) == wid )) && return
+    if [[ "$focused" = "0x"[[:xdigit:]]## ]] && (( focused == wid )); then
+        return
+    fi
 
     {
         # Remove old PPID file.
