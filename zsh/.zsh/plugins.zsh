@@ -2,14 +2,14 @@
 
 # keychain: Keychain SSH/GPG agent.
 # bgnotify: Background notifier for long running commands.
-zi wait lucid for \
+zinit wait lucid for \
     has'keychain' _local/keychain \
     _local/bgnotify
 
 # F-Sy-H: Syntax highlighting.
 # zsh-autosuggestions: Auto suggestions.
-zi wait'0b' lucid nocd for \
-    atinit"ZI[COMPINIT_OPTS]=-C; zicompinit; zicdreplay" \
+zinit wait'0b' lucid nocd for \
+    atinit"ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay" \
         z-shell/F-Sy-H \
     wait'0c' atload"→keybinds_onload_autosuggestions && _zsh_autosuggest_start && zle && zle autosuggest-fetch && zle redisplay" \
         zsh-users/zsh-autosuggestions

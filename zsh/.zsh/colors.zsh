@@ -2,7 +2,7 @@ autoload -U colors
 colors
 
 # LS_COLORS definitions.
-zi light-mode for \
+zinit light-mode for \
     pick'clrs.zsh' \
     atclone'dircolors -b LS_COLORS >! clrs.zsh' \
     atpull'%atclone' \
