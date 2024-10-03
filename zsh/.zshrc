@@ -19,16 +19,18 @@ zmodload -F zsh/files -b:chmod
 
 # Utils {{{
 
-.log::debug() {
-    (( Juici[debug] )) && print -Pr -- "%B%F{8}debug%f:%b $1%f"
++log::debug() {
+    if (( Juici[debug] )); then
+        print -Pr -- "%B%F{8}debug%f:%b $1%f"
+    fi
 }
-.log::info() {
++log::info() {
     print -Pr -- "%B%F{blue}info%f:%b $1%f"
 }
-.log::warn() {
++log::warn() {
     print -Pr -- "%B%F{yellow}warning%f:%b $1%f"
 }
-.log::error() {
++log::error() {
     print -Pru2 -- "%B%F{red}error%f:%b $1%f"
 }
 
@@ -47,12 +49,12 @@ zmodload -F zsh/files -b:chmod
 
         case $yesno in
             [yY])
-                .log::warning 'continuing loading configs'
+                +log::warning 'continuing loading configs'
                 return 0
                 ;;
             *)
                 # Default to no.
-                .log::info 'stopping loading configs'
+                +log::info 'stopping loading configs'
                 return 1
                 ;;
         esac
@@ -84,7 +86,7 @@ zmodload -F zsh/files -b:chmod
                 ;;
             *)
                 # Default to no.
-                .log::info 'zpmod will not be built'
+                +log::info 'zpmod will not be built'
                 return 1
                 ;;
         esac
@@ -93,23 +95,23 @@ zmodload -F zsh/files -b:chmod
             # Change directory to build zpmod.
             cd "$module_dir" || return 1
 
-            .log::info "building zpmod at $(.pp_path $module_dir)"
+            +log::info "building zpmod at $(.pp_path $module_dir)"
 
             if [[ -f "$module_dir/Makefile" ]]; then
-                .log::debug 'runnning make clean'
+                +log::debug 'runnning make clean'
                 make clean
             fi
 
             "$module_dir/configure" --enable-cflags='-g -Wall -Wextra -O3' --disable-gdbm --without-tcsetpgrp --quiet
-            .log::debug 'runnning make'
+            +log::debug 'runnning make'
 
             local cores=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
             if command make --jobs="$cores" && [[ -f "$module_dir/Src/zi/zpmod.so" ]]; then
                 cp -f "$module_dir/Src/zi/zpmod.so"  "$module_dir/Src/zi/zpmod.bundle"
-                .log::info '%F{green}zpmod has been built correctly'
+                +log::info '%F{green}zpmod has been built correctly'
                 return 0
             else
-                .log::error 'zpmod failed to build correctly'
+                +log::error 'zpmod failed to build correctly'
                 return 1
             fi
         } always {
@@ -119,7 +121,7 @@ zmodload -F zsh/files -b:chmod
     }
 
     if (( ! ${+commands[git]} )); then
-        .log::error 'no %B%F{green}git%f%b available, cannot proceed'
+        +log::error 'no %B%F{green}git%f%b available, cannot proceed'
         .maybe_continue || return
     fi
 
@@ -132,13 +134,13 @@ zmodload -F zsh/files -b:chmod
     # Install Zinit if missing.
     if [[ ! -d "${ZINIT[BIN_DIR]}/.git" ]]; then
         mkdir -p "${ZINIT[BIN_DIR]:h}"
-        .log::info "installing %B%F{cyan}(zdharma-continuum/zinit)%f%b %B%F{yellow}plugin manager%f%b at $(.pp_path ${ZINIT[BIN_DIR]})"
+        +log::info "installing %B%F{cyan}(zdharma-continuum/zinit)%f%b %B%F{yellow}plugin manager%f%b at $(.pp_path ${ZINIT[BIN_DIR]})"
         git clone https://github.com/zdharma-continuum/zinit.git "${ZINIT[BIN_DIR]}"
 
         if [[ -d "${ZINIT[BIN_DIR]}/.git" ]]; then
-            .log::info "%F{green}successfully installed at $(.pp_path ${ZINIT[BIN_DIR]})"
+            +log::info "%F{green}successfully installed at $(.pp_path ${ZINIT[BIN_DIR]})"
         else
-            .log::error "something went wrong, failed to install Zinit at $(.pp_path ${ZINIT[BIN_DIR]})"
+            +log::error "something went wrong, failed to install Zinit at $(.pp_path ${ZINIT[BIN_DIR]})"
             .maybe_continue || return
         fi
     fi

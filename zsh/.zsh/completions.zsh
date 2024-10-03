@@ -14,6 +14,7 @@ zinit wait lucid blockf for \
 
 # Rust completions.
 zinit wait lucid blockf for \
+    atpull'zinit creinstall -q .' \
     Juici/zsh-rust-completions
 
 # Pnpm completions.
@@ -23,8 +24,9 @@ zinit wait lucid blockf for \
     g-plane/pnpm-shell-completion
 
 # General completions.
-zinit wait lucid blockf for \
-    _local/completions
+zinit wait lucid blockf atpull'zinit creinstall -q .' for \
+    _local/completions \
+    _local/carapace
 
 # }}}
 
@@ -58,6 +60,8 @@ zstyle ':completion:*' matcher-list \
     '+m:{_-}={-_}' \
     'r:|[._-]=* r:|=*' \
     'l:|=* r:|=*'
+
+# zstyle ':completion:*:functions' ignored-patterns '([_-\.]*)'
 
 # Allow completion of ..<Tab> to ../ and beyond.
 zstyle -e ':completion:*' special-dirs '[[ $PREFIX = (../)#(..) ]] && reply=(..)'

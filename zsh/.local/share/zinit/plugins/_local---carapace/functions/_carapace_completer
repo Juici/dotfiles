@@ -1,0 +1,58 @@
+#autoload
+
+function _carapace_completer() {
+  local match mbegin mend IFS='\n'
+
+  local input=$(CARAPACE_ZSH_HASH_DIRS=$(hash -d) carapace "${words[1]}" zsh "${(@)words}")
+
+  local zstyle message data
+  IFS=$'\001' read -rd '' zstyle message data <<<"$input"
+
+  local block tag displays_ values_
+  local -a displays values
+
+  while IFS=$'\002' read -rd $'\002' block; do
+    IFS=$'\003' read -rd '' tag displays_ values_ <<<"$block"
+
+    displays+=( "${(@f)displays_}" )
+    values+=( "${(@f)values_}" )
+  done <<<"$data"
+
+  # Strip trailing spaces.
+  values=( ${values/(#b)(*)' '##/${match[1]}} )
+
+  local -a slashes slashes_displays dots dots_displays
+  local value i=1
+
+  while (( i <= ${#values} )); do
+    value=${values[$i]}
+
+    case "$value" in
+      *'/')
+        slashes+=( "${value[1,-2]}" )
+        slashes_displays+=( "${displays[$i]}" )
+        ;;
+      *'.')
+        dots+=( "${value[1,-2]}" )
+        dots_displays+=( "${displays[$i]}" )
+        ;;
+      *)
+        (( i++ ))
+        continue
+        ;;
+    esac
+
+    values[$i]=()
+    displays[$i]=()
+  done
+
+  zstyle ":completion:${curcontext}:*" list-colors "$zstyle"
+  zstyle ":completion:${curcontext}:*" group-name ''
+
+  # [[ -z "$message" ]] || _message -r "$message"
+
+  _describe 'command' \
+    displays values -qS '' -Q -- \
+    slashes_displays slashes -qS '/' -Q -- \
+    dots_displays dots -qS '.' -Q
+}
