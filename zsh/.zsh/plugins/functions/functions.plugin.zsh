@@ -18,6 +18,11 @@ if [[ $PMSPEC != *b* ]] {
   path+=( "${0:h}/bin" )
 }
 
+# Standard hash for plugins, to not pollute the namespace.
+# https://wiki.zshell.dev/community/zsh_plugin_standard#standard-plugins-hash
+typeset -gA Plugins
+Plugins[FUNCTIONS_DIR]="${0:h}"
+
 autoload -Uz \
   bar \
   parseoffset \

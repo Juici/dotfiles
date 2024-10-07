@@ -61,7 +61,7 @@ typeset -gaU BGNOTIFY_IGNORE=(
     'ssh'
 
     # Any commands defined before loading plugin.
-    $BGNOTIFY_IGNORE
+    "${BGNOTIFY_IGNORE[@]}"
 )
 
 # Get the ID of the active window.

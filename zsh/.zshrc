@@ -10,6 +10,13 @@ Juici[rc]="$HOME/.zshrc"
 Juici[rc_local]="$HOME/.zshrc.local"
 Juici[dot_zsh]="$HOME/.zsh"
 Juici[zpmod]="${Juici[dot_zsh]}/zpmod"
+Juici[plugins]="${Juici[dot_zsh]}/plugins"
+
+# Declare $ZINIT global hashtable.
+typeset -gA ZINIT
+
+ZINIT[HOME_DIR]="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit"
+ZINIT[BIN_DIR]="${ZINIT[HOME_DIR]}/zinit.git"
 
 # Load zsh builtins for common file access commands.
 # Don't override chmod since, the syntax of the zsh builtin differs.
@@ -19,19 +26,20 @@ zmodload -F zsh/files -b:chmod
 
 # Utils {{{
 
-+log::debug() {
-    if (( Juici[debug] )); then
-        print -Pr -- "%B%F{8}debug%f:%b $1%f"
-    fi
++log-debug() {
+    (( Juici[debug] )) && builtin print -- "\e[1;33m[DEBUG\e[2m:${functrace[1]}\e[0;1;33m]\e[0m ${*}\e[0m"
 }
-+log::info() {
-    print -Pr -- "%B%F{blue}info%f:%b $1%f"
++log-operation() {
+    builtin print -- "\e[1;34m::\e[39m ${*}\e[0m"
 }
-+log::warn() {
-    print -Pr -- "%B%F{yellow}warning%f:%b $1%f"
++log-info() {
+    builtin print -- "\e[1;32m==>\e[0m ${*}\e[0m"
 }
-+log::error() {
-    print -Pru2 -- "%B%F{red}error%f:%b $1%f"
++log-warn() {
+    builtin print -- " \e[1;33m->\e[0m ${*}\e[0m"
+}
++log-error() {
+    builtin print -- " \e[1;31m->\e[0m ${*}\e[0m"
 }
 
 # }}}
@@ -40,29 +48,28 @@ zmodload -F zsh/files -b:chmod
 
 {
     .maybe_continue() {
+        +log-warn 'Errors may occur if loading continues'
+
         # Prompt the user if they want to exit the shell.
-        # Gives the user time to read the error and the option continue.
-        local yesno prompt='%B%F{yellow}warning%f:%b errors may occur if loading continues, do you wish to continue? [y/N] '
-        read -sk 1 "yesno?${(%)prompt}"
-        # Add a newline.
+        local yesno prompt="$(+log-operation 'Proceed with loading configs? [y/N] ')"
+        read -sk 1 "yesno?${prompt}"
         print
 
-        case $yesno in
+        case "$yesno" in
             [yY])
-                +log::warning 'continuing loading configs'
+                +log-warning 'Proceeding with loading configs...'
                 return 0
                 ;;
             *)
                 # Default to no.
-                +log::info 'stopping loading configs'
+                +log-info 'Stopped loading configs'
                 return 1
                 ;;
         esac
     }
 
     .pp_path() {
-        local path=$1
-        print -Pr -- "%B%F{magenta}${(D)path}%f%b"
+        print -- "\e[1;33m${(D)path}\e[0m"
     }
 
     .maybe_build_zpmod() {
@@ -75,18 +82,19 @@ zmodload -F zsh/files -b:chmod
         # Make must be available.
         # (( ${+commands[make] } )) || return 1
 
+        +log-info 'zpmod has not been built'
+
         # Prompt the user if they want to build zpmod.
-        local yesno prompt='%B%F{blue}info%f:%b zpmod has not been built, do you wish to build it now? [y/N] '
-        read -sk 1 "yesno?${(%)prompt}"
-        # Add a newline.
+        local yesno prompt="$(+log-operation 'Proceed with building zpmod? [y/N] ')"
+        read -sk 1 "yesno?${prompt}"
         print
 
-        case $yesno in
+        case "$yesno" in
             [yY])
                 ;;
             *)
                 # Default to no.
-                +log::info 'zpmod will not be built'
+                +log-info 'zpmod will not be built'
                 return 1
                 ;;
         esac
@@ -95,23 +103,23 @@ zmodload -F zsh/files -b:chmod
             # Change directory to build zpmod.
             cd "$module_dir" || return 1
 
-            +log::info "building zpmod at $(.pp_path $module_dir)"
+            +log-operation "Building zpmod at $(.pp_path $module_dir)..."
 
             if [[ -f "$module_dir/Makefile" ]]; then
-                +log::debug 'runnning make clean'
+                +log-debug 'make clean'
                 make clean
             fi
 
             "$module_dir/configure" --enable-cflags='-g -Wall -Wextra -O3' --disable-gdbm --without-tcsetpgrp --quiet
-            +log::debug 'runnning make'
+            +log-debug 'make'
 
             local cores=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
             if command make --jobs="$cores" && [[ -f "$module_dir/Src/zi/zpmod.so" ]]; then
                 cp -f "$module_dir/Src/zi/zpmod.so"  "$module_dir/Src/zi/zpmod.bundle"
-                +log::info '%F{green}zpmod has been built correctly'
+                +log-info 'Successfully built zpmod'
                 return 0
             else
-                +log::error 'zpmod failed to build correctly'
+                +log-error 'Failed to build zpmod'
                 return 1
             fi
         } always {
@@ -121,26 +129,20 @@ zmodload -F zsh/files -b:chmod
     }
 
     if (( ! ${+commands[git]} )); then
-        +log::error 'no %B%F{green}git%f%b available, cannot proceed'
+        +log-error 'Missing git executable'
         .maybe_continue || return
     fi
-
-    # Declare $ZINIT global.
-    typeset -gA ZINIT
-
-    ZINIT[HOME_DIR]="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit"
-    ZINIT[BIN_DIR]="${ZINIT[HOME_DIR]}/zinit.git"
 
     # Install Zinit if missing.
     if [[ ! -d "${ZINIT[BIN_DIR]}/.git" ]]; then
         mkdir -p "${ZINIT[BIN_DIR]:h}"
-        +log::info "installing %B%F{cyan}(zdharma-continuum/zinit)%f%b %B%F{yellow}plugin manager%f%b at $(.pp_path ${ZINIT[BIN_DIR]})"
+        +log-operation "Installing Zinit plugin manager at $(.pp_path ${ZINIT[BIN_DIR]})..."
         git clone https://github.com/zdharma-continuum/zinit.git "${ZINIT[BIN_DIR]}"
 
         if [[ -d "${ZINIT[BIN_DIR]}/.git" ]]; then
-            +log::info "%F{green}successfully installed at $(.pp_path ${ZINIT[BIN_DIR]})"
+            +log-info "Successfully installed Zinit"
         else
-            +log::error "something went wrong, failed to install Zinit at $(.pp_path ${ZINIT[BIN_DIR]})"
+            +log-error "Failed to install Zinit"
             .maybe_continue || return
         fi
     fi
@@ -166,9 +168,9 @@ source "${ZINIT[BIN_DIR]}/zinit.zsh"
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 
+# Zinit annexes.
 zinit light-mode for \
-    zdharma-continuum/zinit-annex-meta-plugins \
-    zdharma-continuum/zinit-annex-bin-gem-node
+    zdharma-continuum/zinit-annex-binary-symlink
 
 # }}}
 
@@ -187,7 +189,7 @@ setopt extended_glob
 () {
     local dot_zsh=${Juici[dot_zsh]}
 
-    if [[ -d $dot_zsh ]]; then
+    if [[ -d "$dot_zsh" ]]; then
         local -aU files
 
         # List of possible files to load.
@@ -210,14 +212,14 @@ setopt extended_glob
         )
 
         local file file_path
-        for file in ${files[@]}; do
+        for file in "${files[@]}"; do
             # Source file.
-            file_path="$dot_zsh/$file.zsh"
-            [[ -f $file_path ]] && source $file_path
+            file_path="${dot_zsh}/${file}.zsh"
+            [[ -f "$file_path" ]] && source "$file_path"
 
             # Source local overrides.
-            file_path="$dot_zsh/$file.local.zsh"
-            [[ -f $file_path ]] && source $file_path
+            file_path="${dot_zsh}/${file}.local.zsh"
+            [[ -f "$file_path" ]] && source "$file_path"
         done
     fi
 }

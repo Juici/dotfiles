@@ -9,22 +9,27 @@
 # vivid: LS_COLORS generator.
 # neovim: Replacement for vim.
 zinit wait lucid as'program' from'gh-r' for \
-    if'(( ! ${+commands[rg]} ))' sbin'**/rg' \
+    if'(( ! ${+commands[rg]} ))' lbin'!**/rg' \
         BurntSushi/ripgrep \
-    if'(( ! ${+commands[eza]} ))' sbin'**/eza' cp'completions/eza.zsh _eza' \
+    if'(( ! ${+commands[eza]} ))' lbin'!**/eza' cp'completions/eza.zsh _eza' \
         eza-community/eza \
-    if'(( ! ${+commands[fd]} ))' sbin'**/fd' \
+    if'(( ! ${+commands[fd]} ))' lbin'!**/fd' \
         @sharkdp/fd \
-    if'(( ! ${+commands[bat]} ))' sbin'**/bat' \
+    if'(( ! ${+commands[bat]} ))' lbin'!**/bat' \
         @sharkdp/bat \
-    if'(( ! ${+commands[hexyl]} ))' sbin'**/hexyl' \
+    if'(( ! ${+commands[hexyl]} ))' lbin'!**/hexyl' \
         @sharkdp/hexyl \
-    if'(( ! ${+commands[hyperfine]} ))' sbin'**/hyperfine' \
+    if'(( ! ${+commands[hyperfine]} ))' lbin'!**/hyperfine' \
         @sharkdp/hyperfine \
-    if'(( ! ${+commands[vivid]} ))' sbin'**/vivid' \
+    if'(( ! ${+commands[vivid]} ))' lbin'!**/vivid' \
         @sharkdp/vivid \
-    if'(( ! ${+commands[nvim]} ))' sbin'**/bin/nvim' \
+    if'(( ! ${+commands[nvim]} ))' lbin'!**/bin/nvim' \
         neovim/neovim
+
+zinit wait lucid as'program' for \
+    atclone'cargo build --bins --release' atpull'%atclone' \
+    lbin'!target/release/{termi,supports-kitty-protocol}' \
+        Juici/termi
 
 # }}}
 
@@ -32,6 +37,6 @@ zinit wait lucid as'program' from'gh-r' for \
 
 # Tweaks and configurations for bat.
 zinit wait lucid for \
-    _local/config-bat
+    ${Juici[plugins]}/config-bat
 
 # }}}

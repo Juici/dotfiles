@@ -3,8 +3,8 @@
 # keychain: Keychain SSH/GPG agent.
 # bgnotify: Background notifier for long running commands.
 zinit wait lucid for \
-    has'keychain' _local/keychain \
-    _local/bgnotify
+    has'keychain' "${Juici[plugins]}/keychain" \
+    "${Juici[plugins]}/bgnotify"
 
 # F-Sy-H: Syntax highlighting.
 # zsh-autosuggestions: Auto suggestions.

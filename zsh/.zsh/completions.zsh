@@ -1,32 +1,27 @@
 # Plugins {{{
 
-# Zsh completion functions.
+# zsh-users: general completions
+# zsh-rust-completions: rustc/rustup/cargo
+# pnpm-shell-completion: pnpm
 zinit wait lucid blockf for \
     atpull'zinit creinstall -q .' \
-    zsh-users/zsh-completions
+        zsh-users/zsh-completions \
+    atpull'zinit creinstall -q .' \
+        Juici/zsh-rust-completions \
+    atclone'./zplug.zsh' atpull'%atclone' \
+        g-plane/pnpm-shell-completion
 
 # Python pip completions.
-zinit wait lucid blockf for \
-    as'completion' \
-    OMZP::pip/_pip \
-    atload'unalias pipreq; unalias pipir' \
-    OMZP::pip
-
-# Rust completions.
-zinit wait lucid blockf for \
-    atpull'zinit creinstall -q .' \
-    Juici/zsh-rust-completions
-
-# Pnpm completions.
-zinit wait lucid blockf for \
-    atclone'./zplug.zsh' \
-    atpull'%atclone' \
-    g-plane/pnpm-shell-completion
+# zinit wait lucid blockf for \
+#     as'completion' \
+#         OMZP::pip/_pip \
+#     atload'unalias pipreq; unalias pipir' \
+#         OMZP::pip
 
 # General completions.
-zinit wait lucid blockf atpull'zinit creinstall -q .' for \
-    _local/completions \
-    _local/carapace
+zinit wait lucid blockf for \
+    "${Juici[plugins]}/completions" \
+    "${Juici[plugins]}/carapace"
 
 # }}}
 

@@ -1,3 +1,3 @@
 zinit wait lucid for \
     blockf \
-        _local/functions
+        "${Juici[plugins]}/functions"
