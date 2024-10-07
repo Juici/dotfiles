@@ -3,7 +3,8 @@
 # keychain: Keychain SSH/GPG agent.
 # bgnotify: Background notifier for long running commands.
 zinit wait lucid for \
-    has'keychain' "${Juici[plugins]}/keychain" \
+    has'keychain' \
+        "${Juici[plugins]}/keychain" \
     "${Juici[plugins]}/bgnotify"
 
 # F-Sy-H: Syntax highlighting.
@@ -27,8 +28,8 @@ ZSH_AUTOSUGGEST_USE_ASYNC=1
 ZSH_AUTOSUGGEST_MANUAL_REBIND=1
 
 # Strategy.
-ZSH_AUTOSUGGEST_STRATEGY=(history)
-#ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+# ZSH_AUTOSUGGEST_STRATEGY=(history)
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
 # Widgets.
 ZSH_AUTOSUGGEST_ACCEPT_WIDGETS=(end-of-line)
