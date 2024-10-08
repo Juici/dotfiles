@@ -46,7 +46,8 @@ local function syntax()
   use { 'sheerun/vim-polyglot' }
 
   -- ZI syntax highlighting.
-  use { 'z-shell/zi-vim-syntax' }
+  use { 'zdharma-continuum/zinit-vim-syntax' } -- Zinit syntax in ZSH.
+  use { 'fladson/vim-kitty' } -- kitty config files.
 
   -- Use treesitter for syntax highlighting.
   use {
