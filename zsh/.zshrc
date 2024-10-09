@@ -27,19 +27,66 @@ zmodload -F zsh/files -b:chmod
 # Utils {{{
 
 +log-debug() {
-    (( Juici[debug] )) && builtin print -- "\e[1;33m[DEBUG\e[2m:${functrace[1]}\e[0;1;33m]\e[0m ${*}\e[0m"
+    (( Juici[debug] )) || return
+
+    builtin print -- "\e[1;33m[DEBUG\e[2m:${functrace[1]}\e[0;1;33m]\e[0m ${1}\e[0m"
 }
+
 +log-operation() {
-    builtin print -- "\e[1;34m::\e[39m ${*}\e[0m"
+    builtin print -- "\e[1;34m::\e[39m ${1}\e[0m"
 }
+
 +log-info() {
-    builtin print -- "\e[1;32m==>\e[0m ${*}\e[0m"
+    local depth=0 msg="$1" color prefix
+
+    if (( $# > 1 )); then
+        (( depth = $1 ))
+        msg="$2"
+    fi
+
+    if (( depth > 0 )); then
+        color='1;34'
+        prefix="${(pl:${depth}:)} ->"
+    else
+        color='1;32'
+        prefix='==>'
+    fi
+
+    builtin print -- "\e[${color}m${prefix}\e[0m ${msg}\e[0m"
 }
+
 +log-warn() {
-    builtin print -- " \e[1;33m->\e[0m ${*}\e[0m"
+    local depth=0 msg="$1" color='1;33' prefix
+
+    if (( $# > 1 )); then
+        (( depth = $1 ))
+        msg="$2"
+    fi
+
+    if (( depth > 0 )); then
+        prefix="${(pl:${depth}:)} -> WARNING:"
+    else
+        prefix='==> WARNING:'
+    fi
+
+    builtin print -- "\e[${color}m${prefix}\e[0m ${msg}\e[0m"
 }
+
 +log-error() {
-    builtin print -- " \e[1;31m->\e[0m ${*}\e[0m"
+    local depth=0 msg="$1" color='1;31' prefix
+
+    if (( $# > 1 )); then
+        (( depth = $1 ))
+        msg="$2"
+    fi
+
+    if (( depth > 0 )); then
+        prefix="${(pl:${depth}:)} -> ERROR:"
+    else
+        prefix='==> ERROR:'
+    fi
+
+    builtin print -- "\e[${color}m${prefix}\e[0m ${msg}\e[0m"
 }
 
 # }}}
@@ -57,12 +104,12 @@ zmodload -F zsh/files -b:chmod
 
         case "$yesno" in
             [yY])
-                +log-warning 'Proceeding with loading configs...'
+                +log-info 1 'Proceeding with loading configs...'
                 return 0
                 ;;
             *)
                 # Default to no.
-                +log-info 'Stopped loading configs'
+                +log-info 1 'Stopped loading configs'
                 return 1
                 ;;
         esac
@@ -82,7 +129,7 @@ zmodload -F zsh/files -b:chmod
         # Make must be available.
         # (( ${+commands[make] } )) || return 1
 
-        +log-info 'zpmod has not been built'
+        +log-warn 'zpmod has not been built'
 
         # Prompt the user if they want to build zpmod.
         local yesno prompt="$(+log-operation 'Proceed with building zpmod? [y/N] ')"
@@ -94,7 +141,7 @@ zmodload -F zsh/files -b:chmod
                 ;;
             *)
                 # Default to no.
-                +log-info 'zpmod will not be built'
+                +log-info 1 'zpmod will not be built'
                 return 1
                 ;;
         esac
@@ -103,7 +150,7 @@ zmodload -F zsh/files -b:chmod
             # Change directory to build zpmod.
             cd "$module_dir" || return 1
 
-            +log-operation "Building zpmod at $(.pp_path $module_dir)..."
+            +log-info 1 "Building zpmod at $(.pp_path $module_dir)..."
 
             if [[ -f "$module_dir/Makefile" ]]; then
                 +log-debug 'make clean'
