@@ -243,11 +243,11 @@ setopt extended_glob
         # Arranged in order to prevent conflicts.
         files=(
             'path'
+            'history'
+            'options'
             'colors'
             'completions'
             'prompt'
-            'history'
-            'options'
             'keybinds'
             'aliases'
             'exports'

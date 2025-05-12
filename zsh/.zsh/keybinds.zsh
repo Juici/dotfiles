@@ -44,7 +44,7 @@ bindkey '^[[1;5D' backward-word
 (( ${+terminfo[kRIT5]} )) && bindkey "${terminfo[kRIT5]}" forward-word
 bindkey '^[[1;5C' forward-word
 
-# Bind variations of [Ctrl]+[Shift]+[Alt]+Up to noop.
+# Bind variations of [Ctrl]+[Shift]+[Alt]+{Up,Down} to noop.
 () {
     integer i
     for (( i = 3; i <= 8; i++ )); do

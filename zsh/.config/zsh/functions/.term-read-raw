@@ -1,0 +1,42 @@
+#!/usr/bin/env zsh
+# -*- mode: zsh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+# vim: ft=zsh tw=120 sw=4 sts=4 et foldmarker=[[[,]]]
+
+zmodload zsh/system
+zmodload zsh/datetime
+
+.term-read-raw() {
+    local -i10 tty_fd=$1
+    local filter=$2 buffer
+
+    local -F start timeout leftover
+    ((
+        start = EPOCHREALTIME,
+        timeout = 0.5,
+        leftover = timeout
+    ))
+
+    unset REPLY
+
+    while
+        if ! sysread -i $tty_fd -t $leftover buffer; then
+            (( status == 4 )) && break
+            continue
+        fi
+
+        REPLY+="$buffer"
+
+        while sysread -i $tty_fd -t 0 buffer; do
+            REPLY+="$buffer"
+        done
+
+        [[ "$REPLY" == *${~filter}* ]] && return
+
+        (( 
+            leftover = timeout - (EPOCHREALTIME - start),
+            leftover > 0,
+        ))
+    do :; done
+}
+
+.term-read-raw "$@"

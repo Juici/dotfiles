@@ -1,0 +1,16 @@
+#!/usr/bin/env zsh
+# -*- mode: zsh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+# vim: ft=zsh tw=120 sw=4 sts=4 et foldmarker=[[[,]]]
+
+builtin emulate -LR zsh ${=${options[xtrace]:#off}:+-o xtrace}
+builtin setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
+
+local input
+if (( $# )); then
+    input="$*"
+else
+    input="$(<&0)"
+fi
+
+builtin printf '%02x' "'${(@s::)^input}"
+builtin print

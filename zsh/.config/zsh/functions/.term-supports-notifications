@@ -1,0 +1,50 @@
+#!/usr/bin/env zsh
+# -*- mode: zsh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+# vim: ft=zsh tw=120 sw=4 sts=4 et foldmarker=[[[,]]]
+
+zmodload zsh/system
+
+autoload -Uz .term-read-raw
+
+.term-supports-notifications() {
+    builtin emulate -LR zsh ${=${options[xtrace]:#off}:+-o xtrace}
+    builtin setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
+
+    [[ -v commands[stty] ]] || return 1
+
+    local -i10 tty_fd
+    local REPLY mode seq \
+        notification_filter=$'\e\\]99;[^\e\a]#(\a|\e\\\\)' \
+        da1_filter=$'\e\\[\\?[\x30-\x3f]#[\x20-\x2f]#c'
+
+    # Open TTY.
+    sysopen -rw -o cloexec -u tty_fd /dev/tty || return 1
+
+    {
+        # Get current mode.
+        mode="$(command stty -g <&$tty_fd)"
+
+        # Enable raw mode.
+        command stty raw -echo <&$tty_fd
+        # Send query.
+        builtin print -rn -u $tty_fd $'\e]99;i=1:p=?;\a\e[c'
+
+        # Read terminal response.
+        .term-read-raw $tty_fd "(${notification_filter}|${da1_filter})"
+        seq="$REPLY"
+
+        # Make sure we have read the DA1 response.
+        [[ "$seq" == *${~da1_filter}* ]] || .term-read-raw $tty_fd "${da1_filter}"
+
+        # Check if the terminal responded with support for notifications. 
+        [[ "$seq" == *${~notification_filter}* ]]
+    } always {
+        # Restore mode.
+        [[ -n "$mode" ]] && command stty "$mode" <&$tty_fd
+
+        # Close TTY file descriptor.
+        builtin exec {tty_fd}<&-
+    }
+}
+
+.term-supports-notifications "$@"

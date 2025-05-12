@@ -29,7 +29,7 @@ manpath=(
     $HOME/.local/share/man
     /usr/local/share/man
     /usr/share/man
-    $infopath
+    $manpath
 )
 
 # Paths to look for info pages.

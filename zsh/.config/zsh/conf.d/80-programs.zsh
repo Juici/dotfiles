@@ -1,4 +1,6 @@
-# Programs {{{
+#!/usr/bin/env zsh
+# -*- mode: zsh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+# vim: ft=zsh tw=120 sw=4 sts=4 et foldmarker=[[[,]]]
 
 # rg: Replacement for grep.
 # eza: Replacement for ls.
@@ -30,13 +32,3 @@ zinit wait lucid as'null' for \
     atclone'cargo build --bins --release' atpull'%atclone' \
     lbin'!target/release/termi' \
         Juici/termi
-
-# }}}
-
-# Configs {{{
-
-# Tweaks and configurations for bat.
-zinit wait lucid for \
-    ${Juici[plugins]}/config-bat
-
-# }}}

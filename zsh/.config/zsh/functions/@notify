@@ -1,0 +1,138 @@
+#!/usr/bin/env zsh
+# -*- mode: zsh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+# vim: ft=zsh tw=120 sw=4 sts=4 et foldmarker=[[[,]]]
+
+zmodload zsh/zutil
+
+autoload -Uz @term-supports-notifications
+
+.notify-detect-handler() {
+    if @term-supports-notifications; then
+
+        # Kitty desktop notification protocol.
+        # https://github.com/kovidgoyal/kitty/blob/master/docs/desktop-notifications.rst
+        .notify-handler() {
+            local title="$1" body="$2" timeout="$3" urgency="$4" \
+                PREFIX=$'\e]99;' SUFFIX=$'\a' APP_NAME_BASE64='enNo' \
+                id="${$}-${RANDOM}${RANDOM}" \
+                msg
+
+            if (( timeout > 0 )); then
+                timeout=":w=${timeout}"
+            else
+                timeout=
+            fi
+
+            case "$urgency" in
+                (low)
+                    urgency=':u=0'
+                    ;;
+                (normal)
+                    urgency=':u=1'
+                    ;;
+                (critical)
+                    urgency=':u=2'
+                    ;;
+                (*)
+                    urgency=
+                    ;;
+            esac
+
+            msg+="${PREFIX}i=${id}:f=${APP_NAME_BASE64}${urgency}${timeout}:d=0:p=title;${(V)title}${SUFFIX}"
+            msg+="${PREFIX}i=${id}:d=1:p=body;${(V)body}${SUFFIX}"
+
+            if [[ -t 1 && ! -p /dev/stdout ]]; then
+                builtin print -rn -- "$msg"
+            else
+                builtin print -rn -- "$msg" >/dev/tty
+            fi
+        }
+
+        return 0
+
+    elif [[ -v commands[notify-send] ]]; then
+
+        .notify-handler() {
+            local title="$1" body="$2" timeout="$3" urgency="$4"
+
+            local -a opts=(
+                -a zsh          # App name.
+                -u "$urgency"   # Urgency level.
+            )
+
+            (( timeout > 0 )) && opts+=( -t "$timeout" )
+
+            command notify-send "${opts[@]}" "$title" "$body" &>/dev/null
+        }
+
+        return 0
+
+    fi
+
+    return 1
+}
+
+# TODO: More handlers.
+
+@notify() {
+    builtin emulate -LR zsh ${=${options[xtrace]:#off}:+-o xtrace}
+    builtin setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
+
+    local -A opts
+
+    # Parse options.
+    builtin zparseopts -A opts -D -F -K -M -- \
+        h=-help -help: \
+        t:=-timeout -timeout: \
+        u:=-urgency -urgency: \
+        || return
+
+    # Maybe print help.
+    if [[ -v opts[--help] ]]; then
+        builtin print -r "Sends a desktop notification.
+
+Usage: ${0} [OPTIONS] <TITLE> [BODY]
+
+Options:
+  -h, --help                  Print help
+  -t, --timeout <TIMEOUT_MS>  Duration of the notification in milliseconds
+  -u, --urgency <URGENCY>     Urgency of the notification"
+
+        return 0
+    fi
+
+    # Check for title.
+    if (( $# == 0 )); then
+        builtin print -ru2 "${0}: missing notification title"
+        return 1
+    fi
+
+    local title="$1" body="$2" timeout urgency="normal"
+
+    # Validate timeout.
+    if [[ -v opts[--timeout] ]]; then
+        if [[ "${opts[--timeout]}" != <-> ]]; then
+            builtin print -ru2 "${0}: invalid timeout '${opts[--timeout]}'"
+            return 1
+        fi
+        timeout=$(( [##10] opts[--timeout] ))
+    fi
+
+    # Validate urgency
+    if [[ -v opts[--urgency] ]]; then
+        urgency="${opts[--urgency]}"
+        if [[ "$urgency" != (low|normal|critical) ]]; then
+            builtin print -ru2 "${0}: invalid urgency '${urgency}', expected one of: low, normal, critical"
+            return 1
+        fi
+    fi
+
+    if [[ ! -v functions[.notify-handler] ]] && ! .notify-detect-handler; then
+        builtin print -ru2 "${0}: no notification handler"
+        return 1
+    fi
+
+    .notify-handler "$title" "$body" "$timeout" "$urgency"
+}
+
+@notify "$@"

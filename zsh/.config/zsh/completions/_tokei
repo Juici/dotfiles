@@ -1,0 +1,38 @@
+#compdef tokei
+
+# zsh completion for tokei                               -*- shell-script -*-
+
+_tokei() {
+    local curcontext="$curcontext" ret=1
+
+    local context state state_descr line
+    local -A opt_args
+
+    local -a common
+
+    common=(
+        '(- 1 *)'{-h,--help}'[show help message]'
+    )
+
+    _arguments -s -S -C "${common[@]}" \
+        '(- 1 *)'{-V,--version}'[show version information]' \
+        '1: :_termi_cmds' \
+        '*:: :->args'
+
+    case "$state" in
+        (args)
+            curcontext="${curcontext%:*}-${words[1]}:"
+            case "${words[1]}" in
+                (query)
+                    _arguments -s -S "${common[@]}" \
+                        '1: :_termi_query_cmds'
+                    ;;
+                (help)
+                    _termi_cmds
+                    ;;
+            esac
+            ;;
+    esac
+}
+
+_tokei

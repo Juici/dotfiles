@@ -19,7 +19,7 @@ parseoffset() {
   local -a match mbegin mend reply
 
   # Input string.
-  local input="$@"
+  local input="$*"
 
   # Strip whitespace.
   input=${input//[[:space:]]/}

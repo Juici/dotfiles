@@ -1,0 +1,6 @@
+#!/usr/bin/env zsh
+# -*- mode: zsh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+# vim: ft=zsh tw=120 sw=4 sts=4 et foldmarker=[[[,]]]
+
+builtin print -rn -- $'\e[>2t\e]2;'"${(V)1}"$'\a'
+builtin print -rn -- $'\e]30;'"${(V)1}"$'\a'
