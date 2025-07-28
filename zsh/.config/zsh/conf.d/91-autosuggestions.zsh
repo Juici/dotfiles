@@ -1,4 +1,3 @@
-#!/usr/bin/env zsh
 # -*- mode: zsh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
 # vim: ft=zsh tw=120 sw=4 sts=4 et foldmarker=[[[,]]]
 
@@ -32,8 +31,24 @@ ZSH_AUTOSUGGEST_CLEAR_WIDGETS=(
     tab-complete
 )
 
-# F-Sy-H: Syntax highlighting.
-# zsh-autosuggestions: Auto suggestions.
+→autosuggestions-atload() {
+    unfunction →autosuggestions-atload
+
+    # Use Ctrl+Space to accept whole suggestion.
+    bindkey '^ ' autosuggest-accept
+
+    # If fast-syntax-highlighting is already loaded rebind widgets to fix
+    # highlighting issues from our new keybinds.
+    if (( ${+functions[_zsh_highlight_bind_widgets]} )); then
+        _zsh_highlight_bind_widgets
+    fi
+
+    # Start autosuggestions.
+    _zsh_autosuggest_start
+    # Fetch autosuggestion and redisplay.
+    zle && zle autosuggest-fetch && zle redisplay
+}
+
 zinit wait'0c' lucid nocd for \
-    atload'(( ${+functions[_zsh_highlight_bind_widgets]} )) && _zsh_highlight_bind_widgets; _zsh_autosuggest_start; zle && zle autosuggest-fetch && zle redisplay' \
+    atload'→autosuggestions-atload' \
         zsh-users/zsh-autosuggestions

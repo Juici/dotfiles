@@ -1,4 +1,0 @@
-#compdef carapace
-
-compquote '' 2>/dev/null && _carapace_completer
-compdef _carapace_completer carapace

@@ -130,7 +130,7 @@ fpath+=( "${Juici[functions_dir]}" )
 
             +log-debug 'make'
             if command make --jobs="$cores" && [[ -f "$module_dir/Src/zi/zpmod.so" ]]; then
-                builtin cp -f "$module_dir/Src/zi/zpmod.so"  "$module_dir/Src/zi/zpmod.bundle"
+                command cp -f "$module_dir/Src/zi/zpmod.so"  "$module_dir/Src/zi/zpmod.bundle"
                 +log-info 'Successfully built zpmod'
                 return 0
             else

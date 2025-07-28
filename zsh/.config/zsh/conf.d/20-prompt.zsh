@@ -1,4 +1,3 @@
-#!/usr/bin/env zsh
 # -*- mode: zsh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
 # vim: ft=zsh tw=120 sw=4 sts=4 et foldmarker=[[[,]]]
 
@@ -43,7 +42,7 @@ esac
 Prompt+=(
     pre-ps1     $'%{\e]133;A;k=i;click_events=1;aid='"${Prompt[aid]}"$'\a\e]133;P;k=i\a%}'
     post-ps1    $'%{\e]133;B\a%}'
-    
+
     pre-ps2     $'%{\e]133;A;k=s;click_events=1;aid='"${Prompt[aid]}"$'\a\e]133;P;k=s\a%}'
     post-ps2    $'%{\e]133;B\a%}'
 
@@ -249,10 +248,10 @@ zstyle ':vcs_info:git+set-message:*' hooks git-untracked
 .prompt-username() {
     local user="$USERNAME"
     local -i10 is_root is_ssh
-    
-    (( 
+
+    ((
         is_root = EUID == 0,
-        is_ssh = ${+SSH_CONNECTION} || ${+SSH_CLIENT} || ${+SSH_TTY}
+        is_ssh = ${+SSH_TTY} || ${+SSH_CLIENT} || ${+SSH_CONNECTION}
     ))
 
     # If not root and not an ssh connection: check if the user differs from the login user.
@@ -272,7 +271,10 @@ zstyle ':vcs_info:git+set-message:*' hooks git-untracked
 →prompt-preexec() {
     builtin emulate -LR zsh ${=${options[xtrace]:#off}:+-o xtrace}
     builtin setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
- 
+
+    # builtin print -rn -- "${(%)Prompt[pre-exec]}"
+    builtin print -rn -- $'\e]133;C;'"${(q)1}"$'\a'
+
     Prompt[cmd_duration]=
     Prompt[cmd_start]="${epochtime[@]}"
 }
@@ -299,6 +301,28 @@ zstyle ':vcs_info:git+set-message:*' hooks git-untracked
 
 add-zsh-hook preexec →prompt-preexec
 add-zsh-hook precmd →prompt-precmd
+
+# Handle prompt click events.
+→prompt-onclick-sgr1006() {
+    local b
+
+    # TODO: Parse and handle click.
+    #
+    # https://github.com/kovidgoyal/kitty/blob/a0b73b4c19586488a38cf082b170361773a11040/kitty/mouse.c#L519
+    # https://github.com/kovidgoyal/kitty/blob/a0b73b4c19586488a38cf082b170361773a11040/kitty/mouse.c#L94
+    #
+    # https://github.com/kovidgoyal/kitty/blob/a0b73b4c19586488a38cf082b170361773a11040/shell-integration/zsh/kitty-integration#L56
+
+    # Read bytes until a CSI dispach byte (0x40..=0x7e).
+    while
+        read -k b
+
+        (( #b < 0x40 || #b > 0x7e ))
+    do :; done
+}
+
+zle -N →prompt-onclick-sgr1006
+bindkey '\e[<' →prompt-onclick-sgr1006
 
 # ]]]
 

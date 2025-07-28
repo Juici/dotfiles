@@ -1,4 +1,3 @@
-#!/usr/bin/env zsh
 # -*- mode: zsh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
 # vim: ft=zsh tw=120 sw=4 sts=4 et foldmarker=[[[,]]]
 
@@ -16,7 +15,7 @@
     local depth=0 msg="$1" color='1;34' prefix
 
     if (( $# > 1 )); then
-        (( depth = -$1 ))
+        (( depth = ${msg#-} ))
         msg="$2"
     fi
 
@@ -33,7 +32,7 @@
     local depth=0 msg="$1" color='1;33' prefix
 
     if (( $# > 1 )); then
-        (( depth = -$1 ))
+        (( depth = ${msg#-} ))
         msg="$2"
     fi
 
@@ -50,7 +49,7 @@
     local depth=0 msg="$1" color='1;31' prefix
 
     if (( $# > 1 )); then
-        (( depth = -$1 ))
+        (( depth = ${msg#-} ))
         msg="$2"
     fi
 

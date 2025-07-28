@@ -6,14 +6,11 @@ builtin emulate -LR zsh ${=${options[xtrace]:#off}:+-o xtrace}
 builtin setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
 
 local -a match mbegin mend lines
-local -i10 pad_len
 
-# Get processes.
-lines=( "${(@)${(@f)$(ps -u $USERNAME -o pid,comm)}[2,-1]}" )
+# Get processes, ignoring last line which is the `ps` process itself.
+lines=("${(@)${(@f)$(ps -u $USERNAME -o pid,comm)}[1,-2]}")
+
 # Format output.
-lines=( "${lines[@]//(#b)( #)(<->) ##(*) #/${match[2]}${match[1]} -- ${match[3]}}" )
+lines=("${lines[@]//(#b)( #[^[:space:]]##) (*)/${match[1]} -- ${match[2]}}")
 
-# Get padding from last line match, subtract 3 for "PID" string. 
-pad_len=$(( ${#match[2]} - 3 ))
-
-builtin print -l "PID${(pl:${pad_len}:)}  -- COMMAND" "${lines[@]}"
+builtin print -l "${lines[@]}"

@@ -1,4 +1,3 @@
-#!/usr/bin/env zsh
 # -*- mode: zsh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
 # vim: ft=zsh tw=120 sw=4 sts=4 et foldmarker=[[[,]]]
 
@@ -56,10 +55,10 @@ zstyle -e ':completion:*' special-dirs '[[ $PREFIX = (../)#(..) ]] && reply=(..)
 # they will only be used as a fallback if no completions are found.
 zstyle ':completion:*:complete:(cd|pushd):*' tag-order 'local-directories named-directories'
 
-# Colour processes.
+# Format and colour processes.
 zstyle ':completion:*:*:*:*:processes' command 'list-processes'
 zstyle ':completion:*:*:*:*:processes' list-colors '=(#b) #([0-9]##) ##-- ##(*) #=2=0=01;34'
-zstyle ':completion:*:*:*:*:processes' sort numeric
+zstyle ':completion:*:*:*:*:processes' sort false
 
 # Don't complete user pollution.
 () {

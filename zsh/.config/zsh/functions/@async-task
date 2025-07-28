@@ -4,6 +4,24 @@
 
 typeset -gA AsyncTasks
 
+→async-task-callback() {
+    local -i10 fd=$1
+    local output callback="${AsyncTasks[$fd]}"
+
+    # Remove entry from task map.
+    builtin unset "AsyncTasks[$fd]"
+
+    # Remove the handler.
+    builtin zle -F $fd
+    # Read from the file descriptor.
+    output="$(<&$fd)"
+    # Close the file descriptor.
+    builtin exec {fd}<&-
+
+    # Call the user callback with the task output.
+    "$callback" "$output"
+}
+
 @async-task() {
     builtin emulate -LR zsh ${=${options[xtrace]:#off}:+-o xtrace}
     builtin setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
@@ -19,20 +37,4 @@ typeset -gA AsyncTasks
     builtin zle -F "$fd" →async-task-callback
 }
 
-→async-task-callback() {
-    local -i10 fd=$1
-    local output callback="${AsyncTasks[$fd]}"
-
-    # Remove entry from task map.
-    builtin unset "AsyncTasks[$fd]"
-
-    # Remove the handler.
-    builtin zle -F $fd
-    # Read from the file descriptor.
-    output="$(<&$fd)"
-    # Close the file descriptor.
-    builtin exec {fd}<&-
-
-    # Call the user callback with the task ID and task output.
-    "$callback" "$output"
-}
+@async-task "$@"

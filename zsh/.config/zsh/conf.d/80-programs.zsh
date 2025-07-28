@@ -1,4 +1,3 @@
-#!/usr/bin/env zsh
 # -*- mode: zsh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
 # vim: ft=zsh tw=120 sw=4 sts=4 et foldmarker=[[[,]]]
 
@@ -16,15 +15,15 @@ zinit wait lucid as'null' from'gh-r' for \
     if'(( ! ${+commands[eza]} ))' lbin'!**/eza' cp'completions/eza.zsh _eza' \
         eza-community/eza \
     if'(( ! ${+commands[fd]} ))' lbin'!**/fd' \
-        sharkdp/fd \
+        @sharkdp/fd \
     if'(( ! ${+commands[bat]} ))' lbin'!**/bat' \
-        sharkdp/bat \
+        @sharkdp/bat \
     if'(( ! ${+commands[hexyl]} ))' lbin'!**/hexyl' \
-        sharkdp/hexyl \
+        @sharkdp/hexyl \
     if'(( ! ${+commands[hyperfine]} ))' lbin'!**/hyperfine' \
-        sharkdp/hyperfine \
+        @sharkdp/hyperfine \
     if'(( ! ${+commands[vivid]} ))' lbin'!**/vivid' \
-        sharkdp/vivid \
+        @sharkdp/vivid \
     if'(( ! ${+commands[nvim]} ))' lbin'!**/bin/nvim' \
         neovim/neovim
 
