@@ -1,3 +1,0 @@
-#!/bin/sh
-
-"$HOME/.local/share/kitty_dropdown/kitty_dropdown" "$@"
