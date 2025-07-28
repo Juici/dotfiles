@@ -99,11 +99,10 @@ zstyle ':vcs_info:git+set-message:*' hooks git-untracked
     if (( n == 6 )); then
         # Untracked files are marked by lines starting '??', so we filter on
         # those lines.
-        local -a untracked
-        untracked=( "${(@M)${(@f)"$(git status --porcelain --no-ahead-behind --no-renames --ignore-submodules=all --untracked-files=all 2>/dev/null)"}##'??'*}" )
+        local untracked=${#${(@M)"${(@f)"$(git status --porcelain --no-ahead-behind --no-renames --ignore-submodules=all --untracked-files=all 2>/dev/null)"}"##'??'*}}
 
         # If there are untracked files update the message.
-        if (( ${#untracked} > 0 )); then
+        if (( untracked > 0 )); then
             # Override the message.
             hook_com[message]='1'
             # Set `ret` to non-zero so that our message is used.
