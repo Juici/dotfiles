@@ -12,7 +12,7 @@
 zinit wait lucid as'null' from'gh-r' for \
     if'(( ! ${+commands[rg]} ))' lbin'!**/rg' \
         BurntSushi/ripgrep \
-    if'(( ! ${+commands[eza]} ))' lbin'!**/eza' cp'completions/eza.zsh _eza' \
+    if'(( ! ${+commands[eza]} ))' lbin'!**/eza' \
         eza-community/eza \
     if'(( ! ${+commands[fd]} ))' lbin'!**/fd' \
         @sharkdp/fd \
@@ -24,7 +24,7 @@ zinit wait lucid as'null' from'gh-r' for \
         @sharkdp/hyperfine \
     if'(( ! ${+commands[vivid]} ))' lbin'!**/vivid' \
         @sharkdp/vivid \
-    if'(( ! ${+commands[nvim]} ))' lbin'!**/bin/nvim' \
+    if'(( ! ${+commands[nvim]} ))' bpick'*.tar.gz' lbin'!**/bin/nvim' \
         neovim/neovim
 
 zinit wait lucid as'null' for \
