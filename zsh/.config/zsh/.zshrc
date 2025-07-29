@@ -4,7 +4,7 @@
 
 # Setup [[[
 
-# Freeze TTY settings. 
+# Freeze TTY settings.
 builtin ttyctl -f
 
 # Access internal hash tables for special shell parameters.
