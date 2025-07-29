@@ -2,6 +2,9 @@
 # -*- mode: zsh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
 # vim: ft=zsh tw=120 sw=4 sts=4 et foldmarker=[[[,]]]
 
+# Skip Ubuntu global compinit.
+export skip_global_compinit=1
+
 # XDG.
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-"${HOME}/.config"}"
 export XDG_CACHE_HOME="${XDG_CACHE_HOME:-"${HOME}/.cache"}"
