@@ -2,7 +2,20 @@
 # vim: ft=zsh tw=120 sw=4 sts=4 et foldmarker=[[[,]]]
 
 # Keychain command is required.
-# (( ${+commands[keychain]} )) || return
+(( ${+commands[keychain]} )) || return
+
+[[ -o interactive ]] || {
+    eval "$(
+        keychain \
+            --eval \
+            --quiet \
+            --noask \
+            --confallhosts \
+            --ignore-missing \
+            ${HOME}/.ssh/*.pub(.N:t:r)
+    )"
+    return
+}
 
 →keychain-eval-callback() {
     local keychain_eval=$1
