@@ -152,7 +152,7 @@ fpath+=( "${Juici[functions_dir]}" )
     if [[ ! -d "${ZINIT[BIN_DIR]}/.git" ]]; then
         builtin mkdir -p "${ZINIT[BIN_DIR]:h}"
         +log-operation "Installing Zinit plugin manager at $(.pp-path ${ZINIT[BIN_DIR]})..."
-        command git clone https://github.com/zdharma-continuum/zinit.git "${ZINIT[BIN_DIR]}"
+        command git clone https://github.com/Juici/zinit.git "${ZINIT[BIN_DIR]}"
 
         if [[ -d "${ZINIT[BIN_DIR]}/.git" ]]; then
             +log-info "Successfully installed Zinit"
