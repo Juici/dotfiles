@@ -310,7 +310,7 @@ add-zsh-hook precmd →prompt-precmd
     # https://github.com/kovidgoyal/kitty/blob/a0b73b4c19586488a38cf082b170361773a11040/kitty/mouse.c#L519
     # https://github.com/kovidgoyal/kitty/blob/a0b73b4c19586488a38cf082b170361773a11040/kitty/mouse.c#L94
     #
-    # https://github.com/kovidgoyal/kitty/blob/a0b73b4c19586488a38cf082b170361773a11040/shell-integration/zsh/kitty-integration#L56
+    # https://github.com/kovidgoyal/kitty/blob/a0b73b4c19586488a38cf082b170361773a11040/shell-integration/zsh/kitty-integration
 
     # Read bytes until a CSI dispach byte (0x40..=0x7e).
     while
