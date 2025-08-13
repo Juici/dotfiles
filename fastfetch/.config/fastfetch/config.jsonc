@@ -1,0 +1,128 @@
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "auto",
+    "source": "~/.config/fastfetch/images/shiro.png",
+    "height": 20,
+    "padding": {
+      "top": 1,
+      "left": 5,
+      "right": 5
+    }
+  },
+  "display": {
+    "separator": "  ",
+    "color": {
+      "keys": "blue",
+      "separator": "1" // Bold,
+    },
+    "constants": ["────────────────────────────"],
+    "key": {
+      "type": "icon",
+      "paddingLeft": 4
+    }
+  },
+  "modules": [
+    "break",
+    // ====================
+    // Hardware
+    // ====================
+    {
+      "type": "custom",
+      "format": "{#1;90}┌{$1} Hardware {$1}┐"
+    },
+    {
+      "type": "host"
+    },
+    {
+      "type": "display",
+      "format": "{width}x{height} @ {refresh-rate}Hz {#2}({inch}\")  [{type}]{?is-primary} *{?}"
+      // "compactType": "original-with-refresh-rate"
+    },
+    {
+      "type": "cpu",
+      "format": "{name}  {?temperature}{temperature} {?}{#2}[C:{core-types}] [{freq-max}]",
+      "showPeCoreCount": true
+      // "temp": true
+    },
+    {
+      "type": "gpu",
+      "format": "{name}  {?temperature}{temperature} {?}{#2}{/shared-total}{?dedicated-total}[{dedicated-total}] {?}{/}{?frequency}[{frequency}] {?}[{type}]",
+      "detectionMethod": "auto"
+      // "temp": true,
+      // "driverSpecific": true
+    },
+    {
+      "type": "memory",
+      "format": "{used} / {total} ({percentage})"
+    },
+    {
+      "type": "disk",
+      "format": "{size-used} / {size-total} ({size-percentage})  {#2}[{filesystem}] [{mount-from}:{mountpoint}]"
+    },
+    {
+      "type": "battery",
+      "format": "{capacity}  {?temperature}{temperature} {?}{#2}[{status}]"
+      // "temp": true
+    },
+    // ====================
+    // Software
+    // ====================
+    {
+      "type": "custom",
+      "format": "{#90}├{$1} Software {$1}┤"
+    },
+    {
+      "type": "bios",
+      "format": "{vendor} {release}  {#2}[v{version}] [{type}]"
+    },
+    {
+      "type": "os",
+      "format": "{?pretty-name}{pretty-name}{?}{/pretty-name}{name}{/}  {#2}[v{version}] [{arch}]"
+    },
+    {
+      "type": "kernel",
+      "format": "{sysname}  {#2}[v{release}]"
+    },
+    {
+      "type": "lm",
+      "format": "{service}  {#2}[v{version}] [{type}]"
+    },
+    {
+      "type": "wm",
+      "format": "{pretty-name}  {#2}[{protocol-name}]"
+    },
+    {
+      "type": "de",
+      "format": "{pretty-name}  {#2}{?version}[v{version}]{?}"
+    },
+    {
+      "type": "packages",
+      "format": "{?pacman}{pacman} (pacman){?pacman-branch} {#2}[{pacman-branch}]{#}{?}{?}{?dpkg}, {dpkg} (dpkg){?}{?flatpak-all}, {flatpak-all} (flatpak){?}{?snap}, {snap} (snap){?}"
+    },
+    {
+      "type": "terminal",
+      "format": "{pretty-name}  {#2}{?version}[v{version}] {?}[PID:{pid}] [{tty}]"
+    },
+    {
+      "type": "shell",
+      "format": "{pretty-name}  {#2}[v{version}] [PID:{pid}]"
+    },
+    // ====================
+    // Extra
+    // ====================
+    {
+      "type": "custom",
+      "format": "{#1;90}└{$1}──────────{$1}┘"
+    },
+    // {
+    //   "type": "uptime"
+    // },
+    "break",
+    {
+      "type": "colors",
+      "paddingLeft": 22
+      // "symbol": "circle"
+    }
+  ]
+}
