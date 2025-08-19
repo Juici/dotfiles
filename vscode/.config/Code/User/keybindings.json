@@ -1,0 +1,156 @@
+// Use along with IntelliJ IDEA Keybindings extension.
+[
+  // Save/Format.
+  {
+    "key": "ctrl+s",
+    "command": "workbench.action.files.saveWithoutFormatting",
+    "when": "editorTextFocus && !editorReadonly && !inCompositeEditor"
+  },
+  {
+    "key": "ctrl+shift+s",
+    "command": "workbench.action.files.save",
+    "when": "editorTextFocus && !editorReadonly && !inCompositeEditor"
+  },
+
+  {
+    "key": "ctrl+r",
+    "command": "editor.action.startFindReplaceAction",
+    "when": "editorFocus && !editorReadonly || editorIsOpen && !editorReadonly"
+  },
+
+  // Multicursor.
+  {
+    "key": "ctrl+alt+up",
+    "command": "editor.action.insertCursorAbove",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "ctrl+alt+down",
+    "command": "editor.action.insertCursorBelow",
+    "when": "editorTextFocus"
+  },
+
+  // Rust move item.
+  {
+    "key": "ctrl+shift+up",
+    "command": "rust-analyzer.moveItemUp",
+    "when": "editorLangId == rust && editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "ctrl+shift+down",
+    "command": "rust-analyzer.moveItemDown",
+    "when": "editorLangId == rust && editorTextFocus && !editorReadonly"
+  },
+  // Move lines.
+  {
+    "key": "ctrl+shift+up",
+    "command": "editor.action.moveLinesUpAction",
+    "when": "editorLangId != rust && editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "ctrl+shift+down",
+    "command": "editor.action.moveLinesDownAction",
+    "when": "editorLangId != rust && editorTextFocus && !editorReadonly"
+  },
+
+  // Disabled keybindings.
+  {
+    "key": "ctrl+y",
+    "command": "-redo"
+  },
+  {
+    "key": "ctrl+shift+i",
+    "command": "-editor.action.formatDocument"
+  },
+  {
+    "key": "ctrl+alt+l",
+    "command": "-editor.action.formatDocument"
+  },
+  {
+    "key": "ctrl+shift+i",
+    "command": "-editor.action.formatDocument.none"
+  },
+  {
+    "key": "ctrl+f2",
+    "command": "-editor.action.changeAll"
+  },
+  {
+    "key": "ctrl+shift+s",
+    "command": "-workbench.action.files.saveAs"
+  },
+  {
+    "key": "ctrl+shift+s",
+    "command": "-workbench.action.files.saveLocalFile"
+  },
+  {
+    "key": "ctrl+q",
+    "command": "-workbench.action.quit"
+  },
+  {
+    "key": "ctrl+w",
+    "command": "-editor.action.smartSelect.grow"
+  },
+  {
+    "key": "shift+f6",
+    "command": "-workbench.action.focusPreviousPart"
+  },
+  {
+    "key": "ctrl+r",
+    "command": "-workbench.action.openRecent"
+  },
+  {
+    "key": "ctrl+r",
+    "command": "-editor.action.startFindReplaceAction"
+  },
+  {
+    "key": "ctrl+h",
+    "command": "-editor.action.startFindReplaceAction"
+  },
+  {
+    "key": "ctrl+alt+left",
+    "command": "-workbench.action.navigateBack"
+  },
+  {
+    "key": "ctrl+alt+right",
+    "command": "-workbench.action.navigateForward"
+  },
+  {
+    "key": "ctrl+shift+up",
+    "command": "-editor.action.insertCursorAbove"
+  },
+  {
+    "key": "ctrl+shift+down",
+    "command": "-editor.action.insertCursorBelow"
+  },
+  {
+    "key": "ctrl+shift+down",
+    "command": "-editor.action.moveLinesDownAction"
+  },
+  {
+    "key": "ctrl+shift+up",
+    "command": "-editor.action.moveLinesUpAction"
+  },
+  {
+    "key": "ctrl+shift+f12",
+    "command": "-workbench.action.maximizeEditor"
+  },
+  {
+    "key": "ctrl+t",
+    "command": "-git.sync"
+  },
+  {
+    "key": "ctrl+shift+t",
+    "command": "-java.test.goToTest",
+    "when": "editorTextFocus && java:testRunnerActivated"
+  },
+  {
+    "key": "f5",
+    "command": "workbench.action.debug.continue",
+    "when": "inDebugMode && debugState == 'stopped'"
+  },
+  {
+    "key": "f5",
+    "command": "-workbench.action.debug.continue",
+    "when": "debugState == 'stopped'"
+  }
+]
