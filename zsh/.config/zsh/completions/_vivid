@@ -1,0 +1,3 @@
+#compdef vivid
+
+compdef _carapace_completer vivid
