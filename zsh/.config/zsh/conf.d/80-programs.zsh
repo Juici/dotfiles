@@ -24,8 +24,12 @@ zinit wait lucid as'null' from'gh-r' for \
         @sharkdp/hyperfine \
     if'(( ! ${+commands[vivid]} ))' lbin'!**/vivid' \
         @sharkdp/vivid \
+    if'(( ! ${+commands[dust]} ))' lbin'!**/dust' \
+        bootandy/dust \
     if'(( ! ${+commands[nvim]} ))' bpick'*.tar.gz' lbin'!**/bin/nvim' \
-        neovim/neovim
+        neovim/neovim \
+    if'(( ! ${+commands[mold]} ))' lbin'!**/bin/mold' \
+        rui314/mold
 
 zinit wait lucid as'null' for \
     atclone'cargo build --bins --release' atpull'%atclone' \
