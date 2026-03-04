@@ -1,5 +1,15 @@
 // Use along with IntelliJ IDEA Keybindings extension.
 [
+  // Switch between tabs.
+  {
+    "key": "ctrl+tab",
+    "command": "workbench.action.nextEditor"
+  },
+  {
+    "key": "ctrl+shift+tab",
+    "command": "workbench.action.previousEditor"
+  },
+
   // Save/Format.
   {
     "key": "ctrl+s",
@@ -12,6 +22,7 @@
     "when": "editorTextFocus && !editorReadonly && !inCompositeEditor"
   },
 
+  // Find/Replace only when editor is not readonly.
   {
     "key": "ctrl+r",
     "command": "editor.action.startFindReplaceAction",
