@@ -1,0 +1,12 @@
+#compdef git-unlock
+#description delete abandoned index.lock file
+
+_git-unlock() {}
+
+# don't run the completion function when being source-ed or eval-ed
+if [ "${funcstack[1]}" = "_git-unlock" ]; then
+    _git-unlock
+fi
+
+# -*- mode: zsh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+# vim: ft=zsh tw=120 sw=4 sts=4 et foldmarker=[[[,]]]
