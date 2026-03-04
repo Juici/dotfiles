@@ -20,7 +20,16 @@ export LESS='-RMSK --mouse --wheel-lines=3'
 export SYSTEMD_LESS='-FRSMK --mouse --wheel-lines=3'
 
 # Fix electron wastebin problem.
-export ELECTRON_TRASH='kioclient5'
+() {
+    local -a progs=( 'kioclient' 'kioclient5' )
+    local prog
+    for prog in "${progs[@]}"; do
+        if [[ -v commands["${prog}"] ]]; then
+            export ELECTRON_TRASH="${prog}"
+            break
+        fi
+    done
+}
 
 # Enable command history in IEx.
 export ERL_AFLAGS='-kernel shell_history enabled -kernel shell_history_file_bytes 1024000'
