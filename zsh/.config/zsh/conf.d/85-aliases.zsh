@@ -24,7 +24,7 @@ alias diff='diff -u --color=auto'
 
 # Eza aliases.
 if (( $+commands[eza] )); then
-    alias eza='eza --colour=auto --extended --git'
+    alias eza='eza --extended --git'
     alias e='eza'
     alias ea='eza --all'
     alias el='eza --long'
@@ -58,5 +58,12 @@ alias gr='git remote'
 
 alias gsb='git status -sb'
 alias gst='git status'
+
+# ]]]
+
+# Python. [[[
+
+(( ${+commands[python3]} && ! ${+commands[python]} )) && alias python='python3'
+(( ${+commands[ipython3]} && ! ${+commands[ipython]} )) && alias ipython='ipython3'
 
 # ]]]
