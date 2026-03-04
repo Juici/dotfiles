@@ -40,10 +40,10 @@ esac
 
 # Control sequences for shell integration with terminal.
 Prompt+=(
-    pre-ps1     $'%{\e]133;A;k=i;click_events=1;aid='"${Prompt[aid]}"$'\a\e]133;P;k=i\a%}'
+    pre-ps1     $'%{\e]133;A;k=i;cl=m;aid='"${Prompt[aid]}"$'\a\e]133;P;k=i\a%}'
     post-ps1    $'%{\e]133;B\a%}'
 
-    pre-ps2     $'%{\e]133;A;k=s;click_events=1;aid='"${Prompt[aid]}"$'\a\e]133;P;k=s\a%}'
+    pre-ps2     $'%{\e]133;A;k=s;cl=m;aid='"${Prompt[aid]}"$'\a\e]133;P;k=s\a%}'
     post-ps2    $'%{\e]133;B\a%}'
 
     # pre-exec    $'%{\e]133;C;cmdline=%1v\a%}'
@@ -113,7 +113,7 @@ zstyle ':vcs_info:git+set-message:*' hooks git-untracked
 
 .prompt-async-vcsinfo() {
     # If it looks like we are no longer within the VCS tree, then clear the VCS info from the prompt.
-    if [[ -n "${Prompt[vcs_root]}" ]] && [[ "$PWD" != "${Prompt[vcs_root]}"* ]]; then
+    if [[ -n "${Prompt[vcs_root]}" ]] && [[ "${PWD:P}" != "${Prompt[vcs_root]}"* ]]; then
         Prompt[vcs_root]=
         Prompt[vcs_info]=
     fi
@@ -249,7 +249,7 @@ zstyle ':vcs_info:git+set-message:*' hooks git-untracked
     local -i10 is_root is_ssh
 
     ((
-        is_root = EUID == 0,
+        is_root = (EUID == 0),
         is_ssh = ${+SSH_TTY} || ${+SSH_CLIENT} || ${+SSH_CONNECTION}
     ))
 
@@ -292,6 +292,8 @@ zstyle ':vcs_info:git+set-message:*' hooks git-untracked
         Prompt[cmd_duration]="$(.prompt-format-duration "${time[@]}" "${(z)Prompt[cmd_start]}")"
         Prompt[cmd_start]=
     else
+        builtin print -rn -- $'\e]133;D;'"${cmd_status};err=CANCEL;aid=${Prompt[aid]}"$'\a'
+
         Prompt[cmd_duration]=
     fi
 
