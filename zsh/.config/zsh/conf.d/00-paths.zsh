@@ -15,6 +15,7 @@ path=(
     "${HOME}/.local/bin"
     "${HOME}/.cargo/bin"
     "${^gopath[@]}/bin"
+    "${ZPFX}/bin"
     /usr/local/{,s}bin
     /usr/{,s}bin
     /{,s}bin
@@ -35,4 +36,9 @@ infopath=(
     /usr/local/share/info
     /usr/share/info
     "${infopath[@]}"
+)
+
+fpath=(
+    "${fpath[@]}"
+    /usr/{,local/}share/zsh/{site-functions,vendor-completions}
 )
