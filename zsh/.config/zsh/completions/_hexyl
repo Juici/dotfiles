@@ -1,0 +1,87 @@
+#compdef hexyl
+
+autoload -U is-at-least
+
+_hexyl() {
+    typeset -A opt_args
+    typeset -a _arguments_options
+    local ret=1
+
+    if is-at-least 5.2; then
+        _arguments_options=(-s -S -C)
+    else
+        _arguments_options=(-s -C)
+    fi
+
+    local context curcontext="$curcontext" state line
+    _arguments "${_arguments_options[@]}" : \
+'-n+[Only read N bytes from the input. The N argument can also include a unit with a decimal prefix (kB, MB, ..) or binary prefix (kiB, MiB, ..), or can be specified using a hex number. The short option '\''-l'\'' can be used as an alias. Examples\: --length=64, --length=4KiB, --length=0xff]:N:_default' \
+'-c+[Only read N bytes from the input. The N argument can also include a unit with a decimal prefix (kB, MB, ..) or binary prefix (kiB, MiB, ..), or can be specified using a hex number. The short option '\''-l'\'' can be used as an alias. Examples\: --length=64, --length=4KiB, --length=0xff]:N:_default' \
+'--length=[Only read N bytes from the input. The N argument can also include a unit with a decimal prefix (kB, MB, ..) or binary prefix (kiB, MiB, ..), or can be specified using a hex number. The short option '\''-l'\'' can be used as an alias. Examples\: --length=64, --length=4KiB, --length=0xff]:N:_default' \
+'--bytes=[Only read N bytes from the input. The N argument can also include a unit with a decimal prefix (kB, MB, ..) or binary prefix (kiB, MiB, ..), or can be specified using a hex number. The short option '\''-l'\'' can be used as an alias. Examples\: --length=64, --length=4KiB, --length=0xff]:N:_default' \
+'-s+[Skip the first N bytes of the input. The N argument can also include a unit (see \`--length\` for details). A negative value is valid and will seek from the end of the file.]:N:_default' \
+'--skip=[Skip the first N bytes of the input. The N argument can also include a unit (see \`--length\` for details). A negative value is valid and will seek from the end of the file.]:N:_default' \
+'--block-size=[Sets the size of the \`block\` unit to SIZE. Examples\: --block-size=1024, --block-size=4kB]:SIZE:_default' \
+'--color=[When to use colors]:WHEN:((always\:"Always use colorized output"
+auto\:"Only displays colors if the output goes to an interactive terminal"
+never\:"Do not use colorized output"
+force\:"Override the NO_COLOR environment variable"))' \
+'--border=[Whether to draw a border]:STYLE:((unicode\:"Draw a border with Unicode characters"
+ascii\:"Draw a border with ASCII characters"
+none\:"Do not draw a border at all"))' \
+'--character-table=[Defines how bytes are mapped to characters]:FORMAT:((default\:"Show printable ASCII characters as-is, '\''⋄'\'' for NULL bytes, '\'' '\'' for space, '\''_'\'' for other ASCII whitespace, '\''•'\'' for other ASCII characters, and '\''×'\'' for non-ASCII bytes"
+ascii\:"Show printable ASCII as-is, '\'' '\'' for space, '\''.'\'' for everything else"
+codepage-1047\:"Show printable EBCDIC as-is, '\'' '\'' for space, '\''.'\'' for everything else"
+codepage-437\:"Uses code page 437 (for non-ASCII bytes)"
+braille\:"Uses braille characters for non-printable bytes"))' \
+'--color-scheme=[Defines the color scheme for the characters]:FORMAT:((default\:"Show the default colors\: bright black for NULL bytes, green for ASCII space characters and non-printable ASCII, cyan for printable ASCII characters, and yellow for non-ASCII bytes"
+gradient\:"Show bright black for NULL bytes, cyan for printable ASCII characters, a gradient from pink to violet for non-printable ASCII characters and a heatmap-like gradient from red to yellow to white for non-ASCII bytes"))' \
+'-o+[Add N bytes to the displayed file position. The N argument can also include a unit (see \`--length\` for details). A negative value is valid and calculates an offset relative to the end of the file.]:N:_default' \
+'--display-offset=[Add N bytes to the displayed file position. The N argument can also include a unit (see \`--length\` for details). A negative value is valid and calculates an offset relative to the end of the file.]:N:_default' \
+'--panels=[Sets the number of hex data panels to be displayed. \`--panels=auto\` will display the maximum number of hex data panels based on the current terminal width. By default, hexyl will show two panels, unless the terminal is not wide enough for that]:N:_default' \
+'-g+[Number of bytes/octets that should be grouped together. You can use the '\''--endianness'\'' option to control the ordering of the bytes within a group. '\''--groupsize'\'' can be used as an alias (xxd-compatibility)]:N:((1\:"Grouped together every byte/octet"
+2\:"Grouped together every 2 bytes/octets"
+4\:"Grouped together every 4 bytes/octets"
+8\:"Grouped together every 8 bytes/octets"))' \
+'--group-size=[Number of bytes/octets that should be grouped together. You can use the '\''--endianness'\'' option to control the ordering of the bytes within a group. '\''--groupsize'\'' can be used as an alias (xxd-compatibility)]:N:((1\:"Grouped together every byte/octet"
+2\:"Grouped together every 2 bytes/octets"
+4\:"Grouped together every 4 bytes/octets"
+8\:"Grouped together every 8 bytes/octets"))' \
+'--endianness=[Whether to print out groups in little-endian or big-endian format. This option only has an effect if the '\''--group-size'\'' is larger than 1. '\''-e'\'' can be used as an alias for '\''--endianness=little'\'']:FORMAT:((little\:"Print out groups in little-endian format"
+big\:"Print out groups in big-endian format"))' \
+'-b+[Sets the base used for the bytes. The possible options are binary, octal, decimal, and hexadecimal]:B:_default' \
+'--base=[Sets the base used for the bytes. The possible options are binary, octal, decimal, and hexadecimal]:B:_default' \
+'(--panels)--terminal-width=[Sets the number of terminal columns to be displayed. Since the terminal width may not be an evenly divisible by the width per hex data column, this will use the greatest number of hex data panels that can fit in the requested width but still leave some space to the right. Cannot be used with other width-setting options.]:N:_default' \
+'--completion=[Show shell completion for a certain shell]:SHELL:(bash elvish fish powershell zsh)' \
+'-v[Displays all input data. Otherwise any number of groups of output lines which would be identical to the preceding group of lines, are replaced with a line comprised of a single asterisk]' \
+'--no-squeezing[Displays all input data. Otherwise any number of groups of output lines which would be identical to the preceding group of lines, are replaced with a line comprised of a single asterisk]' \
+'-p[Display output with --no-characters, --no-position, --border=none, and --color=never]' \
+'--plain[Display output with --no-characters, --no-position, --border=none, and --color=never]' \
+'--no-characters[Do not show the character panel on the right]' \
+'-C[Show the character panel on the right. This is the default, unless --no-characters has been specified]' \
+'--characters[Show the character panel on the right. This is the default, unless --no-characters has been specified]' \
+'-P[Whether to display the position panel on the left]' \
+'--no-position[Whether to display the position panel on the left]' \
+'-e[An alias for '\''--endianness=little'\'']' \
+'--print-color-table[Print a table showing how different types of bytes are colored]' \
+'(-e --endianness)-i[Output in C include file style]' \
+'(-e --endianness)--include[Output in C include file style]' \
+'-h[Print help (see more with '\''--help'\'')]' \
+'--help[Print help (see more with '\''--help'\'')]' \
+'-V[Print version]' \
+'--version[Print version]' \
+'::file -- The file to display. If no FILE argument is given, read from STDIN:_files' \
+&& ret=0
+}
+
+(( $+functions[_hexyl_commands] )) ||
+_hexyl_commands() {
+    local commands; commands=()
+    _describe -t commands 'hexyl commands' commands "$@"
+}
+
+if [ "$funcstack[1]" = "_hexyl" ]; then
+    _hexyl "$@"
+else
+    compdef _hexyl hexyl
+fi
