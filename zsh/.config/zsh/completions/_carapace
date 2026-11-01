@@ -1,3 +1,0 @@
-#compdef carapace
-
-compdef _carapace_completer carapace
