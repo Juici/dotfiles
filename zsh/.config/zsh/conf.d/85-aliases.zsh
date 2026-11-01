@@ -20,10 +20,10 @@ alias lla='ls -lA'
 alias diff='diff -u --color=auto'
 
 # Use neovim over vim.
-(( $+commands[nvim] )) && alias vim='nvim'
+[[ -v commands[nvim] ]] && alias vim='nvim'
 
 # Eza aliases.
-if (( $+commands[eza] )); then
+if [[ -v commands[eza] ]]; then
     alias eza='eza --extended --git'
     alias e='eza'
     alias ea='eza --all'
@@ -63,7 +63,18 @@ alias gst='git status'
 
 # Python. [[[
 
-(( ${+commands[python3]} && ! ${+commands[python]} )) && alias python='python3'
-(( ${+commands[ipython3]} && ! ${+commands[ipython]} )) && alias ipython='ipython3'
+[[ -v commands[python3] && ! -v commands[python] ]] && alias python='python3'
+[[ -v commands[ipython3] && ! -v commands[ipython] ]] && alias ipython='ipython3'
 
 # ]]]
+
+# Try to reduce Git index lock conflicts in VSCode.
+if [[ -v commands[code] ]]; then
+    code() {
+        if [[ -v GIT_OPTIONAL_LOCKS ]]; then
+            builtin command code "$@"
+        else
+            GIT_OPTIONAL_LOCKS=0 builtin command code "$@"
+        fi
+    }
+fi
