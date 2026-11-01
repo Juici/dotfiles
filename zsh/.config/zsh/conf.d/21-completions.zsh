@@ -74,7 +74,7 @@ zstyle ':completion:*:*:*:*:processes' sort false
 # zsh-users: general completions
 # zsh-rust-completions: rustc/rustup/cargo
 # pnpm-shell-completion: pnpm
-zinit wait lucid blockf for \
+zinit wait lucid blockf completions for \
     atpull'zinit creinstall -q .' \
         zsh-users/zsh-completions \
     atpull'zinit creinstall -q .' \

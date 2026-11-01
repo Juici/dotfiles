@@ -1,0 +1,1210 @@
+#compdef kache
+
+autoload -U is-at-least
+
+_kache() {
+    typeset -A opt_args
+    typeset -a _arguments_options
+    local ret=1
+
+    if is-at-least 5.2; then
+        _arguments_options=(-s -S -C)
+    else
+        _arguments_options=(-s -C)
+    fi
+
+    local context curcontext="$curcontext" state line
+    _arguments "${_arguments_options[@]}" : \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help (see more with '\''--help'\'')]' \
+'--help[Print help (see more with '\''--help'\'')]' \
+'-V[Print version]' \
+'--version[Print version]' \
+":: :_kache_commands" \
+"*::: :->kache" \
+&& ret=0
+    case $state in
+    (kache)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:kache-command-$line[1]:"
+        case $line[1] in
+            (cargo)
+_arguments "${_arguments_options[@]}" : \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'*::args -- Built-in build/check arguments passed verbatim to Cargo (use `--` first):_default' \
+&& ret=0
+;;
+(list)
+_arguments "${_arguments_options[@]}" : \
+'--sort=[Sort by\: name, size, hits, age]:SORT:_default' \
+'--no-pager[Print directly instead of using a pager]' \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'::crate_name -- Crate name to show details for (omit to list all):_default' \
+&& ret=0
+;;
+(gc)
+_arguments "${_arguments_options[@]}" : \
+'(--stale-schema)--max-age=[Evict entries older than this duration (e.g. 7d, 24h)]:MAX_AGE:_default' \
+'--stale-schema[Remove entries from old or unrecorded cache-key schemas]' \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(purge)
+_arguments "${_arguments_options[@]}" : \
+'--crate-name=[Only purge entries for this crate]:CRATE_NAME:_default' \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(clean)
+_arguments "${_arguments_options[@]}" : \
+'--stale=[Targets no build used for this long, and targets whose worktree is gone (default 14d)]:DURATION:_default' \
+'(--cache --stale)--crate=[Remove the cache entries of this crate]:NAME:_default' \
+'(--cache --crate --stale --orphans --stale-schema)--units[Remove obsolete units in live targets using a recorded Cargo command]' \
+'(--cache --crate --stale --orphans --stale-schema)--artifacts[Remove obsolete units in live targets using a recorded Cargo command]' \
+'-n[Show what would be removed and what kache keeps, and remove nothing]' \
+'--dry-run[Show what would be removed and what kache keeps, and remove nothing]' \
+'-y[Remove without asking. For scripts and cron; preview first with --dry-run]' \
+'--yes[Remove without asking. For scripts and cron; preview first with --dry-run]' \
+'--cache[Empty the cache instead. Asks first. The daemon already keeps it under its size limit]' \
+'(--stale --cache --crate)--orphans[Only targets whose worktree or workspace no longer exists, however recently they were built]' \
+'(--stale --stale-schema)--all[With --cache\: the same, kept for older scripts]' \
+'(--stale)--stale-schema[With --cache, remove entries from old or unrecorded cache-key schemas]' \
+'--tracked[Accepted for older scripts\: tracked targets are the default now]' \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'::path -- Look for target/ directories under this directory instead of using the ones kache tracks:_files' \
+&& ret=0
+;;
+(targets)
+_arguments "${_arguments_options[@]}" : \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+":: :_kache__subcmd__targets_commands" \
+"*::: :->targets" \
+&& ret=0
+
+    case $state in
+    (targets)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:kache-targets-command-$line[1]:"
+        case $line[1] in
+            (share)
+_arguments "${_arguments_options[@]}" : \
+'--apply[Clone each match from the stored blob. Without this, only report]' \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'*::paths -- Target directories to read. Defaults to tracked directories:_files' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_kache__subcmd__targets__subcmd__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:kache-targets-help-command-$line[1]:"
+        case $line[1] in
+            (share)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+;;
+(init)
+_arguments "${_arguments_options[@]}" : \
+'(--check --no-service --no-shell)--shims=[Only create the compiler-name links to kache (Unix), in DIR or ~/.local/lib/kache/shims, and change nothing else]::DIR:_files' \
+'-y[Accept all default answers (non-interactive)]' \
+'--yes[Accept all default answers (non-interactive)]' \
+'--no-service[Do not install the daemon as a login service]' \
+'--no-shell[Leave shell startup files alone\: no C/C++ shims on PATH and no test runner (Cargo native dependencies are still configured)]' \
+'--check[Print what would change without modifying anything]' \
+'--from-path[With --shims, also link every other compiler name on PATH (target triplets)]' \
+'(--from-path)--canonical-only[With --shims, link only the unversioned names, not the versioned compilers on PATH (clang-19, g++-13)]' \
+'--force[With --shims, replace existing entries instead of refusing]' \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(doctor)
+_arguments "${_arguments_options[@]}" : \
+'--fix[Auto-fix issues (migrate from sccache, repair config)]' \
+'--purge-sccache[Also remove sccache cache and binary (requires --fix)]' \
+'--verify[Verify cache integrity (entries, blobs, metadata)]' \
+'--checksums[Also verify blob checksums (slower, implies --verify)]' \
+'--repair[Remove corrupted entries (implies --verify)]' \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(sync)
+_arguments "${_arguments_options[@]}" : \
+'--manifest-path=[Path to Cargo.toml (default\: current directory)]:MANIFEST_PATH:_default' \
+'--pull[Only download from the remote (skip uploads)]' \
+'--push[Only upload to the remote (skip downloads)]' \
+'--dry-run[Show what would be synced without transferring]' \
+'--all[Pull all remote artifacts (ignore workspace filtering)]' \
+'(--all)--workspace[Scope the pull listing to workspace members (one LIST per member) instead of one LIST per Cargo.lock dependency crate]' \
+'--allow-partial[Allow partial synchronization and exit successfully (code 0) even if some transfers or imports fail]' \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help (see more with '\''--help'\'')]' \
+'--help[Print help (see more with '\''--help'\'')]' \
+&& ret=0
+;;
+(save-manifest)
+_arguments "${_arguments_options[@]}" : \
+'--manifest-key=[Override manifest key (default\: identity key plus host triple)]:MANIFEST_KEY:_default' \
+'--namespace=[Shard namespace\: target/rustc_hash/profile. If set and Cargo.lock exists, uploads content-addressed shards alongside the monolithic build manifest]:NAMESPACE:_default' \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(daemon)
+_arguments "${_arguments_options[@]}" : \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+":: :_kache__subcmd__daemon_commands" \
+"*::: :->daemon" \
+&& ret=0
+
+    case $state in
+    (daemon)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:kache-daemon-command-$line[1]:"
+        case $line[1] in
+            (status)
+_arguments "${_arguments_options[@]}" : \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(run)
+_arguments "${_arguments_options[@]}" : \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(start)
+_arguments "${_arguments_options[@]}" : \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(stop)
+_arguments "${_arguments_options[@]}" : \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(restart)
+_arguments "${_arguments_options[@]}" : \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(install)
+_arguments "${_arguments_options[@]}" : \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(uninstall)
+_arguments "${_arguments_options[@]}" : \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(log)
+_arguments "${_arguments_options[@]}" : \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_kache__subcmd__daemon__subcmd__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:kache-daemon-help-command-$line[1]:"
+        case $line[1] in
+            (status)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(run)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(start)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(stop)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(restart)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(install)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(uninstall)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(log)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+;;
+(monitor)
+_arguments "${_arguments_options[@]}" : \
+'--since=[Preload events from this window (e.g. 15m, 2h, 7d; a bare number is hours)]:SINCE:_default' \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(stats)
+_arguments "${_arguments_options[@]}" : \
+'--since=[Event window (e.g. 15m, 2h, 7d; a bare number is hours)]:SINCE:_default' \
+'--root=[Only this build tree/root\: the latest session in it with \`--last-build\`, its compiler events with \`--full\`]:ROOT:_files' \
+'--format=[Write the full report as json, markdown, github, or trace (Perfetto / Chrome trace). Implies --full]:FORMAT:_default' \
+'-o+[Write the full report to a file instead of stdout. Implies --full]:OUTPUT:_files' \
+'--output=[Write the full report to a file instead of stdout. Implies --full]:OUTPUT:_files' \
+'--top=[Entries in each top list of the full report. Implies --full]:TOP:_default' \
+'(--since)--last-build[Report the latest recorded activity session. Sessions may span Cargo commands; events without IDs use a five-minute idle gap per root]' \
+'--full[The full build report instead of the summary]' \
+'--record[Also append the full report'\''s summary and timing, with the host'\''s load, to \`<cache dir>/telemetry/sessions.jsonl\`, which outlives the runtime dir a CI job deletes. Implies --full]' \
+'--redact[Replace cache keys, roots, and object paths in the full report with \`redacted\`. Implies --full]' \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(telemetry)
+_arguments "${_arguments_options[@]}" : \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+":: :_kache__subcmd__telemetry_commands" \
+"*::: :->telemetry" \
+&& ret=0
+
+    case $state in
+    (telemetry)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:kache-telemetry-command-$line[1]:"
+        case $line[1] in
+            (write)
+_arguments "${_arguments_options[@]}" : \
+'--scenario=[Bench scenario this dump belongs to (same string as \`kache.bench.project\`)]:SCENARIO:_default' \
+'--phase=[Bench phase this dump belongs to (\`cold\`, \`warm\`, \`pull\`)]:PHASE:_default' \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':dir -- Directory to write. Created if missing:_files' \
+&& ret=0
+;;
+(push)
+_arguments "${_arguments_options[@]}" : \
+'--session=[Send one session by id]:SESSION:_default' \
+'*--label=[Extra \`key=value\` label recorded with the build, repeatable]:KEY=VALUE:_default' \
+'(--session)--all[Send every session still in the logs, not just the last build]' \
+'--dry-run[Print the records instead of sending them]' \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_kache__subcmd__telemetry__subcmd__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:kache-telemetry-help-command-$line[1]:"
+        case $line[1] in
+            (write)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(push)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+;;
+(explain)
+_arguments "${_arguments_options[@]}" : \
+'()--root=[Without a crate\: only builds recorded for this build tree]:ROOT:_files' \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'::crate_name -- The crate to explain. Without one, compare the latest build'\''s misses with the build before it:_default' \
+&& ret=0
+;;
+(diff)
+_arguments "${_arguments_options[@]}" : \
+'--root=[Only sessions recorded for this build tree]:ROOT:_files' \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(report)
+_arguments "${_arguments_options[@]}" : \
+'--format=[Output format\: json, trace, perfetto, chrome-trace, markdown, github, text]:FORMAT:_default' \
+'--since=[Event window (e.g. 15m, 2h, 7d; a bare number is hours)]:SINCE:_default' \
+'--root=[Only include compiler events from this build tree/root]:ROOT:_files' \
+'-o+[Write output to a file instead of stdout]:OUTPUT:_files' \
+'--output=[Write output to a file instead of stdout]:OUTPUT:_files' \
+'--top=[Number of top entries to show]:TOP:_default' \
+'(--since)--last-build[Report the latest recorded activity session. Sessions may span Cargo commands; events without IDs use a five-minute idle gap per root]' \
+'--record[Also append this report'\''s summary and timing, with the host'\''s load, to \`<cache dir>/telemetry/sessions.jsonl\`, which outlives the runtime dir a CI job deletes]' \
+'--redact[Replace cache keys, roots, and object paths with \`redacted\`]' \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(config)
+_arguments "${_arguments_options[@]}" : \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(login)
+_arguments "${_arguments_options[@]}" : \
+'--device[Sign in on another device (prints a URL and a code)]' \
+'--retrust[Accept and re-pin the planner'\''s current login issuer when it no longer matches the one first trusted]' \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(logout)
+_arguments "${_arguments_options[@]}" : \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(install-shims)
+_arguments "${_arguments_options[@]}" : \
+'--force[Replace existing entries instead of refusing]' \
+'--from-path[Also wrap every other compiler name on PATH (target triplets)]' \
+'(--from-path)--canonical-only[Link only the unversioned names, not the versioned compilers on PATH]' \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'::dir -- Directory to populate. Defaults to ~/.local/lib/kache/shims:_files' \
+&& ret=0
+;;
+(completions)
+_arguments "${_arguments_options[@]}" : \
+'--json[Machine-readable JSON on stdout, on commands that support it]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':shell -- Shell to generate completions for:(bash elvish fish powershell zsh)' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_kache__subcmd__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:kache-help-command-$line[1]:"
+        case $line[1] in
+            (cargo)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(list)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(gc)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(purge)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(clean)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(targets)
+_arguments "${_arguments_options[@]}" : \
+":: :_kache__subcmd__help__subcmd__targets_commands" \
+"*::: :->targets" \
+&& ret=0
+
+    case $state in
+    (targets)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:kache-help-targets-command-$line[1]:"
+        case $line[1] in
+            (share)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+(init)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(doctor)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(sync)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(save-manifest)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(daemon)
+_arguments "${_arguments_options[@]}" : \
+":: :_kache__subcmd__help__subcmd__daemon_commands" \
+"*::: :->daemon" \
+&& ret=0
+
+    case $state in
+    (daemon)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:kache-help-daemon-command-$line[1]:"
+        case $line[1] in
+            (status)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(run)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(start)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(stop)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(restart)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(install)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(uninstall)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(log)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+(monitor)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(stats)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(telemetry)
+_arguments "${_arguments_options[@]}" : \
+":: :_kache__subcmd__help__subcmd__telemetry_commands" \
+"*::: :->telemetry" \
+&& ret=0
+
+    case $state in
+    (telemetry)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:kache-help-telemetry-command-$line[1]:"
+        case $line[1] in
+            (write)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(push)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+(explain)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(diff)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(report)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(config)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(login)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(logout)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(install-shims)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(completions)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+}
+
+(( $+functions[_kache_commands] )) ||
+_kache_commands() {
+    local commands; commands=(
+'cargo:Run Cargo with canonical duplicate Cargo-home rustflags collapsed once' \
+'list:List cache entries, or one crate'\''s entries in detail' \
+'gc:Evict cache entries by the size and age limits, as the daemon does. Kept for scripts' \
+'purge:Remove the whole cache or one crate'\''s entries. Kept for scripts; \`kache clean --cache\` empties the cache too' \
+'clean:Free disk space\: remove old target directories, or empty the cache' \
+'targets:Show tracked target directories. Kept for scripts; \`kache clean --dry-run\` shows the same targets' \
+'init:Set up caching for Cargo and C/C++ builds' \
+'doctor:Diagnose setup issues and verify cache integrity' \
+'sync:Pull from and push to the configured remote' \
+'save-manifest:Save a build manifest for future prefetch warming' \
+'daemon:Show the background daemon'\''s status, or start, stop or install it' \
+'monitor:Live dashboard of builds and the cache' \
+'stats:Hit rate, time saved and cache size; --full for the whole report' \
+'telemetry:Write cache counters as OTLP JSON for Kartero to import later' \
+'explain:Explain why a crate, or the latest build, missed the cache' \
+'diff:Compare misses in the two newest sessions of one build root. Kept for scripts; \`kache explain\` with no crate explains the same build' \
+'report:The full build report. Kept for scripts; \`kache stats --full\` is the same report' \
+'config:Open the configuration editor' \
+'login:Log in to the planner with your Kunobi account' \
+'logout:Log out of the planner and revoke the stored Kunobi session' \
+'install-shims:Create compiler-name links to kache in a directory you put first on PATH. Kept for scripts and packages; \`kache init --shims\` does the same in the default directory' \
+'completions:Generate shell completion scripts' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'kache commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__cargo_commands] )) ||
+_kache__subcmd__cargo_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache cargo commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__clean_commands] )) ||
+_kache__subcmd__clean_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache clean commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__completions_commands] )) ||
+_kache__subcmd__completions_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache completions commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__config_commands] )) ||
+_kache__subcmd__config_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache config commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__daemon_commands] )) ||
+_kache__subcmd__daemon_commands() {
+    local commands; commands=(
+'status:Show daemon status (alias for bare \`kache daemon\`)' \
+'run:Run the daemon server in the foreground' \
+'start:Start daemon in background (returns immediately)' \
+'stop:Stop a running daemon' \
+'restart:Restart daemon (via launchd/systemd if installed, else manual stop+start)' \
+'install:Install daemon as a system service (launchd/systemd)' \
+'uninstall:Remove the daemon service' \
+'log:Stream daemon logs' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'kache daemon commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__daemon__subcmd__help_commands] )) ||
+_kache__subcmd__daemon__subcmd__help_commands() {
+    local commands; commands=(
+'status:Show daemon status (alias for bare \`kache daemon\`)' \
+'run:Run the daemon server in the foreground' \
+'start:Start daemon in background (returns immediately)' \
+'stop:Stop a running daemon' \
+'restart:Restart daemon (via launchd/systemd if installed, else manual stop+start)' \
+'install:Install daemon as a system service (launchd/systemd)' \
+'uninstall:Remove the daemon service' \
+'log:Stream daemon logs' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'kache daemon help commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__daemon__subcmd__help__subcmd__help_commands] )) ||
+_kache__subcmd__daemon__subcmd__help__subcmd__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache daemon help help commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__daemon__subcmd__help__subcmd__install_commands] )) ||
+_kache__subcmd__daemon__subcmd__help__subcmd__install_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache daemon help install commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__daemon__subcmd__help__subcmd__log_commands] )) ||
+_kache__subcmd__daemon__subcmd__help__subcmd__log_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache daemon help log commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__daemon__subcmd__help__subcmd__restart_commands] )) ||
+_kache__subcmd__daemon__subcmd__help__subcmd__restart_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache daemon help restart commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__daemon__subcmd__help__subcmd__run_commands] )) ||
+_kache__subcmd__daemon__subcmd__help__subcmd__run_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache daemon help run commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__daemon__subcmd__help__subcmd__start_commands] )) ||
+_kache__subcmd__daemon__subcmd__help__subcmd__start_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache daemon help start commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__daemon__subcmd__help__subcmd__status_commands] )) ||
+_kache__subcmd__daemon__subcmd__help__subcmd__status_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache daemon help status commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__daemon__subcmd__help__subcmd__stop_commands] )) ||
+_kache__subcmd__daemon__subcmd__help__subcmd__stop_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache daemon help stop commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__daemon__subcmd__help__subcmd__uninstall_commands] )) ||
+_kache__subcmd__daemon__subcmd__help__subcmd__uninstall_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache daemon help uninstall commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__daemon__subcmd__install_commands] )) ||
+_kache__subcmd__daemon__subcmd__install_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache daemon install commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__daemon__subcmd__log_commands] )) ||
+_kache__subcmd__daemon__subcmd__log_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache daemon log commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__daemon__subcmd__restart_commands] )) ||
+_kache__subcmd__daemon__subcmd__restart_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache daemon restart commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__daemon__subcmd__run_commands] )) ||
+_kache__subcmd__daemon__subcmd__run_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache daemon run commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__daemon__subcmd__start_commands] )) ||
+_kache__subcmd__daemon__subcmd__start_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache daemon start commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__daemon__subcmd__status_commands] )) ||
+_kache__subcmd__daemon__subcmd__status_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache daemon status commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__daemon__subcmd__stop_commands] )) ||
+_kache__subcmd__daemon__subcmd__stop_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache daemon stop commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__daemon__subcmd__uninstall_commands] )) ||
+_kache__subcmd__daemon__subcmd__uninstall_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache daemon uninstall commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__diff_commands] )) ||
+_kache__subcmd__diff_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache diff commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__doctor_commands] )) ||
+_kache__subcmd__doctor_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache doctor commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__explain_commands] )) ||
+_kache__subcmd__explain_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache explain commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__gc_commands] )) ||
+_kache__subcmd__gc_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache gc commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help_commands] )) ||
+_kache__subcmd__help_commands() {
+    local commands; commands=(
+'cargo:Run Cargo with canonical duplicate Cargo-home rustflags collapsed once' \
+'list:List cache entries, or one crate'\''s entries in detail' \
+'gc:Evict cache entries by the size and age limits, as the daemon does. Kept for scripts' \
+'purge:Remove the whole cache or one crate'\''s entries. Kept for scripts; \`kache clean --cache\` empties the cache too' \
+'clean:Free disk space\: remove old target directories, or empty the cache' \
+'targets:Show tracked target directories. Kept for scripts; \`kache clean --dry-run\` shows the same targets' \
+'init:Set up caching for Cargo and C/C++ builds' \
+'doctor:Diagnose setup issues and verify cache integrity' \
+'sync:Pull from and push to the configured remote' \
+'save-manifest:Save a build manifest for future prefetch warming' \
+'daemon:Show the background daemon'\''s status, or start, stop or install it' \
+'monitor:Live dashboard of builds and the cache' \
+'stats:Hit rate, time saved and cache size; --full for the whole report' \
+'telemetry:Write cache counters as OTLP JSON for Kartero to import later' \
+'explain:Explain why a crate, or the latest build, missed the cache' \
+'diff:Compare misses in the two newest sessions of one build root. Kept for scripts; \`kache explain\` with no crate explains the same build' \
+'report:The full build report. Kept for scripts; \`kache stats --full\` is the same report' \
+'config:Open the configuration editor' \
+'login:Log in to the planner with your Kunobi account' \
+'logout:Log out of the planner and revoke the stored Kunobi session' \
+'install-shims:Create compiler-name links to kache in a directory you put first on PATH. Kept for scripts and packages; \`kache init --shims\` does the same in the default directory' \
+'completions:Generate shell completion scripts' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'kache help commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__cargo_commands] )) ||
+_kache__subcmd__help__subcmd__cargo_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help cargo commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__clean_commands] )) ||
+_kache__subcmd__help__subcmd__clean_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help clean commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__completions_commands] )) ||
+_kache__subcmd__help__subcmd__completions_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help completions commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__config_commands] )) ||
+_kache__subcmd__help__subcmd__config_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help config commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__daemon_commands] )) ||
+_kache__subcmd__help__subcmd__daemon_commands() {
+    local commands; commands=(
+'status:Show daemon status (alias for bare \`kache daemon\`)' \
+'run:Run the daemon server in the foreground' \
+'start:Start daemon in background (returns immediately)' \
+'stop:Stop a running daemon' \
+'restart:Restart daemon (via launchd/systemd if installed, else manual stop+start)' \
+'install:Install daemon as a system service (launchd/systemd)' \
+'uninstall:Remove the daemon service' \
+'log:Stream daemon logs' \
+    )
+    _describe -t commands 'kache help daemon commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__daemon__subcmd__install_commands] )) ||
+_kache__subcmd__help__subcmd__daemon__subcmd__install_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help daemon install commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__daemon__subcmd__log_commands] )) ||
+_kache__subcmd__help__subcmd__daemon__subcmd__log_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help daemon log commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__daemon__subcmd__restart_commands] )) ||
+_kache__subcmd__help__subcmd__daemon__subcmd__restart_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help daemon restart commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__daemon__subcmd__run_commands] )) ||
+_kache__subcmd__help__subcmd__daemon__subcmd__run_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help daemon run commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__daemon__subcmd__start_commands] )) ||
+_kache__subcmd__help__subcmd__daemon__subcmd__start_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help daemon start commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__daemon__subcmd__status_commands] )) ||
+_kache__subcmd__help__subcmd__daemon__subcmd__status_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help daemon status commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__daemon__subcmd__stop_commands] )) ||
+_kache__subcmd__help__subcmd__daemon__subcmd__stop_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help daemon stop commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__daemon__subcmd__uninstall_commands] )) ||
+_kache__subcmd__help__subcmd__daemon__subcmd__uninstall_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help daemon uninstall commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__diff_commands] )) ||
+_kache__subcmd__help__subcmd__diff_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help diff commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__doctor_commands] )) ||
+_kache__subcmd__help__subcmd__doctor_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help doctor commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__explain_commands] )) ||
+_kache__subcmd__help__subcmd__explain_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help explain commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__gc_commands] )) ||
+_kache__subcmd__help__subcmd__gc_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help gc commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__help_commands] )) ||
+_kache__subcmd__help__subcmd__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help help commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__init_commands] )) ||
+_kache__subcmd__help__subcmd__init_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help init commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__install-shims_commands] )) ||
+_kache__subcmd__help__subcmd__install-shims_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help install-shims commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__list_commands] )) ||
+_kache__subcmd__help__subcmd__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help list commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__login_commands] )) ||
+_kache__subcmd__help__subcmd__login_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help login commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__logout_commands] )) ||
+_kache__subcmd__help__subcmd__logout_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help logout commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__monitor_commands] )) ||
+_kache__subcmd__help__subcmd__monitor_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help monitor commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__purge_commands] )) ||
+_kache__subcmd__help__subcmd__purge_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help purge commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__report_commands] )) ||
+_kache__subcmd__help__subcmd__report_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help report commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__save-manifest_commands] )) ||
+_kache__subcmd__help__subcmd__save-manifest_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help save-manifest commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__stats_commands] )) ||
+_kache__subcmd__help__subcmd__stats_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help stats commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__sync_commands] )) ||
+_kache__subcmd__help__subcmd__sync_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help sync commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__targets_commands] )) ||
+_kache__subcmd__help__subcmd__targets_commands() {
+    local commands; commands=(
+'share:Share target files with blobs the store already holds' \
+    )
+    _describe -t commands 'kache help targets commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__targets__subcmd__share_commands] )) ||
+_kache__subcmd__help__subcmd__targets__subcmd__share_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help targets share commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__telemetry_commands] )) ||
+_kache__subcmd__help__subcmd__telemetry_commands() {
+    local commands; commands=(
+'write:Snapshot live cache counters into \`metrics.otlp.json\` + \`schema_version\`' \
+'push:Send build timeline records for finished builds to the service' \
+    )
+    _describe -t commands 'kache help telemetry commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__telemetry__subcmd__push_commands] )) ||
+_kache__subcmd__help__subcmd__telemetry__subcmd__push_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help telemetry push commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__help__subcmd__telemetry__subcmd__write_commands] )) ||
+_kache__subcmd__help__subcmd__telemetry__subcmd__write_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache help telemetry write commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__init_commands] )) ||
+_kache__subcmd__init_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache init commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__install-shims_commands] )) ||
+_kache__subcmd__install-shims_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache install-shims commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__list_commands] )) ||
+_kache__subcmd__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache list commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__login_commands] )) ||
+_kache__subcmd__login_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache login commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__logout_commands] )) ||
+_kache__subcmd__logout_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache logout commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__monitor_commands] )) ||
+_kache__subcmd__monitor_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache monitor commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__purge_commands] )) ||
+_kache__subcmd__purge_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache purge commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__report_commands] )) ||
+_kache__subcmd__report_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache report commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__save-manifest_commands] )) ||
+_kache__subcmd__save-manifest_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache save-manifest commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__stats_commands] )) ||
+_kache__subcmd__stats_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache stats commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__sync_commands] )) ||
+_kache__subcmd__sync_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache sync commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__targets_commands] )) ||
+_kache__subcmd__targets_commands() {
+    local commands; commands=(
+'share:Share target files with blobs the store already holds' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'kache targets commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__targets__subcmd__help_commands] )) ||
+_kache__subcmd__targets__subcmd__help_commands() {
+    local commands; commands=(
+'share:Share target files with blobs the store already holds' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'kache targets help commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__targets__subcmd__help__subcmd__help_commands] )) ||
+_kache__subcmd__targets__subcmd__help__subcmd__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache targets help help commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__targets__subcmd__help__subcmd__share_commands] )) ||
+_kache__subcmd__targets__subcmd__help__subcmd__share_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache targets help share commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__targets__subcmd__share_commands] )) ||
+_kache__subcmd__targets__subcmd__share_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache targets share commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__telemetry_commands] )) ||
+_kache__subcmd__telemetry_commands() {
+    local commands; commands=(
+'write:Snapshot live cache counters into \`metrics.otlp.json\` + \`schema_version\`' \
+'push:Send build timeline records for finished builds to the service' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'kache telemetry commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__telemetry__subcmd__help_commands] )) ||
+_kache__subcmd__telemetry__subcmd__help_commands() {
+    local commands; commands=(
+'write:Snapshot live cache counters into \`metrics.otlp.json\` + \`schema_version\`' \
+'push:Send build timeline records for finished builds to the service' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'kache telemetry help commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__telemetry__subcmd__help__subcmd__help_commands] )) ||
+_kache__subcmd__telemetry__subcmd__help__subcmd__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache telemetry help help commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__telemetry__subcmd__help__subcmd__push_commands] )) ||
+_kache__subcmd__telemetry__subcmd__help__subcmd__push_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache telemetry help push commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__telemetry__subcmd__help__subcmd__write_commands] )) ||
+_kache__subcmd__telemetry__subcmd__help__subcmd__write_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache telemetry help write commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__telemetry__subcmd__push_commands] )) ||
+_kache__subcmd__telemetry__subcmd__push_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache telemetry push commands' commands "$@"
+}
+(( $+functions[_kache__subcmd__telemetry__subcmd__write_commands] )) ||
+_kache__subcmd__telemetry__subcmd__write_commands() {
+    local commands; commands=()
+    _describe -t commands 'kache telemetry write commands' commands "$@"
+}
+
+if [ "$funcstack[1]" = "_kache" ]; then
+    _kache "$@"
+else
+    compdef _kache kache
+fi
