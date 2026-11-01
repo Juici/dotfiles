@@ -13,9 +13,8 @@ if [[ "$0" != tw || -n "$ZSH_SCRIPT" ]]; then
     0="${${(M)0:#/*}:-$PWD/$0}"
 
     fpath+=( "${0:h}" )
-
-    autoload -Uz parseoffset
 fi
+
 
 zmodload zsh/datetime 2>/dev/null || {
     print -Pru2 '%F{red}tw%f: failed to load zsh/datetime module'
@@ -25,6 +24,8 @@ zmodload zsh/zutil 2>/dev/null || {
     print -Pru2 '%F{red}tw%f: failed to load zsh/zutil module'
     return 1
 }
+
+autoload -Uz parseoffset
 
 # Time warp by setting GIT_AUTHOR_DATE and GIT_COMMITTER_DATE.
 tw() {
