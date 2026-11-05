@@ -40,14 +40,11 @@ esac
 
 # Control sequences for shell integration with terminal.
 Prompt+=(
-    pre-ps1     $'%{\e]133;A;k=i;cl=m;aid='"${Prompt[aid]}"$'\a\e]133;P;k=i\a%}'
+    pre-ps1     $'%{\e]133;P;k=i\a%}'
     post-ps1    $'%{\e]133;B\a%}'
 
-    pre-ps2     $'%{\e]133;A;k=s;cl=m;aid='"${Prompt[aid]}"$'\a\e]133;P;k=s\a%}'
+    pre-ps2     $'%{\e]133;P;k=s\a%}'
     post-ps2    $'%{\e]133;B\a%}'
-
-    # pre-exec    $'%{\e]133;C;cmdline=%1v\a%}'
-    # post-exec   $'%{\e]133;D;%?;aid='"${Prompt[aid]}"$'\a%}'
 )
 
 () {
@@ -271,8 +268,8 @@ zstyle ':vcs_info:git+set-message:*' hooks git-untracked
     builtin emulate -LR zsh ${=${options[xtrace]:#off}:+-o xtrace}
     builtin setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
 
-    # builtin print -rn -- "${(%)Prompt[pre-exec]}"
-    builtin print -rn -- $'\e]133;C;'"${(q)1}"$'\a'
+    # Indicate end of user input and start of output.
+    builtin print -rn -- $'\e]133;C\a'
 
     Prompt[cmd_duration]=
     Prompt[cmd_start]="${epochtime[@]}"
@@ -286,16 +283,20 @@ zstyle ':vcs_info:git+set-message:*' hooks git-untracked
     local -i10 cmd_status=$status
 
     if [[ -n "${Prompt[cmd_start]}" ]]; then
-        # builtin print -rn -- "${(%)Prompt[post-exec]}"
+        # Indicate the end of the command.
         builtin print -rn -- $'\e]133;D;'"${cmd_status};aid=${Prompt[aid]}"$'\a'
 
         Prompt[cmd_duration]="$(.prompt-format-duration "${time[@]}" "${(z)Prompt[cmd_start]}")"
         Prompt[cmd_start]=
     else
+        # Indicate the end of the command, caused by an interrupt.
         builtin print -rn -- $'\e]133;D;'"${cmd_status};err=CANCEL;aid=${Prompt[aid]}"$'\a'
 
         Prompt[cmd_duration]=
     fi
+
+    # Indicate the start of a new command and the start of the prompt.
+    builtin print -rn -- $'\e]133;A;cl=m;aid='"${Prompt[aid]}"$'\a'
 
     .prompt-async-vcsinfo
 }
