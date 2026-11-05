@@ -21,7 +21,7 @@ autoload -Uz @term-set-title
 }
 
 .hooks-set-user-var() {
-    local key="$1" value="$(builtin print -rn "$2" | base64)"
+    local key="$1" value="$(builtin print -rn -- "$2" | base64)"
 
     # TODO: Handle Tmux passthrough.
     builtin print -rn $'\e]1337;SetUserVar='"${key}=${value}"$'\a'
@@ -43,6 +43,8 @@ autoload -Uz @term-set-title
     builtin setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
 
     .hooks-set-user-var 'WEZTERM_PROG' ''
+    .hooks-set-user-var 'WEZTERM_USER' "${USERNAME}"
+    .hooks-set-user-var 'WEZTERM_HOST' "${HOST}"
     .hooks-set-user-var 'WEZTERM_IN_TMUX' "${${TMUX:+1}:-0}"
 
     .hooks-report-cwd
