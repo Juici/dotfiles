@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+
+  "runtime": {
+    "version": "LuaJIT",
+    "path": ["lua/?.lua", "lua/?/init.lua"]
+  },
+
+  "workspace": {
+    "library": [
+      "${env:VIMRUNTIME}",
+      "/snap/nvim/current/usr/share/nvim/runtime",
+      "${env:XDG_DATA_HOME}/nvim/lazy"
+    ],
+    "checkThirdParty": false
+  },
+
+  "diagnostics": {
+    "unusedLocalExclude": ["_*"]
+  },
+
+  "codeLens.enable": true
+}

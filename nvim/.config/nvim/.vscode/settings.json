@@ -1,0 +1,7 @@
+{
+  "files.readonlyInclude": {
+    "/home/*/.local/share/nvim/lazy/**": true
+  },
+
+  "stylua.targetReleaseVersion": "latest"
+}
