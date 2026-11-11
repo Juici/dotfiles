@@ -1,36 +1,32 @@
 # vim:ft=gitconfig
 
 [color]
-	ui = auto
 	pager = true
+
 [core]
 	autocrlf = false
-	eolf = lf
-	fscache = true
 	whitespace = 'tabwidth=4'
-[help]
-	autoCorrect = 50
-[push]
-	default = simple
-	autoSetupRemote = true
+
 [user]
 	signingKey = 5283B069B646BDF63B6C0C27F03278A61EEDB2CA
 	name = James Whaley
 	email = juicy66173@gmail.com
+
 [commit]
 	gpgSign = true
 [tag]
-	forceSignAnnotated = true
-[gpg]
-	program = gpg2
-[include]
-	path = config.local
-[pull]
-	rebase = false
-[advice]
-	addEmptyPathspec = false
+	gpgSign = true
+
+[push]
+	autoSetupRemote = true
 [fetch]
 	prune = true
+[pull]
+	ff = only
+
+[init]
+	defaultBranch = master
+
 
 [diff "pdf"]
 	binary = true
@@ -42,5 +38,5 @@
 	binary = true
 	textconv = odt2txt
 
-[init]
-	defaultBranch = master
+[include]
+	path = config.local
