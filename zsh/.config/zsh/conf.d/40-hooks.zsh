@@ -9,15 +9,13 @@ autoload -Uz @term-set-title
 }
 
 .hooks-set-title() {
-    local match mbegin mend title cwd="${(D)PWD}" cmd="$1"
+    local match mbegin mend
+    local cwd="${(D)PWD}" cmd="$1"
 
     # Prettify current working directory path.
     (( ${#cwd} > 20 )) && cwd=${cwd//(#b)('~'[^\/]#|(.|)[^\/])[^\/]#\//"${match[1]}/"}
 
-    title="${cwd}"
-    [[ -n "${cmd}" ]] && title="${cwd} - ${cmd}"
-
-    @term-set-title "${title}"
+    @term-set-title "${cwd}${cmd:+ - ${cmd}}"
 }
 
 .hooks-set-user-var() {
